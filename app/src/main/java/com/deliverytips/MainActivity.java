@@ -86,16 +86,16 @@ public class MainActivity extends AppCompatActivity
 
         FragmentManager fm = getFragmentManager();
 
-        if (id == R.id.nav_camera) {
+        if (id == R.id.home) {
 
             //Toast toast = new Toast();
             fm.beginTransaction().replace(R.id.content_frame, new DashboardTable()).commit();
             // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        } else if (id == R.id.new_delivery) {
 
-        } else if (id == R.id.nav_slideshow) {
+        } else if (id == R.id.phone_search) {
 
-        } else if (id == R.id.nav_manage) {
+        } else if (id == R.id.settings) {
 
             fm.beginTransaction().replace(R.id.content_frame,new Settings()).commit();
 
