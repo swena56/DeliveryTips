@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity
             fm.beginTransaction().replace(R.id.content_frame, new DashboardTable()).commit();
             // Handle the camera action
         } else if (id == R.id.new_delivery) {
-
+            fm.beginTransaction().replace(R.id.content_frame, new NewDelivery()).commit();
         } else if (id == R.id.phone_search) {
 
         } else if (id == R.id.settings) {
