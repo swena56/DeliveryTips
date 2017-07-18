@@ -21,7 +21,8 @@ public class DashboardTable extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_dashboard_table, container, false);
 
         text = (TextView) rootView.findViewById(R.id.textViewDashboardText);
-        text.setText("Dashboard - All Customers\n");
+        text.setText("Dashboard\nCustomers\n");
+        text.setText(text.getText() + "ID PHONE ADDRESS\n");
 
         MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(getContext());
         SQLiteDatabase db = myDatabaseHelper.getWritableDatabase();
@@ -40,15 +41,17 @@ public class DashboardTable extends Fragment {
         {
             // your calculation goes here
             Person person = new Person(cursor);
-            text.setText( text.getText().toString() + person._phone_number + "\n" );
+            text.setText( text.getText().toString() + person._id + " " + person._phone_number + " " + person._address+ "\n" );
         }
 
         // add deliveryEvents
         text.setText(text.getText() + "\nDelivery Events\n");
+        text.setText(text.getText() + "ID ORDERNUM PRICE TIMESTAMP \n");
         cursor = db.query(
                 DeliveryEvent.TABLE_NAME,
                 new String[] {
                         DeliveryEvent.COLUMN_NAME_ID,
+                        DeliveryEvent.COLUMN_NAME_ORDER_NUMBER,
                         DeliveryEvent.COLUMN_NAME_PRICE,
                         DeliveryEvent.COLUMN_NAME_TIMESTAMP,
                         DeliveryEvent.COLUMN_NAME_CUSTOMER_ID
@@ -59,7 +62,7 @@ public class DashboardTable extends Fragment {
             while (cursor.moveToNext()) {
                 // your calculation goes here
                 DeliveryEvent deliveryEvent = new DeliveryEvent(cursor);
-                text.setText(text.getText().toString() + deliveryEvent._price + " " + deliveryEvent._timestamp + "\n");
+                text.setText(text.getText().toString() + deliveryEvent._id + " " + deliveryEvent._order_number + " " + deliveryEvent._price + " " + deliveryEvent._timestamp + " " + deliveryEvent._person_id +  "\n");
             }
         }
 

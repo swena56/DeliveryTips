@@ -20,12 +20,13 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "DB";
 
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 6;
 
     // Database creation sql statement
     private static final String CREATE_DELIVERY_EVENT = "CREATE TABLE IF NOT EXISTS " + DeliveryEvent.TABLE_NAME +
             " ( " +
                 DeliveryEvent.COLUMN_NAME_ID + " integer primary key, " +
+                DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + " integer, " +
                 DeliveryEvent.COLUMN_NAME_TIMESTAMP + " text, " +
                 DeliveryEvent.COLUMN_NAME_PRICE + "  double, " +
                 DeliveryEvent.COLUMN_NAME_CUSTOMER_ID + "  integer" +

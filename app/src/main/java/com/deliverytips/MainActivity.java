@@ -1,6 +1,7 @@
 package com.deliverytips;
 
 import android.app.FragmentManager;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -20,6 +21,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     FragmentManager fm;
+    Intent intent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,11 +31,17 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+
+        intent = new Intent(this, NewDeliveryActivity.class);
+
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "New Delivery Event", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+
+                //fm.beginTransaction().replace(R.id.content_frame, new NewDelivery()).commit();
+                startActivity(intent);
             }
         });
 
@@ -98,7 +106,10 @@ public class MainActivity extends AppCompatActivity
             fm.beginTransaction().replace(R.id.content_frame, new DashboardTable()).commit();
             // Handle the camera action
         } else if (id == R.id.new_delivery) {
-            fm.beginTransaction().replace(R.id.content_frame, new NewDelivery()).commit();
+            startActivity(intent);
+
+            //currently working to convert the new Delivery fragment over to a fullscreen activity so it can take advantage of CTR
+            //fm.beginTransaction().replace(R.id.content_frame, new NewDelivery()).commit();
         } else if (id == R.id.phone_search) {
             fm.beginTransaction().replace(R.id.content_frame, new Search()).commit();
         } else if (id == R.id.settings) {
@@ -108,5 +119,12 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        fm.beginTransaction().replace(R.id.content_frame, new DashboardTable()).commit();
+
     }
 }

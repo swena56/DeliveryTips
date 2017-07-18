@@ -14,6 +14,8 @@ public class Person  {
     //column names
     static String COLUMN_NAME_ID = "id";
     static String COLUMN_NAME_ADDRESS= "address";
+    static String COLUMN_NAME_FIRST_NAME= "first_name";
+    static String COLUMN_NAME_LAST_NAME= "last_name";
     static String COLUMN_NAME_PHONE_NUMBER= "phone_number";
 
     public long _id = 0;
@@ -21,7 +23,6 @@ public class Person  {
     public String _last_name;
     public String _address;
     public String _phone_number;
-
 
     Person(){
 
@@ -35,6 +36,8 @@ public class Person  {
         if( cursor != null ){
             this._id = Long.parseLong( cursor.getString(cursor.getColumnIndex(Person.COLUMN_NAME_ID)));
             this._address = cursor.getString(cursor.getColumnIndex(Person.COLUMN_NAME_ADDRESS));
+            //this._address = cursor.getString(cursor.getColumnIndex(Person.COLUMN_NAME_ADDRESS));
+            //this._address = cursor.getString(cursor.getColumnIndex(Person.COLUMN_NAME_ADDRESS));
             this._phone_number = cursor.getString(cursor.getColumnIndex(Person.COLUMN_NAME_PHONE_NUMBER));
         }
     }
@@ -57,6 +60,8 @@ public class Person  {
         if( cursor != null ){
             this._id = Long.parseLong( cursor.getString(cursor.getColumnIndex(Person.COLUMN_NAME_ID)));
             this._address = cursor.getString(cursor.getColumnIndex(Person.COLUMN_NAME_ADDRESS));
+            //this._address = cursor.getString(cursor.getColumnIndex(Person.COLUMN_NAME_ADDRESS));
+            //this._address = cursor.getString(cursor.getColumnIndex(Person.COLUMN_NAME_ADDRESS));
             this._phone_number = cursor.getString(cursor.getColumnIndex(Person.COLUMN_NAME_PHONE_NUMBER));
             return this;
         }
@@ -68,6 +73,8 @@ public class Person  {
         ContentValues c = new ContentValues();
         c.put(this.COLUMN_NAME_PHONE_NUMBER, this._phone_number);
         c.put(this.COLUMN_NAME_ADDRESS, this._address);
+        //c.put(this.COLUMN_NAME_ADDRESS, this._address);
+        //c.put(this.COLUMN_NAME_ADDRESS, this._address);
 
         return c;
     }

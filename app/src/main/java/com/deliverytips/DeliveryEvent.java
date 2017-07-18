@@ -20,12 +20,14 @@ public class DeliveryEvent {
 
     //column names
     static String COLUMN_NAME_ID = "id";
+    static String COLUMN_NAME_ORDER_NUMBER = "order_number";
     static String COLUMN_NAME_TIMESTAMP = "timestamp";
     static String COLUMN_NAME_PRICE = "price";
     static String COLUMN_NAME_CUSTOMER_ID = "customer_id";
 
     //private variables
     long _id;
+    long _order_number;
     String _timestamp = "0000-00-00 00:00:00";
     Double _price = 0.00;
     Person _person = null;
@@ -46,6 +48,7 @@ public class DeliveryEvent {
     DeliveryEvent(Cursor cursor){
         if( cursor != null ){
             this._id = Long.parseLong( cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_ID)));
+            this._order_number = Long.parseLong( cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_ORDER_NUMBER)));
             this._price = Double.parseDouble(cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_PRICE)));
             this._timestamp = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_TIMESTAMP));
             this._person_id = Long.parseLong(cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_CUSTOMER_ID)));
@@ -78,6 +81,10 @@ public class DeliveryEvent {
         _price = price;
     }
 
+    public void setOrderNumber(long orderNumber){
+        this._order_number = orderNumber;
+    }
+
     //TODO change so DeliveryEvent only uses person_id not the person obj
     public void setPerson( Person person ){
         _person = person;
@@ -94,6 +101,7 @@ public class DeliveryEvent {
     public ContentValues getContentValues(){
         ContentValues c = new ContentValues();
         c.put(this.COLUMN_NAME_PRICE, this._price);
+        c.put(this.COLUMN_NAME_ORDER_NUMBER, this._order_number);
         c.put(this.COLUMN_NAME_TIMESTAMP, this._timestamp);
 
        if( this._person != null  ){
