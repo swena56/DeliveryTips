@@ -1,6 +1,7 @@
 package com.deliverytips;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 
 import java.text.SimpleDateFormat;
@@ -42,6 +43,10 @@ public class DeliveryEvent {
 
     // Empty constructor
     public DeliveryEvent(){
+
+    }
+
+    public DeliveryEvent(long _order_number, Context context){
 
     }
 

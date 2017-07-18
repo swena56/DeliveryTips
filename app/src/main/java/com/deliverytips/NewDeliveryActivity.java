@@ -137,9 +137,19 @@ public class NewDeliveryActivity extends AppCompatActivity {
                     deliveryEvent.setPerson(person);
 
                     //TODO check if delivery order already exists
+                    cursor = db.query(
+                        DeliveryEvent.TABLE_NAME,
+                        new String[] {
+                                DeliveryEvent.COLUMN_NAME_ORDER_NUMBER
+                        },
+                        DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + "=" + editTextOrderNumber.getText().toString(), null, null, null, null);
 
-                    db.insert(deliveryEvent.TABLE_NAME, null, deliveryEvent.getContentValues());
-                    Toast.makeText(context, "Delivery Event: " + deliveryEvent.getContentValues().toString(), Toast.LENGTH_SHORT).show();
+                    if( cursor.getCount() == 0 ) {
+                        db.insert(deliveryEvent.TABLE_NAME, null, deliveryEvent.getContentValues());
+                        Toast.makeText(context, "Delivery Event: " + deliveryEvent.getContentValues().toString(), Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(context, "Delivery Event: Already Exists", Toast.LENGTH_SHORT).show();
+                    }
                 } else {
                     Toast.makeText(context, "Invalid Person", Toast.LENGTH_SHORT).show();
                 }
@@ -234,22 +244,23 @@ public class NewDeliveryActivity extends AppCompatActivity {
                                                 String order = text;
                                                 order = order.replaceAll("[^0-9]", "");
 
-
-                                                Log.w("Detected Order", order);
-                                                editTextOrderNumber.setText(order);
-
-                                            } else
-                                            //detect zip
-                                            if (text.matches("(.)*(\\d{5})(.)*")) {
-
-                                                String zip = text;
-                                                zip = zip.replaceAll("[^0-9]", "");
-
-                                                if (zip.length() == 5) {
-                                                    Log.w("Detected Zip", zip);
-                                                    editTextAddress.setText(zip);
+                                                if (order.length() == 6) {
+                                                    Log.w("Detected Order", order);
+                                                    editTextOrderNumber.setText(order);
                                                 }
+
                                             }
+                                            //detect zip
+//                                            if (text.matches("(.)*(\\d{5})(.)*")) {
+//
+//                                                String zip = text;
+//                                                zip = zip.replaceAll("[^0-9]", "");
+//
+//                                                if (zip.length() == 5) {
+//                                                    Log.w("Detected Zip", zip);
+//                                                    editTextAddress.setText(zip);
+//                                                }
+//                                            }
                                         }
                                     }
 
@@ -257,10 +268,19 @@ public class NewDeliveryActivity extends AppCompatActivity {
                                         String price = text;
                                         price = price.replaceAll("[^0-9\\.]", "");
                                         editTextPrice.setText(price);
-                                        Log.w("Detected price", price);
+                                        //Log.w("Detected price", price);
                                     }
 
-                                    Log.w("New Delivery Activity", "Scanning: " + text);
+
+                                    //detect street
+                                    if( text.matches(".*[ ][avenue|lane|road|boulevard|drive|street|ave|dr|rd|blvd|ln|st][ ].*") ) {
+                                        if (text.matches(".*\\d+[ ].*[avenue|lane|road|boulevard|drive|street|ave|dr|rd|blvd|ln|st][ ].*")) {
+
+                                            editTextAddress.setText(text);
+                                        }
+                                    }
+
+                                            Log.w("New Delivery Activity", "Scanning: " + text);
                                     //stringBuilder.append(text);
                                 }
                             }
