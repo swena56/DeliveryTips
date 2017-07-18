@@ -20,22 +20,21 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "DB";
 
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 4;
 
     // Database creation sql statement
-    private static final String CREATE_DELIVERY_EVENT = "CREATE TABLE " + DeliveryEvent.TABLE_NAME + " IF NOT EXISTS " +
+    private static final String CREATE_DELIVERY_EVENT = "CREATE TABLE IF NOT EXISTS " + DeliveryEvent.TABLE_NAME +
             " ( " +
-                "delivery_id integer primary key, " +
+                DeliveryEvent.COLUMN_NAME_ID + " integer primary key, " +
                 DeliveryEvent.COLUMN_NAME_TIMESTAMP + " text, " +
                 DeliveryEvent.COLUMN_NAME_PRICE + "  double, " +
                 DeliveryEvent.COLUMN_NAME_CUSTOMER_ID + "  integer" +
             ");";
 
-    private static final String CREATE_PERSON_TABLE = "CREATE TABLE " + Person.TABLE_NAME + " IF NOT EXISTS " +
-            "(" +  Person.COLUMN_NAME_ID + " integer primary key, " +
+    private static final String CREATE_PERSON_TABLE = "CREATE TABLE IF NOT EXISTS " + Person.TABLE_NAME +
+            "(" +  Person.COLUMN_NAME_ID + " integer primary key , " +
             Person.COLUMN_NAME_PHONE_NUMBER + " text, " +
             Person.COLUMN_NAME_ADDRESS + " text );";
-
 
     //DeliveryEvent.
     public MyDatabaseHelper(Context context) {
@@ -61,7 +60,6 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
 
         database.execSQL(CREATE_DELIVERY_EVENT);
         database.execSQL(CREATE_PERSON_TABLE);
-
     }
 
     // Method is called during an upgrade of the database,
@@ -71,12 +69,9 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
                 "Upgrading database from version " + oldVersion + " to "
                         + newVersion + ", which will destroy all old data");
 
-
         database.execSQL("DROP TABLE IF EXISTS " + DeliveryEvent.TABLE_NAME);
         database.execSQL("DROP TABLE IF EXISTS " + Person.TABLE_NAME);
 
         onCreate(database);
     }
-
-
 }

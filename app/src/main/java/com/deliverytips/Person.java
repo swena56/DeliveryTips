@@ -1,14 +1,13 @@
 package com.deliverytips;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 
 /**
  * Created by Andrew Swenson on 7/15/2017.
  */
 
 public class Person  {
-
-
 
     static String TABLE_NAME = "Person";
 
@@ -17,10 +16,7 @@ public class Person  {
     static String COLUMN_NAME_ADDRESS= "address";
     static String COLUMN_NAME_PHONE_NUMBER= "phone_number";
 
-
-
-
-    int id = 0;
+    public long _id = 0;
     public String _first_name;
     public String _last_name;
     public String _address;
@@ -29,6 +25,18 @@ public class Person  {
 
     Person(){
 
+    }
+
+    Person(long person_id){
+        //search for person with matching id
+    }
+
+    Person(Cursor cursor){
+        if( cursor != null ){
+            this._id = Long.parseLong( cursor.getString(cursor.getColumnIndex(Person.COLUMN_NAME_ID)));
+            this._address = cursor.getString(cursor.getColumnIndex(Person.COLUMN_NAME_ADDRESS));
+            this._phone_number = cursor.getString(cursor.getColumnIndex(Person.COLUMN_NAME_PHONE_NUMBER));
+        }
     }
 
     public String toString(){
@@ -44,6 +52,18 @@ public class Person  {
         return string;
     }
 
+    public Person setCursor(Cursor cursor){
+
+        if( cursor != null ){
+            this._id = Long.parseLong( cursor.getString(cursor.getColumnIndex(Person.COLUMN_NAME_ID)));
+            this._address = cursor.getString(cursor.getColumnIndex(Person.COLUMN_NAME_ADDRESS));
+            this._phone_number = cursor.getString(cursor.getColumnIndex(Person.COLUMN_NAME_PHONE_NUMBER));
+            return this;
+        }
+
+        return null;
+    }
+
     public ContentValues getContentValues(){
         ContentValues c = new ContentValues();
         c.put(this.COLUMN_NAME_PHONE_NUMBER, this._phone_number);
@@ -54,15 +74,9 @@ public class Person  {
 
     public boolean isValidPerson(){
 
-        if( _first_name == null || _last_name == null ){
-            return false;
-        }
-
         if( _phone_number == null ){
             return false;
         }
-
-
 
         return true;
     }

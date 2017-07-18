@@ -1,6 +1,7 @@
 package com.deliverytips;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -24,10 +25,11 @@ public class DeliveryEvent {
     static String COLUMN_NAME_CUSTOMER_ID = "customer_id";
 
     //private variables
-    int _id;
+    long _id;
     String _timestamp = "0000-00-00 00:00:00";
     Double _price = 0.00;
     Person _person = null;
+    long _person_id;
 
     //TODO does not handle null strings
     public String toString(){
@@ -39,6 +41,15 @@ public class DeliveryEvent {
     // Empty constructor
     public DeliveryEvent(){
 
+    }
+
+    DeliveryEvent(Cursor cursor){
+        if( cursor != null ){
+            this._id = Long.parseLong( cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_ID)));
+            this._price = Double.parseDouble(cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_PRICE)));
+            this._timestamp = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_TIMESTAMP));
+            this._person_id = Long.parseLong(cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_CUSTOMER_ID)));
+        }
     }
 
     public DeliveryEvent( Double price, Person Person){
@@ -67,26 +78,32 @@ public class DeliveryEvent {
         _price = price;
     }
 
+    //TODO change so DeliveryEvent only uses person_id not the person obj
     public void setPerson( Person person ){
         _person = person;
     }
 
-
-    public ContentValues getContentValues(){
-
-        ContentValues c = new ContentValues();
-
-        c.put("customer_id", this._person.id);
-        c.put("timestamp", this._timestamp);
-        c.put("price", this._price);
-
-        return c;
+    public void setPersonId( long id ){
+        _person_id = id;
     }
+
     public String getTimestamp(){
         return _timestamp;
     }
 
-    //public Content
+    public ContentValues getContentValues(){
+        ContentValues c = new ContentValues();
+        c.put(this.COLUMN_NAME_PRICE, this._price);
+        c.put(this.COLUMN_NAME_TIMESTAMP, this._timestamp);
+
+       if( this._person != null  ){
+           c.put(this.COLUMN_NAME_CUSTOMER_ID, this._person._id);
+       } else {
+           c.put(this.COLUMN_NAME_CUSTOMER_ID, this._person_id);
+       }
+
+        return c;
+    }
 
     public boolean isValid(){
 
@@ -104,7 +121,4 @@ public class DeliveryEvent {
 
         return true;
     }
-
-
-
 }

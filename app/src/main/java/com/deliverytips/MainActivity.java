@@ -14,8 +14,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.deliverytips.fragments.Search;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    FragmentManager fm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +46,9 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-
+        //load the default dashboard fragment
+        fm = getFragmentManager();
+        fm.beginTransaction().replace(R.id.content_frame, new DashboardTable()).commit();
 
     }
 
@@ -84,7 +90,7 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        FragmentManager fm = getFragmentManager();
+        fm = getFragmentManager();
 
         if (id == R.id.home) {
 
@@ -94,11 +100,9 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.new_delivery) {
             fm.beginTransaction().replace(R.id.content_frame, new NewDelivery()).commit();
         } else if (id == R.id.phone_search) {
-
+            fm.beginTransaction().replace(R.id.content_frame, new Search()).commit();
         } else if (id == R.id.settings) {
-
             fm.beginTransaction().replace(R.id.content_frame,new Settings()).commit();
-
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
