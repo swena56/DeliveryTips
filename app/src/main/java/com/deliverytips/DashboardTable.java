@@ -1,6 +1,9 @@
 package com.deliverytips;
 
 import android.app.Fragment;
+import android.app.FragmentManager;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -29,9 +32,9 @@ import java.util.Map;
 
 public class DashboardTable extends Fragment {
 
-    static String store_id = "0000";
-    static String username = "username";
-    static String password = "password";
+    static String store_id;
+    static String username;
+    static String password;
 
     String server_date = "10/3/2017:10/3/2017";  //might need to manually update this
     String session_id = "XXXX";
@@ -48,11 +51,15 @@ public class DashboardTable extends Fragment {
     HttpStack httpStack;
     StringRequest stringRequest = null;
 
+    SharedPreferences sharedPref;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_dashboard_table, container, false);
+
+        sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
 
         text = (TextView) rootView.findViewById(R.id.textViewDashboardText);
         text.setText("Dashboard\nCustomers\n");
@@ -103,93 +110,124 @@ public class DashboardTable extends Fragment {
         //CookieHandler.setDefault(cookieManager);
         DefaultHttpClient httpclient = new DefaultHttpClient();
 
-        httpStack = new HttpClientStack( httpclient );
+        httpStack = new HttpClientStack(httpclient);
         queue = Volley.newRequestQueue(getActivity(), httpStack);
 
         Button login_button = (Button) rootView.findViewById(R.id.buttonLogin);
 
-        login_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        store_id = sharedPref.getString("store_id", null);
+        username = sharedPref.getString("username", null);
+        password = sharedPref.getString("password", null);
 
-                //httpclient.setCookieStore( cookieManager.getCookieStore() );
-                Toast.makeText(getActivity(),"Procesing PWR Login", Toast.LENGTH_LONG).show();
+        //enable the button if storeid, username, and password are not null
+        if (store_id == "" || store_id == null || username == "" || username == null || password == null || password == "") {
 
-                final StringRequest postRequest = new StringRequest(Request.Method.POST, url,
-                        new Response.Listener<String>()
-                        {
-                            @Override
-                            public void onResponse(String response) {
-                                // response
-                                Log.d("Response", response);
-                                text.setText(text.getText().toString() + "\n\nURL: " + url +"url\n\n" + "\nCookie: " + cookie_str  +"\n\n" + response );
+            login_button.setText("Settings");
+            // if null values send user to settings page to fill it in.
+            login_button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    FragmentManager fm = getActivity().getFragmentManager();
+                    fm.beginTransaction().replace(R.id.content_frame, new Settings()).commit();
+                }
+            });
+        } else {
+
+            login_button.setText("Login in to PWR");
+            login_button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    //httpclient.setCookieStore( cookieManager.getCookieStore() );
+                    Toast.makeText(getActivity(), "Procesing PWR Login for store " + store_id, Toast.LENGTH_LONG).show();
+
+                    final StringRequest postRequest = new StringRequest(Request.Method.POST, url,
+                            new Response.Listener<String>() {
+                                @Override
+                                public void onResponse(String response) {
+                                    // response
+                                    Log.d("Response", response);
+
+                                    //parse data
+                                    String delims = "id=\"__VIEWSTATE\"";
+                                    String[] str_tokens = response.split(delims);
+                                    text.setText(text.getText().toString() +  "\n\nsize: " + str_tokens.length );
+
+                                    if( str_tokens.length > 0 ){
+                                        //text.setText(text.getText().toString() + str_tokens[1] );
+                                    }
+
+                                    // Check if successfully logged in
+                                    String[] login_name_label = response.split("LabelLoginName");
+                                    if( login_name_label.length > 0){
+                                        text.setText(text.getText().toString() +  "\nSuccessful login" );
+                                        text.setText(text.getText().toString() + "\n\nURL: " + url + "url\n\n" + "\nCookie: " + cookie_str + "\n\n" + response);
+                                    } else {
+                                        text.setText(text.getText().toString() +  "\nFailed to login");
+                                    }
+                                }
+                            },
+                            new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    // error
+                                    Log.d("Error.Response", error.toString());
+                                }
                             }
-                        },
-                        new Response.ErrorListener()
-                        {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                // error
-                                Log.d("Error.Response", error.toString());
-                            }
+                    ) {
+                        @Override
+                        protected Map<String, String> getParams() {
+                            Map<String, String> params = new HashMap<String, String>();
+                            params.put("txtUsername", username);
+                            params.put("txtPassword", password);
+                            params.put("btnLogin", "Sign+In");
+                            params.put(username + "_RptParams", "+RealTime|RealTime_OrderDetail|sr_" + store_id + "|0|" + server_date + "|Store " + store_id + "|");
+                            params.put("__AntiXsrfToken", token);
+                            params.put("ReturnUrl", "%2fPWR%2fRealTimeOrderDetail.aspx%3fFilterCode%3dsr_" + store_id);
+                            params.put("FilterCode", "sr_" + store_id);
+                            params.put("PwrMainGridRowSelect", "1");
+                            params.put("ASP.NET_SessionId", session_id);
+                            params.put("PwrAuthCookie", cookie);
+                            params.put(username + "_CurrentCulture", "en-US");
+                            params.put("TimeZoneOffset", "7");
+
+                            //params.put("fileDownloadToken","?");
+                            //params.put("__LASTFOCUS","");
+                            //params.put("__VIEWSTATE","");
+                            //params.put("__VIEWSTATEGENERATOR","");
+                            //params.put("__EVENTTARGET","");
+                            //params.put("__EVENTARGUMENT","");
+                            return params;
                         }
-                ) {
-                    @Override
-                    protected Map<String, String> getParams()
-                    {
-                        Map<String, String>  params = new HashMap<String, String>();
-                        params.put("txtUsername", username);
-                        params.put("txtPassword", password );
-                        params.put("btnLogin","Sign+In");
 
-                        //params.put("fileDownloadToken","?");
-                        //params.put("__LASTFOCUS","");
-                        //params.put("__VIEWSTATE","");
-                        //params.put("__VIEWSTATEGENERATOR","");
-                        //params.put("__EVENTTARGET","");
-                        //                params.put("__EVENTARGUMENT","");
-                        return params;
-                    }
+                        @Override
+                        public Map<String, String> getHeaders() throws AuthFailureError {
+                            Map<String, String> params = new HashMap<String, String>();
 
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String,String> params = new HashMap<String, String>();
+                            params.put("Host", "pwr.dominos.com");
+                            params.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:55.0) Gecko/20100101 Firefox/55.0");
+                            //params.put("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+                            params.put("Accept", "*/*");
+                            params.put("Accept-Language", "en-US,en;q=0.8");
+                            params.put("Accept-Encoding", "gzip, deflate, br");
+                            params.put("Pragma", "no-cache");
+                            params.put("Upgrade-Insecure-Requests", "1");
+                            params.put("Cache-Control", "no-cache");
+                            params.put("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
 
-                        params.put("Host", "pwr.dominos.com");
-                        params.put("User-Agent","Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:55.0) Gecko/20100101 Firefox/55.0");
-                        //params.put("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
-                        params.put("Accept","*/*");
-                        params.put("Accept-Language","en-US,en;q=0.8");
-                        params.put("Accept-Encoding","gzip, deflate, br");
+                            // params.put("Content-Length","20");
+                            params.put("Connection", "keep-alive");
 
-                        params.put("Pragma","no-cache");
-                        //  params.put("Upgrade-Insecure-Requests", "1");
+                            return params;
+                        }
+                    };
 
-                        params.put("Cache-Control","no-cache");
-                        params.put("Content-Type","application/x-www-form-urlencoded; charset=utf-8");
-
-                        // params.put("Content-Length","20");
-                        params.put("Referer","https://pwr.dominos.com/PWR/RealTimeOrderDetail.aspx?FilterCode=sr_"+store_id+"^&FilterDesc=Store-"+ store_id);
-
-                        //set cookie
-                        cookie_str = "ASP.NET_SessionId="+ session_id;
-                        cookie_str += ";PwrAuthCookie=" + cookie;
-                        cookie_str += ";__AntiXsrfToken=" + token;
-                        cookie_str += ";" + username + "_IsCultureSet=" + "N" ;
-                        cookie_str += ";_RptParams=+RealTime|RealTime_OrderDetail|sr_" + store_id +"|0|"+server_date+"||";
-                        cookie_str += ";TimeZoneOffset=" + "7";
-                        params.put("Cookie", cookie_str);
-
-                        //params.put("Connection", "close");
-
-                        return params;
-                    }
-                };
-
-                queue.add(postRequest);
-            }
-        });
+                    queue.add(postRequest);
+                }
+            });
+        }
 
         return rootView;
     }
+
 }

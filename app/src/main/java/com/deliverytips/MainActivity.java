@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        fm.beginTransaction().replace(R.id.content_frame, new DashboardTable()).commit();
+        //fm.beginTransaction().replace(R.id.content_frame, new DashboardTable()).commit();
 
     }
 }
