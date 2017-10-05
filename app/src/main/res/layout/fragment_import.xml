@@ -34,10 +34,14 @@
         android:visibility="invisible"
         android:text="Import Dataset"/>
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
     <TextView
         android:id="@+id/textViewOutput"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:text="" />
+    </ScrollView>
     </LinearLayout>
 </FrameLayout>
