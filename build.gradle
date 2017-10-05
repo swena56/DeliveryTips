@@ -1,8 +1,6 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 dependencies {
-    //compile files('lib/apache-mime4j-0.6.1.jar')
-    //compile files('lib/httpmime-4.3.jar')
 }
 
 buildscript {

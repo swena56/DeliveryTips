@@ -24,6 +24,7 @@ import com.android.volley.toolbox.HttpClientStack;
 import com.android.volley.toolbox.HttpStack;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.deliverytips.fragments.Import;
 
 import org.apache.http.impl.client.DefaultHttpClient;
 
@@ -36,7 +37,7 @@ public class DashboardTable extends Fragment {
     static String username;
     static String password;
 
-    String server_date = "10/3/2017:10/3/2017";  //might need to manually update this
+    String server_date = "10/4/2017:10/4/2017";  //might need to manually update this
     String session_id = "XXXX";
     String token = "XXXXX";
     String cookie = "XXXXXXXXXXXXXXXXXXX";
@@ -114,10 +115,19 @@ public class DashboardTable extends Fragment {
         queue = Volley.newRequestQueue(getActivity(), httpStack);
 
         Button login_button = (Button) rootView.findViewById(R.id.buttonLogin);
+        Button import_button = (Button) rootView.findViewById(R.id.buttonImport);
 
         store_id = sharedPref.getString("store_id", null);
         username = sharedPref.getString("username", null);
         password = sharedPref.getString("password", null);
+
+        import_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fm = getActivity().getFragmentManager();
+                fm.beginTransaction().replace(R.id.content_frame, new Import()).commit();
+            }
+        });
 
         //enable the button if storeid, username, and password are not null
         if (store_id == "" || store_id == null || username == "" || username == null || password == null || password == "") {
@@ -143,6 +153,7 @@ public class DashboardTable extends Fragment {
 
                     final StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                             new Response.Listener<String>() {
+
                                 @Override
                                 public void onResponse(String response) {
                                     // response
@@ -161,7 +172,20 @@ public class DashboardTable extends Fragment {
                                     String[] login_name_label = response.split("LabelLoginName");
                                     if( login_name_label.length > 0){
                                         text.setText(text.getText().toString() +  "\nSuccessful login" );
-                                        text.setText(text.getText().toString() + "\n\nURL: " + url + "url\n\n" + "\nCookie: " + cookie_str + "\n\n" + response);
+                                        //text.setText(text.getText().toString() + "\n\nURL: " + url + "url\n\n" + "\nCookie: " + cookie_str + "\n\n" + response);
+
+
+                                        //715 N FRANKLIN ST
+                                        String[] td_tokens = response.split("<tbody>");
+
+                                        if( td_tokens.length > 0  ){
+                                            //String[] a = td_tokens[1].split("</tbody>");
+
+
+
+                                            text.setText(text.getText().toString() +  "\nDectect table data: " + td_tokens.length + td_tokens[0] );
+                                        }
+
                                     } else {
                                         text.setText(text.getText().toString() +  "\nFailed to login");
                                     }
@@ -226,6 +250,7 @@ public class DashboardTable extends Fragment {
                 }
             });
         }
+
 
         return rootView;
     }
