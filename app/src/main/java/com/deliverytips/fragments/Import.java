@@ -5,6 +5,7 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -18,6 +19,9 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.deliverytips.DeliveryEvent;
+import com.deliverytips.MyDatabaseHelper;
+import com.deliverytips.Person;
 import com.deliverytips.R;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
@@ -30,8 +34,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import jxl.Cell;
 import jxl.Sheet;
@@ -41,14 +47,12 @@ import jxl.read.biff.BiffException;
 import static android.content.ContentValues.TAG;
 
 
-
 /**
  * A simple {@link Fragment} subclass.
  */
 public class Import extends Fragment {
 
-    Button importDatasetButton;
-    List<String> imported_data = null;
+    Map<Integer, List<String>> imported_data = null;
     TextView textViewOut;
 
     public Import() {
@@ -78,7 +82,7 @@ public class Import extends Fragment {
 
         final View rootView = inflater.inflate(R.layout.fragment_import, container, false);
         final Button getCSVButton = (Button)rootView.findViewById(R.id.buttonGetCSV);
-        importDatasetButton = (Button)rootView.findViewById(R.id.buttonImportDataset);
+        final Button importDatasetButton = (Button)rootView.findViewById(R.id.buttonImportDataset);
         textViewOut = (TextView) rootView.findViewById(R.id.textViewOutput);
         String dl_folder;
 
@@ -120,6 +124,8 @@ public class Import extends Fragment {
                     Log.d("Files", "Path: " + directory.getPath());
                     textViewOut.setText(textViewOut.getText() + "\n" + directory.getPath());
                     showFileChooser();
+                    importDatasetButton.setVisibility(View.VISIBLE);
+
                 } else {
                     textViewOut.setText(textViewOut.getText() + "\nPermission: BAD");
                 }
@@ -127,12 +133,57 @@ public class Import extends Fragment {
         });
 
         //show data and option to submit dataset
-        if( imported_data != null ){
+            importDatasetButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
 
-            //make button visible
+                    Toast.makeText(getContext(), "Starting Import", Toast.LENGTH_SHORT).show();
+
+                    MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(getContext());
+                    SQLiteDatabase db = myDatabaseHelper.getWritableDatabase();
+
+                    //add each item
+                    for (int i=1; i<imported_data.size(); i++) {
 
 
-        }
+                        //how to access data
+                        //imported_data.get(i).get(0);//store_id
+                        //imported_data.get(i).get(1);//ticket_id
+
+                        //create person if not exists
+                        Person person = new Person();
+                        person._address = imported_data.get(i).get(4);
+                        person._phone_number =  imported_data.get(i).get(3);
+                        person._id = db.insert(person.TABLE_NAME, null, person.getContentValues());
+
+                        //create delivery event if not exists
+                        DeliveryEvent deliveryEvent = new DeliveryEvent();
+
+                        //parse delivery number
+//                        String order_cell = imported_data.get(i).get(1);
+//                        String[] arr = order_cell.split("#");
+//                        Long order_number;
+//                        if( arr.length > 0 ){
+//                            order_number = Long.parseLong( arr[1] );
+//                            deliveryEvent.setOrderNumber(order_number);
+//                        }
+//
+//                        Double price = 0.0;
+//                        if( imported_data.get(i).get(4) != null && Double.parseDouble(imported_data.get(i).get(4) ) > 0 ){
+//                            price = Double.parseDouble(imported_data.get(i).get(4));
+//                        }
+//
+//                        deliveryEvent.setPrice(price);//Double.parseDouble(editTextPrice.getText().toString())
+//                        deliveryEvent.setTimestampNow();
+//                        deliveryEvent.setPerson(person);
+//                        db.insert(deliveryEvent.TABLE_NAME, null, deliveryEvent.getContentValues());
+
+                        Toast.makeText(getContext(), imported_data.get(i).toString(), Toast.LENGTH_SHORT).show();
+                    }
+
+                    Toast.makeText(getContext(), "Import Data Complete", Toast.LENGTH_SHORT).show();
+                }
+            });
 
         // Inflate the layout for this fragment
         return rootView;
@@ -166,7 +217,6 @@ public class Import extends Fragment {
                 textViewOut.setText(textViewOut.getText() + "\nFile: " + filename);
                 imported_data = readExcelFile(getContext(), directory.getPath() + "/" + filename );
 
-                importDatasetButton.setVisibility(View.VISIBLE);
                 textViewOut.setText(textViewOut.getText() + "\n" + imported_data.toString());
             break;
         }
@@ -232,14 +282,14 @@ public class Import extends Fragment {
         }
         return result;
     }
-    private static List<String> readExcelFile(Context context, String filename) {
+    private static Map<Integer, List<String>> readExcelFile(Context context, String filename) {
 
         Toast.makeText(context, "Reading file: " + filename, Toast.LENGTH_SHORT).show();
 
         if (!isExternalStorageAvailable() || isExternalStorageReadOnly())
         {
             Log.e(TAG, "Storage not available or read only");
-            return new ArrayList<String>();
+            return new HashMap<Integer, List<String>>();
         }
 
         try{
@@ -248,7 +298,7 @@ public class Import extends Fragment {
 
             if( !file.exists() ){
                 Toast.makeText(context, "Does not Exists", Toast.LENGTH_SHORT).show();
-                return new ArrayList<String>();
+                return new HashMap<Integer, List<String>>();
             } else {
                 Toast.makeText(context, "Exists", Toast.LENGTH_SHORT).show();
             }
@@ -267,22 +317,30 @@ public class Import extends Fragment {
             /** We now need something to iterate through the cells.**/
             Iterator rowIter = mySheet.rowIterator();
 
-            List<String> resultSet = new ArrayList<String>();
+            Map<Integer, List<String>> map = new HashMap<Integer, List<String>>();
 
             while(rowIter.hasNext()){
+
                 HSSFRow myRow = (HSSFRow) rowIter.next();
                 Iterator cellIter = myRow.cellIterator();
+                List<String> row = new ArrayList<String>();
+
+                //Toast.makeText(context, "cell Value: " + myRow.toString(), Toast.LENGTH_SHORT).show();
+
                 while(cellIter.hasNext()){
                     HSSFCell myCell = (HSSFCell) cellIter.next();
+
                     Log.d(TAG, "Cell Value: " +  myCell.toString());
-                    resultSet.add(myCell.toString());
-                    //Toast.makeText(context, "cell Value: " + myCell.toString(), Toast.LENGTH_SHORT).show();
+                    row.add(myCell.toString());
+
                 }
+
+                map.put(myRow.getRowNum(),row);
             }
 
-            return resultSet;
+            return map;
         }catch (Exception e){e.printStackTrace(); }
 
-        return new ArrayList<String>();
+        return new HashMap<Integer, List<String>>();
     }
 }

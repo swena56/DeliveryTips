@@ -9,7 +9,7 @@ import android.database.Cursor;
 
 public class Person  {
 
-    static String TABLE_NAME = "Person";
+    public static String TABLE_NAME = "Person";
 
     //column names
     static String COLUMN_NAME_ID = "id";
@@ -24,7 +24,7 @@ public class Person  {
     public String _address;
     public String _phone_number;
 
-    Person(){
+    public Person(){
 
     }
 

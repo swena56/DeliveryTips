@@ -16,7 +16,7 @@ import java.util.Date;
 
 public class DeliveryEvent {
 
-    static String TABLE_NAME = "DeliveryEvents";
+    public static String TABLE_NAME = "DeliveryEvents";
     static String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
     //column names
