@@ -2,6 +2,7 @@ package com.deliverytips.fragments;
 
 import android.Manifest;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -19,6 +20,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.deliverytips.DashboardTable;
 import com.deliverytips.DeliveryEvent;
 import com.deliverytips.MyDatabaseHelper;
 import com.deliverytips.Person;
@@ -145,22 +147,28 @@ public class Import extends Fragment {
                     //add each item
                     for (int i=1; i<imported_data.size(); i++) {
 
+                        String address = imported_data.get(i).get(4);
+                        String phone_number = imported_data.get(i).get(3);
+                        String order_cell = imported_data.get(i).get(1);
 
+                        if( address == null || phone_number == null ){
+                            continue;
+                        }
                         //how to access data
                         //imported_data.get(i).get(0);//store_id
                         //imported_data.get(i).get(1);//ticket_id
 
                         //create person if not exists
                         Person person = new Person();
-                        person._address = imported_data.get(i).get(4);
-                        person._phone_number =  imported_data.get(i).get(3);
+                        person._address = address;
+                        person._phone_number = phone_number;
                         person._id = db.insert(person.TABLE_NAME, null, person.getContentValues());
 
                         //create delivery event if not exists
                         DeliveryEvent deliveryEvent = new DeliveryEvent();
 
                         //parse delivery number
-//                        String order_cell = imported_data.get(i).get(1);
+//
 //                        String[] arr = order_cell.split("#");
 //                        Long order_number;
 //                        if( arr.length > 0 ){
@@ -178,10 +186,14 @@ public class Import extends Fragment {
 //                        deliveryEvent.setPerson(person);
 //                        db.insert(deliveryEvent.TABLE_NAME, null, deliveryEvent.getContentValues());
 
-                        Toast.makeText(getContext(), imported_data.get(i).toString(), Toast.LENGTH_SHORT).show();
+                       // Toast.makeText(getContext(), imported_data.get(i).toString(), Toast.LENGTH_SHORT).show();
                     }
 
                     Toast.makeText(getContext(), "Import Data Complete", Toast.LENGTH_SHORT).show();
+
+                    //destory fragment
+                    FragmentManager fm = getActivity().getFragmentManager();
+                    fm.beginTransaction().replace(R.id.content_frame, new DashboardTable()).commit();
                 }
             });
 

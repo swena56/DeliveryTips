@@ -45,6 +45,8 @@ public class MainActivity extends AppCompatActivity
                 Snackbar.make(view, "New Delivery Event", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
 
+                askPermission();
+                
                 //fm.beginTransaction().replace(R.id.content_frame, new NewDelivery()).commit();
                 startActivity(intent);
             }
@@ -58,6 +60,8 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+
 
         //load the default dashboard fragment
         fm = getFragmentManager();

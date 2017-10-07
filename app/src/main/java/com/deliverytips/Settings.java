@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +20,7 @@ public class Settings extends Fragment {
     EditText editTextUsername;
     EditText editTextPassword;
     Button saveButton;
+    Button resetDBButton;
     View rootView;
 
     SharedPreferences sharedPref;
@@ -35,11 +37,14 @@ public class Settings extends Fragment {
         editTextUsername = (EditText) rootView.findViewById(R.id.editTextUsername);
         editTextPassword = (EditText) rootView.findViewById(R.id.editTextPassword);
         saveButton = (Button) rootView.findViewById(R.id.buttonSaveSettings);
+        resetDBButton = (Button) rootView.findViewById(R.id.buttonClearDB);
         sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
 
         editTextStoreId.setText( sharedPref.getString("store_id", null) );
         editTextUsername.setText( sharedPref.getString("username", null) );
         editTextPassword.setText( sharedPref.getString("password", null) );
+
+
 
         saveButton.setOnClickListener(new View.OnClickListener() {
               @Override
@@ -58,6 +63,24 @@ public class Settings extends Fragment {
                   fm.beginTransaction().replace(R.id.content_frame, new DashboardTable()).commit();
               }
         });
+
+        resetDBButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(getContext());
+                SQLiteDatabase db = myDatabaseHelper.getWritableDatabase();
+                db.execSQL("DROP TABLE IF EXISTS " + DeliveryEvent.TABLE_NAME);
+                db.execSQL("DROP TABLE IF EXISTS " + Person.TABLE_NAME);
+
+                db.execSQL(myDatabaseHelper.CREATE_DELIVERY_EVENT);
+                db.execSQL(myDatabaseHelper.CREATE_PERSON_TABLE);
+
+                Toast.makeText(getActivity(),"DB Reset", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
 
         // Inflate the layout for this fragment
         return rootView;

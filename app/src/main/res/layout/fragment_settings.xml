@@ -46,6 +46,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Save"/>
+
+        <Button
+            android:id="@+id/buttonClearDB"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Reset DB"/>
     </LinearLayout>
 
 </FrameLayout>
