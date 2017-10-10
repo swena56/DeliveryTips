@@ -2,7 +2,6 @@ package com.deliverytips;
 
 
 import android.app.Fragment;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -49,47 +48,53 @@ public class NewDelivery extends Fragment implements View.OnClickListener {
             MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(getContext());
             SQLiteDatabase db = myDatabaseHelper.getWritableDatabase();
 
-            //search to see if person exists
-            Cursor cursor = db.query(
-                    Person.TABLE_NAME,
-                    new String[] {
-                            Person.COLUMN_NAME_ID,
-                            Person.COLUMN_NAME_PHONE_NUMBER,
-                            Person.COLUMN_NAME_ADDRESS
-                    },
-                    Person.COLUMN_NAME_PHONE_NUMBER + "=" + editTextPhoneNumber.getText().toString(), null, null, null, null);
-
-            Person person = new Person();
-
-            if( cursor.getCount() > 0 ) {
-
-                while (cursor.moveToNext()) {
-                    person = new Person(cursor);
-                    //Toast.makeText(getContext(),person._phone_number, Toast.LENGTH_SHORT).show();
-                }
-            } else {
-
-                //Insert a person
-                person = new Person();
-                person._address = editTextAddress.getText().toString();
-                person._phone_number =  editTextPhoneNumber.getText().toString();
-                person._id = db.insert(person.TABLE_NAME, null, person.getContentValues());
-
-                Toast.makeText(getContext(),"Person: ( " + person._id + " ) " + person.getContentValues().toString(), Toast.LENGTH_SHORT).show();
-            }
-
-            if( person.isValidPerson()) {
-
-                //save deliveryEvent object
-                DeliveryEvent deliveryEvent = new DeliveryEvent();
+            DeliveryEvent deliveryEvent = new DeliveryEvent();
                 deliveryEvent.setPrice(Double.parseDouble(editTextPrice.getText().toString()));
                 deliveryEvent.setTimestampNow();
-                deliveryEvent.setPerson(person);
                 db.insert(deliveryEvent.TABLE_NAME, null, deliveryEvent.getContentValues());
                 Toast.makeText(getContext(), "Delivery Event: " + deliveryEvent.getContentValues().toString(), Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(getContext(), "Invalid Person", Toast.LENGTH_SHORT).show();
-            }
+
+            //search to see if person exists
+//            Cursor cursor = db.query(
+//                    Person.TABLE_NAME,
+//                    new String[] {
+//                            Person.COLUMN_NAME_ID,
+//                            Person.COLUMN_NAME_PHONE_NUMBER,
+//                            Person.COLUMN_NAME_ADDRESS
+//                    },
+//                    Person.COLUMN_NAME_PHONE_NUMBER + "=" + editTextPhoneNumber.getText().toString(), null, null, null, null);
+//
+//            Person person = new Person();
+//
+//            if( cursor.getCount() > 0 ) {
+//
+//                while (cursor.moveToNext()) {
+//                    person = new Person(cursor);
+//                    //Toast.makeText(getContext(),person._phone_number, Toast.LENGTH_SHORT).show();
+//                }
+//            } else {
+//
+//                //Insert a person
+//                person = new Person();
+//                person._address = editTextAddress.getText().toString();
+//                person._phone_number =  editTextPhoneNumber.getText().toString();
+//                person._id = db.insert(person.TABLE_NAME, null, person.getContentValues());
+//
+//                Toast.makeText(getContext(),"Person: ( " + person._id + " ) " + person.getContentValues().toString(), Toast.LENGTH_SHORT).show();
+//            }
+//
+//            if( person.isValidPerson()) {
+//
+//                //save deliveryEvent object
+//                DeliveryEvent deliveryEvent = new DeliveryEvent();
+//                deliveryEvent.setPrice(Double.parseDouble(editTextPrice.getText().toString()));
+//                deliveryEvent.setTimestampNow();
+//                deliveryEvent.setPerson(person);
+//                db.insert(deliveryEvent.TABLE_NAME, null, deliveryEvent.getContentValues());
+//                Toast.makeText(getContext(), "Delivery Event: " + deliveryEvent.getContentValues().toString(), Toast.LENGTH_SHORT).show();
+//            } else {
+//                Toast.makeText(getContext(), "Invalid Person", Toast.LENGTH_SHORT).show();
+//            }
 
             //destory fragment
             getFragmentManager().beginTransaction().remove(this).commitAllowingStateLoss();

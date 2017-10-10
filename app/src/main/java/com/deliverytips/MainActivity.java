@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.deliverytips.fragments.Search;
+import com.deliverytips.table.DeliveryEventsTable;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -61,11 +62,10 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-
-
         //load the default dashboard fragment
         fm = getFragmentManager();
-        fm.beginTransaction().replace(R.id.content_frame, new DashboardTable()).commit();
+        //fm.beginTransaction().replace(R.id.content_frame, new DashboardTable()).commit();
+        fm.beginTransaction().replace(R.id.content_frame, new DeliveryEventsTable()).commit();
 
     }
 
@@ -160,7 +160,7 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.home) {
 
             //Toast toast = new Toast();
-            fm.beginTransaction().replace(R.id.content_frame, new DashboardTable()).commit();
+            fm.beginTransaction().replace(R.id.content_frame, new DeliveryEventsTable()).commit();
             // Handle the camera action
         } else if (id == R.id.new_delivery) {
             startActivity(intent);
@@ -181,7 +181,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        //fm.beginTransaction().replace(R.id.content_frame, new DashboardTable()).commit();
+        fm.beginTransaction().replace(R.id.content_frame, new DeliveryEventsTable()).commit();
 
     }
 }

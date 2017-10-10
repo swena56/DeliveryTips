@@ -4,8 +4,6 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -62,50 +60,10 @@ public class DashboardTable extends Fragment {
 
         sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
 
-        text = (TextView) rootView.findViewById(R.id.textViewDashboardText);
-        text.setText("Dashboard\nCustomers\n");
-        text.setText(text.getText() + "ID PHONE ADDRESS\n");
-
-        MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(getContext());
-        SQLiteDatabase db = myDatabaseHelper.getWritableDatabase();
+        //MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(getContext());
+        //SQLiteDatabase db = myDatabaseHelper.getWritableDatabase();
 
         //search to see if person exists
-        Cursor cursor = db.query(
-                Person.TABLE_NAME,
-                new String[]{
-                        Person.COLUMN_NAME_ID,
-                        Person.COLUMN_NAME_PHONE_NUMBER,
-                        Person.COLUMN_NAME_ADDRESS
-                },
-                null, null, null, null, null);
-
-        while (cursor.moveToNext()) {
-            // your calculation goes here
-            Person person = new Person(cursor);
-            text.setText(text.getText().toString() + person._id + " " + person._phone_number + " " + person._address + "\n");
-        }
-
-        // add deliveryEvents
-        text.setText(text.getText() + "\nDelivery Events\n");
-        text.setText(text.getText() + "ID ORDER_NUM PRICE TIMESTAMP \n");
-        cursor = db.query(
-                DeliveryEvent.TABLE_NAME,
-                new String[]{
-                        DeliveryEvent.COLUMN_NAME_ID,
-                        DeliveryEvent.COLUMN_NAME_ORDER_NUMBER,
-                        DeliveryEvent.COLUMN_NAME_PRICE,
-                        DeliveryEvent.COLUMN_NAME_TIMESTAMP,
-                        DeliveryEvent.COLUMN_NAME_CUSTOMER_ID
-                },
-                null, null, null, null, null);
-
-        if (cursor.getCount() > 0) {
-            while (cursor.moveToNext()) {
-                // your calculation goes here
-                DeliveryEvent deliveryEvent = new DeliveryEvent(cursor);
-                text.setText(text.getText().toString() + deliveryEvent._id + " " + deliveryEvent._order_number + " " + deliveryEvent._price + " " + deliveryEvent._timestamp + " " + deliveryEvent._person_id + "\n");
-            }
-        }
 
         //cookieManager = new CookieManager(null, CookiePolicy.ACCEPT_ALL);
         //CookieHandler.setDefault(cookieManager);

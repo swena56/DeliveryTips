@@ -41,6 +41,7 @@ dependencies {
     compile group: 'org.apache.poi', name: 'poi', version: '3.9'
     compile group: 'net.sourceforge.jexcelapi', name: 'jxl', version: '2.6'
     compile 'com.obsez.android.lib.filechooser:filechooser:1.1.5'
+    compile 'de.codecrafters.tableview:tableview:2.8.0'
     //compile 'com.github.alirezaaa:FilePickerLibrary:3.5.1'
     //compile 'com.blogspot.tonyatkins:picker:2.0.1'
     //compile 'com.droidninja:filepicker:2.0.8'

@@ -4,6 +4,8 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 
+import com.deliverytips.table.data.Chargable;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -14,31 +16,67 @@ import java.util.Date;
 
  */
 
-public class DeliveryEvent {
+public class DeliveryEvent implements Chargable {
 
     public static String TABLE_NAME = "DeliveryEvents";
     static String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
-    //column names
-    static String COLUMN_NAME_ID = "id";
-    static String COLUMN_NAME_ORDER_NUMBER = "order_number";
-    static String COLUMN_NAME_TIMESTAMP = "timestamp";
-    static String COLUMN_NAME_PRICE = "price";
-    static String COLUMN_NAME_CUSTOMER_ID = "customer_id";
+    //column names and class variables
+    public static String COLUMN_NAME_ID = "id";
+    public long _id;
 
-    //private variables
-    long _id;
-    long _order_number;
-    String _timestamp = "0000-00-00 00:00:00";
-    Double _price = 0.00;
-    Person _person = null;
-    long _person_id;
+    public static String COLUMN_NAME_ORDER_NUMBER = "order_number";
+    public long _order_number;
+
+    public static String COLUMN_NAME_TIMESTAMP = "timestamp";
+    public String _timestamp = "0000-00-00 00:00:00";
+
+    public static String COLUMN_NAME_PHONE_NUMBER = "phone_number";
+    public String _phone = null;
+
+    public static String COLUMN_NAME_FULL_NAME = "full_name";
+    public String _full_name = null;
+
+    public static String COLUMN_NAME_STREET = "street";
+    public String _street = null;
+
+    public static String COLUMN_NAME_PRICE = "price";
+    public Double _price = 0.00;
+
+    public static String COLUMN_NAME_STATUS = "status";
+    public String _status = null;
+
+    public static String COLUMN_NAME_SOURCE = "source";
+    public String _source = null;
+
+    public static String COLUMN_NAME_SERVICE_METHOD = "service_method";
+    public String _service = null;
+
+    public static String COLUMN_NAME_CSR = "csr";
+    public String _csr = null;
+
+    public static String COLUMN_NAME_DRIVER = "driver";
+    public String _driver = null;
+
+    public static String COLUMN_NAME_DESCRIPTION = "description";
+    public String _description = null;
+
+    public static String COLUMN_NAME_NOTES = "notes";
+    public String _notes = null;
+
+    public static String COLUMN_NAME_TIP = "tip";
+    public Double _tip = 0.00;
+
+    public static String COLUMN_NAME_CUSTOMER_ID = "customer_id";
+
+    //public Person _person = null;
+    public long _person_id;
 
     //TODO does not handle null strings
     public String toString(){
 
         //return "delivery event to string - unimplemented";
-        return _timestamp + " " + _price + " " + _person.toString();
+        return _timestamp + " " + _price;
     }
 
     // Empty constructor
@@ -50,13 +88,17 @@ public class DeliveryEvent {
 
     }
 
-    DeliveryEvent(Cursor cursor){
+    public DeliveryEvent(Cursor cursor){
         if( cursor != null ){
             this._id = Long.parseLong( cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_ID)));
             this._order_number = Long.parseLong( cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_ORDER_NUMBER)));
+            this._full_name = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_FULL_NAME));
             this._price = Double.parseDouble(cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_PRICE)));
+            this._tip = Double.parseDouble(cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_TIP)));
             this._timestamp = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_TIMESTAMP));
-            this._person_id = Long.parseLong(cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_CUSTOMER_ID)));
+            this._phone = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_PHONE_NUMBER));
+            this._street = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_STREET));
+            //this._person_id = Long.parseLong(cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_CUSTOMER_ID)));
         }
     }
 
@@ -91,9 +133,11 @@ public class DeliveryEvent {
     }
 
     //TODO change so DeliveryEvent only uses person_id not the person obj
+    /*
     public void setPerson( Person person ){
         _person = person;
     }
+    */
 
     public void setPersonId( long id ){
         _person_id = id;
@@ -106,14 +150,20 @@ public class DeliveryEvent {
     public ContentValues getContentValues(){
         ContentValues c = new ContentValues();
         c.put(this.COLUMN_NAME_PRICE, this._price);
+        c.put(this.COLUMN_NAME_TIP, this._tip);
         c.put(this.COLUMN_NAME_ORDER_NUMBER, this._order_number);
         c.put(this.COLUMN_NAME_TIMESTAMP, this._timestamp);
+        c.put(this.COLUMN_NAME_FULL_NAME, this._full_name);
+        c.put(this.COLUMN_NAME_CSR, this._csr);
+        c.put(this.COLUMN_NAME_DESCRIPTION, this._description);
+        c.put(this.COLUMN_NAME_PHONE_NUMBER, this._phone);
+        c.put(this.COLUMN_NAME_STREET, this._street);
 
-       if( this._person != null  ){
-           c.put(this.COLUMN_NAME_CUSTOMER_ID, this._person._id);
-       } else {
-           c.put(this.COLUMN_NAME_CUSTOMER_ID, this._person_id);
-       }
+//       if( this._person != null  ){
+//           c.put(this.COLUMN_NAME_CUSTOMER_ID, this._person._id);
+//       } else {
+//           c.put(this.COLUMN_NAME_CUSTOMER_ID, this._person_id);
+//       }
 
         return c;
     }
@@ -124,14 +174,19 @@ public class DeliveryEvent {
             return false;
         }
 
-        if( _person == null ){
-            return false;
-        }
+//        if( _person == null ){
+//            return false;
+//        }
 
         if( _price == null ){
             return false;
         }
 
         return true;
+    }
+
+    @Override
+    public double getPrice() {
+        return 0;
     }
 }

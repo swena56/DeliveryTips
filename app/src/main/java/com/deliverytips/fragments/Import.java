@@ -5,6 +5,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
@@ -20,11 +21,11 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.deliverytips.DashboardTable;
 import com.deliverytips.DeliveryEvent;
 import com.deliverytips.MyDatabaseHelper;
-import com.deliverytips.Person;
 import com.deliverytips.R;
+import com.deliverytips.Settings;
+import com.deliverytips.table.DeliveryEventsTable;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -96,14 +97,25 @@ public class Import extends Fragment {
                 // TODO Auto-generated method stub
 
                 //get store_id from shared preferences
-                String store_id = "1953";
+                SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+                String store_id = sharedPref.getString("store_id", null);
+                String username = sharedPref.getString("username", null);
+                String password = sharedPref.getString("password", null);
+
                 String url = "https://pwr.dominos.com/PWR/Login.aspx?ReturnUrl=RealTimeOrderDetail.aspx?FilterCode=sr_"+store_id+"&FilterDesc=Store-"+store_id;
 
                 Toast.makeText(getActivity(), "Opening " + url + " in browser.", Toast.LENGTH_LONG).show();
 
                 Uri uri = Uri.parse(url);
                 Intent intent= new Intent(Intent.ACTION_VIEW,uri);
-                startActivity(intent);
+                if( store_id != null ){
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(getActivity(), "Need to set the store id, in settings.", Toast.LENGTH_LONG).show();
+                    FragmentManager fm = getActivity().getFragmentManager();
+                    fm.beginTransaction().replace(R.id.content_frame, new Settings()).commit();
+                }
+
             }
         });
 
@@ -159,41 +171,41 @@ public class Import extends Fragment {
                         //imported_data.get(i).get(1);//ticket_id
 
                         //create person if not exists
-                        Person person = new Person();
-                        person._address = address;
-                        person._phone_number = phone_number;
-                        person._id = db.insert(person.TABLE_NAME, null, person.getContentValues());
+                        String price_str = imported_data.get(i).get(5);
+                        Double price = 0.00;
+                        price = Double.valueOf(price_str);
 
                         //create delivery event if not exists
                         DeliveryEvent deliveryEvent = new DeliveryEvent();
+                        deliveryEvent._price = price;
+                        deliveryEvent.setTimestampNow();
+                        deliveryEvent._driver = imported_data.get(i).get(10);
+                        deliveryEvent._phone = imported_data.get(i).get(3);
+                        deliveryEvent._csr = imported_data.get(i).get(9);
+                        deliveryEvent._description = imported_data.get(i).get(11);
+                        deliveryEvent._notes = "";
+                        deliveryEvent._tip = 0.00;
+                        deliveryEvent._street = address;
+                        deliveryEvent._full_name = "";
 
                         //parse delivery number
-//
-//                        String[] arr = order_cell.split("#");
-//                        Long order_number;
-//                        if( arr.length > 0 ){
-//                            order_number = Long.parseLong( arr[1] );
-//                            deliveryEvent.setOrderNumber(order_number);
-//                        }
-//
-//                        Double price = 0.0;
-//                        if( imported_data.get(i).get(4) != null && Double.parseDouble(imported_data.get(i).get(4) ) > 0 ){
-//                            price = Double.parseDouble(imported_data.get(i).get(4));
-//                        }
-//
-//                        deliveryEvent.setPrice(price);//Double.parseDouble(editTextPrice.getText().toString())
-//                        deliveryEvent.setTimestampNow();
-//                        deliveryEvent.setPerson(person);
-//                        db.insert(deliveryEvent.TABLE_NAME, null, deliveryEvent.getContentValues());
+                        String[] arr = order_cell.split("#");
+                        Long order_number;
+                        if( arr.length > 0 ){
+                            order_number = Long.parseLong( arr[1] );
+                            deliveryEvent.setOrderNumber(order_number);
+                        }
 
-                       // Toast.makeText(getContext(), imported_data.get(i).toString(), Toast.LENGTH_SHORT).show();
+                        db.insert(deliveryEvent.TABLE_NAME, null, deliveryEvent.getContentValues());
+
+                       Toast.makeText(getContext(), imported_data.get(i).toString(), Toast.LENGTH_SHORT).show();
                     }
 
                     Toast.makeText(getContext(), "Import Data Complete", Toast.LENGTH_SHORT).show();
 
                     //destory fragment
                     FragmentManager fm = getActivity().getFragmentManager();
-                    fm.beginTransaction().replace(R.id.content_frame, new DashboardTable()).commit();
+                    fm.beginTransaction().replace(R.id.content_frame, new DeliveryEventsTable()).commit();
                 }
             });
 
@@ -229,7 +241,63 @@ public class Import extends Fragment {
                 textViewOut.setText(textViewOut.getText() + "\nFile: " + filename);
                 imported_data = readExcelFile(getContext(), directory.getPath() + "/" + filename );
 
-                textViewOut.setText(textViewOut.getText() + "\n" + imported_data.toString());
+                Toast.makeText(getContext(), "Starting Import", Toast.LENGTH_SHORT).show();
+
+                MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(getContext());
+                SQLiteDatabase db = myDatabaseHelper.getWritableDatabase();
+
+                //add each item
+                for (int i=1; i<imported_data.size(); i++) {
+
+                    String address = imported_data.get(i).get(4);
+                    String phone_number = imported_data.get(i).get(3);
+                    String order_cell = imported_data.get(i).get(1);
+
+                    if( address == null || phone_number == null ){
+                        continue;
+                    }
+                    //how to access data
+                    //imported_data.get(i).get(0);//store_id
+                    //imported_data.get(i).get(1);//ticket_id
+
+                    //create person if not exists
+                    String price_str = imported_data.get(i).get(5);
+                    Double price = 0.00;
+                    price = Double.valueOf(price_str);
+
+                    //create delivery event if not exists
+                    DeliveryEvent deliveryEvent = new DeliveryEvent();
+                    deliveryEvent._price = price;
+                    deliveryEvent.setTimestampNow();
+                    deliveryEvent._driver = imported_data.get(i).get(10);
+                    deliveryEvent._phone = imported_data.get(i).get(3);
+                    deliveryEvent._csr = imported_data.get(i).get(9);
+                    deliveryEvent._description = imported_data.get(i).get(11);
+                    deliveryEvent._notes = "";
+                    deliveryEvent._tip = 0.00;
+                    deliveryEvent._street = address;
+                    deliveryEvent._full_name = "";
+
+                    //parse delivery number
+                    String[] arr = order_cell.split("#");
+                    Long order_number;
+                    if( arr.length > 0 ){
+                        order_number = Long.parseLong( arr[1] );
+                        deliveryEvent.setOrderNumber(order_number);
+                    }
+
+                    db.insert(deliveryEvent.TABLE_NAME, null, deliveryEvent.getContentValues());
+
+                    //Toast.makeText(getContext(), imported_data.get(i).toString(), Toast.LENGTH_SHORT).show();
+                }
+
+                Toast.makeText(getContext(), "Import Data Complete", Toast.LENGTH_SHORT).show();
+
+                //destory fragment
+                FragmentManager fm = getActivity().getFragmentManager();
+                fm.beginTransaction().replace(R.id.content_frame, new DeliveryEventsTable()).commit();
+
+                //textViewOut.setText(textViewOut.getText() + "\n" + imported_data.toString());
             break;
         }
         super.onActivityResult(requestCode, resultCode, data);

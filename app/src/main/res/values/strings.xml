@@ -11,4 +11,19 @@
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="app_xls_mime_type">xls</string>
+
+    <string name="default_text_ps">180PS</string>
+    <string name="separator">/</string>
+    <string name="default_text_kws">120kW</string>
+
+    <string name="car_producer_image_content_description">Car Producer</string>
+    <string name="kw">kW</string>
+    <string name="ps">PS</string>
+    <string name="brand">Brand</string>
+    <string name="model">Model</string>
+    <string name="power">Power</string>
+    <string name="price">Price</string>
+    <string name="ticket_id_column">Ticket</string>
+    <string name="address_column">Address</string>
+    <string name="phone_number_column">Phone</string>
 </resources>

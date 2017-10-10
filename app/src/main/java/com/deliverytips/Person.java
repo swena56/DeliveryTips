@@ -12,11 +12,11 @@ public class Person  {
     public static String TABLE_NAME = "Person";
 
     //column names
-    static String COLUMN_NAME_ID = "id";
-    static String COLUMN_NAME_ADDRESS= "address";
-    static String COLUMN_NAME_FIRST_NAME= "first_name";
-    static String COLUMN_NAME_LAST_NAME= "last_name";
-    static String COLUMN_NAME_PHONE_NUMBER= "phone_number";
+    public static String COLUMN_NAME_ID = "id";
+    public static String COLUMN_NAME_ADDRESS= "address";
+    public static String COLUMN_NAME_FIRST_NAME= "first_name";
+    public static String COLUMN_NAME_LAST_NAME= "last_name";
+    public static String COLUMN_NAME_PHONE_NUMBER= "phone_number";
 
     public long _id = 0;
     public String _first_name;
@@ -28,11 +28,11 @@ public class Person  {
 
     }
 
-    Person(long person_id){
+    public Person(long person_id){
         //search for person with matching id
     }
 
-    Person(Cursor cursor){
+    public Person(Cursor cursor){
         if( cursor != null ){
             this._id = Long.parseLong( cursor.getString(cursor.getColumnIndex(Person.COLUMN_NAME_ID)));
             this._address = cursor.getString(cursor.getColumnIndex(Person.COLUMN_NAME_ADDRESS));

@@ -97,61 +97,35 @@ public class NewDeliveryActivity extends AppCompatActivity {
 
                 //phone = phone.replaceAll("\\s+","");
                 phone = phone.replaceAll("[^a-zA-Z0-9]", "");
+                String address = editTextAddress.getText().toString();
 
-                //search to see if person exists
-                Cursor cursor = db.query(
-                        Person.TABLE_NAME,
-                        new String[] {
-                                Person.COLUMN_NAME_ID,
-                                Person.COLUMN_NAME_PHONE_NUMBER,
-                                Person.COLUMN_NAME_ADDRESS
-                        },
-                        Person.COLUMN_NAME_PHONE_NUMBER + "=" + phone, null, null, null, null);
+                //save deliveryEvent object
+                DeliveryEvent deliveryEvent = new DeliveryEvent();
+                deliveryEvent.setPrice(Double.parseDouble(editTextPrice.getText().toString()));
+                deliveryEvent.setTimestampNow();
+                deliveryEvent._driver = "DRIVER";
+                deliveryEvent._phone = phone;
+                deliveryEvent._csr = "CSR";
+                deliveryEvent._description = "description";
+                deliveryEvent._notes = "notes";
+                deliveryEvent._tip = 0.00;
+                deliveryEvent._street = "STREET";
+                deliveryEvent._full_name = "FULL NAME";
 
-                Person person = new Person();
-
-                if( cursor.getCount() > 0 ) {
-
-                    while (cursor.moveToNext()) {
-                        person = new Person(cursor);
-                        //Toast.makeText(getContext(),person._phone_number, Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-
-                    //Insert a person
-                    person = new Person();
-                    person._address = editTextAddress.getText().toString();
-                    person._phone_number =  phone;
-                    person._id = db.insert(person.TABLE_NAME, null, person.getContentValues());
-
-                    Toast.makeText(context,"Person: ( " + person._id + " ) " + person.getContentValues().toString(), Toast.LENGTH_SHORT).show();
-                }
-
-                if( person.isValidPerson()) {
-
-                    //save deliveryEvent object
-                    DeliveryEvent deliveryEvent = new DeliveryEvent();
-                    deliveryEvent.setPrice(Double.parseDouble(editTextPrice.getText().toString()));
-                    deliveryEvent.setTimestampNow();
-                    deliveryEvent.setOrderNumber(Long.parseLong(editTextOrderNumber.getText().toString()));
-                    deliveryEvent.setPerson(person);
+                deliveryEvent.setOrderNumber(Long.parseLong(editTextOrderNumber.getText().toString()));
 
                     //TODO check if delivery order already exists
-                    cursor = db.query(
-                        DeliveryEvent.TABLE_NAME,
-                        new String[] {
-                                DeliveryEvent.COLUMN_NAME_ORDER_NUMBER
-                        },
-                        DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + "=" + editTextOrderNumber.getText().toString(), null, null, null, null);
 
-                    if( cursor.getCount() == 0 ) {
-                        db.insert(deliveryEvent.TABLE_NAME, null, deliveryEvent.getContentValues());
-                        Toast.makeText(context, "Delivery Event: " + deliveryEvent.getContentValues().toString(), Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(context, "Delivery Event: Already Exists", Toast.LENGTH_SHORT).show();
-                    }
+                Cursor dbCursor = db.query(DeliveryEvent.TABLE_NAME, null, null, null, null, null, null);
+                String[] columnNames = dbCursor.getColumnNames();
+
+                Cursor cursor = db.query( DeliveryEvent.TABLE_NAME, columnNames, null, null, null, null, null);
+
+                if( cursor.getCount() == 0 ) {
+                    db.insert(deliveryEvent.TABLE_NAME, null, deliveryEvent.getContentValues());
+                    Toast.makeText(context, "Delivery Event: " + deliveryEvent.getContentValues().toString(), Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(context, "Invalid Person", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Delivery Event: Already Exists", Toast.LENGTH_SHORT).show();
                 }
 
                 //setContentView(R.layout.activity_main);
@@ -223,7 +197,6 @@ public class NewDeliveryActivity extends AppCompatActivity {
                                 StringBuilder stringBuilder = new StringBuilder();
                                 for(int i =0;i<items.size();++i)
                                 {
-
                                     TextBlock item = items.valueAt(i);
 
                                     String text = item.getValue().toLowerCase();

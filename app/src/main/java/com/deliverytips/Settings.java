@@ -13,6 +13,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.deliverytips.fragments.Import;
+
 
 public class Settings extends Fragment {
 
@@ -44,6 +46,15 @@ public class Settings extends Fragment {
         editTextUsername.setText( sharedPref.getString("username", null) );
         editTextPassword.setText( sharedPref.getString("password", null) );
 
+        Button import_button = (Button) rootView.findViewById(R.id.buttonImport);
+
+        import_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fm = getActivity().getFragmentManager();
+                fm.beginTransaction().replace(R.id.content_frame, new Import()).commit();
+            }
+        });
 
 
         saveButton.setOnClickListener(new View.OnClickListener() {

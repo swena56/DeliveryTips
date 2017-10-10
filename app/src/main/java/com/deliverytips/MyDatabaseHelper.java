@@ -20,7 +20,22 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "DB";
 
-    private static final int DATABASE_VERSION = 7;
+    private static final int DATABASE_VERSION = 11;
+
+    //Store
+    // Order #
+    // Time
+    // Phone #
+    // Street
+    // Net Amt
+    // Status
+    // Source
+    // Service Method
+    // CSR
+    // Driver
+    // Description
+
+
 
     // Database creation sql statement
     public static final String CREATE_DELIVERY_EVENT = "CREATE TABLE IF NOT EXISTS " + DeliveryEvent.TABLE_NAME +
@@ -28,14 +43,26 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
                 DeliveryEvent.COLUMN_NAME_ID + " integer primary key, " +
                 DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + " integer, " +
                 DeliveryEvent.COLUMN_NAME_TIMESTAMP + " text, " +
+                DeliveryEvent.COLUMN_NAME_STREET + " text, " +
+                DeliveryEvent.COLUMN_NAME_FULL_NAME + " text, " +
+                DeliveryEvent.COLUMN_NAME_CSR + "  text, " +
+                DeliveryEvent.COLUMN_NAME_DRIVER + "  text, " +
+                DeliveryEvent.COLUMN_NAME_PHONE_NUMBER + "  text, " +
                 DeliveryEvent.COLUMN_NAME_PRICE + "  double, " +
-                DeliveryEvent.COLUMN_NAME_CUSTOMER_ID + "  integer" +
+                DeliveryEvent.COLUMN_NAME_TIP + "  double, " +
+                DeliveryEvent.COLUMN_NAME_DESCRIPTION + " text, " +
+                DeliveryEvent.COLUMN_NAME_NOTES + " text " +
+                //DeliveryEvent.COLUMN_NAME_CUSTOMER_ID + "  integer" +
             ");";
+
 
     public static final String CREATE_PERSON_TABLE = "CREATE TABLE IF NOT EXISTS " + Person.TABLE_NAME +
             "(" +  Person.COLUMN_NAME_ID + " integer primary key , " +
             Person.COLUMN_NAME_PHONE_NUMBER + " text, " +
             Person.COLUMN_NAME_ADDRESS + " text );";
+
+
+
 
     //DeliveryEvent.
     public MyDatabaseHelper(Context context) {
