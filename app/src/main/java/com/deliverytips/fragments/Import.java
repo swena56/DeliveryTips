@@ -303,8 +303,6 @@ public class Import extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-
-
     //not using this approach to parse xls
     public List<String> read(String key) throws IOException  {
         List<String> resultSet = new ArrayList<String>();

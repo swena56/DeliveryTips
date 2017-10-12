@@ -29,6 +29,19 @@ public final class DeliveryEventComparators {
         return new PriceComparator();
     }
 
+    public static Comparator<DeliveryEvent> getTicketComparator() {
+        return new TicketComparator();
+    }
+
+    private static class TicketComparator implements Comparator<DeliveryEvent> {
+
+        @Override
+        public int compare(final DeliveryEvent deliveryEvent1, final DeliveryEvent deliveryEvent2) {
+            if (deliveryEvent1.getTicketID() < deliveryEvent2.getTicketID()) return -1;
+            if (deliveryEvent1.getTicketID() > deliveryEvent2.getTicketID()) return 1;
+            return 0;
+        }
+    }
 
     private static class AddressComparator implements Comparator<DeliveryEvent> {
 

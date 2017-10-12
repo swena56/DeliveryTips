@@ -89,6 +89,9 @@ public class Settings extends Fragment {
                 db.execSQL(myDatabaseHelper.CREATE_PERSON_TABLE);
 
                 Toast.makeText(getActivity(),"DB Reset", Toast.LENGTH_SHORT).show();
+
+                FragmentManager fm = getActivity().getFragmentManager();
+                fm.beginTransaction().replace(R.id.content_frame, new DeliveryEventsTable()).commit();
             }
         });
 

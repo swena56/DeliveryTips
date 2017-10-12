@@ -43,13 +43,13 @@ public class SortableDeliveryEventsTableView extends SortableTableView<DeliveryE
         setHeaderSortStateViewProvider(SortStateViewProviders.brightArrows());
 
         final TableColumnWeightModel tableColumnWeightModel = new TableColumnWeightModel(4);
-        tableColumnWeightModel.setColumnWeight(0, 2);
-        tableColumnWeightModel.setColumnWeight(1, 3);
+        tableColumnWeightModel.setColumnWeight(0, 3);
+        tableColumnWeightModel.setColumnWeight(1, 4);
         tableColumnWeightModel.setColumnWeight(2, 5);
-        tableColumnWeightModel.setColumnWeight(3, 3);
+        tableColumnWeightModel.setColumnWeight(3, 2);
         setColumnModel(tableColumnWeightModel);
 
-        //setColumnComparator(0, DeliveryEventComparators.getCarProducerComparator());
+        setColumnComparator(0, DeliveryEventComparators.getTicketComparator());
 
         setColumnComparator(1, DeliveryEventComparators.getCarNameComparator());
         setColumnComparator(2, DeliveryEventComparators.getCarPowerComparator());

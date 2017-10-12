@@ -363,9 +363,7 @@ public class DeliveryEventsTable extends Fragment {
             Intent i = new Intent(getActivity(), DeliveryEventDetails.class);
             startActivity(i);
 
-//            Intent intent = new Intent(Intent.ACTION_VIEW);
-//            intent.setData(Uri.parse("http://maps.google.co.in/maps?q=" + carString));
-//            startActivity(intent);
+
         }
     }
 
@@ -376,8 +374,14 @@ public class DeliveryEventsTable extends Fragment {
             final String carString = "Long Click: " + rowIndex + " " + clickedData.getAddress();
             Toast.makeText(getContext(), carString, Toast.LENGTH_SHORT).show();
 
-            Intent intent = new Intent(Intent.ACTION_DIAL);
-            intent.setData(Uri.parse("tel:" + clickedData.getName()));
+            //phone number
+//            Intent intent = new Intent(Intent.ACTION_DIAL);
+//            intent.setData(Uri.parse("tel:" + clickedData.getName()));
+//            startActivity(intent);
+
+            //address nav
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse("http://maps.google.co.in/maps?q=" + carString));
             startActivity(intent);
             return true;
         }

@@ -20,6 +20,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.apache.http.client.CookieStore;
 
@@ -27,6 +28,8 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+
+
 
 public class SyncPwr extends AppCompatActivity {
 
@@ -41,6 +44,7 @@ public class SyncPwr extends AppCompatActivity {
     //javascript parser
     public List<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
     public Boolean doneParsing = false;
+  //  public SwipeRefreshLayout swipeRefresh;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +55,7 @@ public class SyncPwr extends AppCompatActivity {
 
         sharedPref = getPreferences(Context.MODE_PRIVATE);
         text = (TextView) findViewById(R.id.log_text);
+       // swipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
         editText = (EditText) findViewById(R.id.EDIT_TEXT);
         webView = (WebView) findViewById(R.id.webview);
 
@@ -92,12 +97,27 @@ public class SyncPwr extends AppCompatActivity {
             loaded = true;
         }
 
+
+//        swipeRefresh.setSwipeToRefreshListener(new SwipeToRefreshListener() {
+//            @Override
+//            public void onRefresh(final RefreshIndicator refreshIndicator) {
+//                swipeRefresh.postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//
+//                        refreshIndicator.hide();
+//                    }
+//                }, 3000);
+//            }});
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Snackbar.make(view, "Parsing....", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+
+                Toast.makeText(getApplicationContext(),"Starting Import", Toast.LENGTH_SHORT).show();
 
                 webView.loadUrl("javascript:window.HTMLOUT.processHTML('<head>'+document.getElementsByTagName('html')[0].innerHTML+'</head>');");
 
@@ -112,6 +132,11 @@ public class SyncPwr extends AppCompatActivity {
                     String address = row.get(4);
                     if( address.contains("&nbsp;") || address == "" ){
                         address = null;
+                    }
+
+                    String phone = row.get(3);
+                    if( phone.contains("&nbsp;") || phone == "" ){
+                        phone = null;
                     }
 
                     Number price = 0;
@@ -129,7 +154,7 @@ public class SyncPwr extends AppCompatActivity {
                     //deliveryEvent._type = row.get(7);
                     deliveryEvent._timestamp = row.get(2);
                     deliveryEvent._driver = row.get(8);
-                    deliveryEvent._phone = row.get(3);
+                    deliveryEvent._phone = phone;
                     deliveryEvent._csr = row.get(10);
                     deliveryEvent._description = row.get(11);
                     deliveryEvent._street = address;
@@ -159,6 +184,9 @@ public class SyncPwr extends AppCompatActivity {
                     cursor.close();
                     db.close();
 
+                    SystemClock.sleep(2000);
+
+                    Toast.makeText(getApplicationContext(),"Data Import Complete", Toast.LENGTH_SHORT).show();
 
                     Intent i = new Intent(getApplicationContext(), MainActivity.class);
                     startActivity(i);

@@ -1,6 +1,7 @@
 package com.deliverytips.table;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -101,7 +102,14 @@ public class TableDataAdapter extends LongPressAwareTableDataAdapter<DeliveryEve
     }
 
     private View renderAddress(final DeliveryEvent deliveryEvent) {
-        return renderString(deliveryEvent.getAddress());
+
+        TextView textView = new TextView(getContext());
+        textView.setText(deliveryEvent.getAddress());
+        textView.setPadding(20, 10, 20, 10);
+        textView.setTextSize(TEXT_SIZE);
+        textView.setTypeface(Typeface.DEFAULT_BOLD);
+        textView.setTextColor(ContextCompat.getColor(getContext(), R.color.colorPrimaryDark));
+        return textView;
     }
 
     private View renderTicketId(final DeliveryEvent deliveryEvent) {
@@ -113,36 +121,47 @@ public class TableDataAdapter extends LongPressAwareTableDataAdapter<DeliveryEve
     private View renderPrice(final DeliveryEvent deliveryEvent) {
         final String priceString = "$" + PRICE_FORMATTER.format(deliveryEvent.getPrice());
 
-        final TextView textView = new TextView(getContext());
+        TextView textView = new TextView(getContext());
         textView.setText(priceString);
         textView.setPadding(20, 10, 20, 10);
         textView.setTextSize(TEXT_SIZE);
 
-        if (deliveryEvent.getPrice() < 50000) {
-            textView.setTextColor(ContextCompat.getColor(getContext(), R.color.table_price_low));
-        } else if (deliveryEvent.getPrice() > 100000) {
+        if (deliveryEvent.getPrice() < 10) {
             textView.setTextColor(ContextCompat.getColor(getContext(), R.color.table_price_high));
+        } else if (deliveryEvent.getPrice()<=10) {
+            textView.setTextColor(ContextCompat.getColor(getContext(), R.color.table_price_low));
         }
 
         return textView;
     }
 
     private View renderPower(final DeliveryEvent deliveryEvent) {
-        //final View view = getLayoutInflater().inflate(R.layout.table_cell_power, parentView, false);
-        //final TextView kwView = (TextView) view.findViewById(R.id.kw_view);
-        //final TextView psView = (TextView) view.findViewById(R.id.ps_view);
-        //kwView.setText(deliveryEvent.getAddress());
-        //psView.setText(deliveryEvent.getAddress());
-
-        final TextView textView = new TextView(getContext());
+        TextView textView = new TextView(getContext());
         textView.setText(deliveryEvent.getAddress());
         textView.setPadding(20, 10, 20, 10);
         textView.setTextSize(TEXT_SIZE);
         return textView;
     }
 
+    //phone number
     private View renderCatName(final DeliveryEvent deliveryEvent) {
-        return renderString(deliveryEvent.getName());
+        //TODO renmae variables
+
+        String phone_str = deliveryEvent.getName().replaceFirst("(\\d{3})(\\d{3})(\\d+)", "($1)-$2-$3");
+
+        final TextView textView = new TextView(getContext());
+        textView.setText(phone_str);
+        textView.setPadding(20, 10, 20, 10);
+        textView.setTextSize(TEXT_SIZE);
+
+        //show if the phone number is invalid
+        if (deliveryEvent.getName().length() > 10 || deliveryEvent.getName().length() < 10 ) {
+            textView.setTextColor(ContextCompat.getColor(getContext(), R.color.table_price_high));
+        } else {
+            textView.setTextColor(ContextCompat.getColor(getContext(), R.color.table_price_low));
+        }
+
+        return textView;
     }
 
     private View renderProducerLogo(final DeliveryEvent deliveryEvent, final ViewGroup parentView) {

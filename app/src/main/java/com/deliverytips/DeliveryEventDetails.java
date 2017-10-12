@@ -29,6 +29,8 @@ public class DeliveryEventDetails extends AppCompatActivity {
         text = (TextView) findViewById(R.id.log_text);
         text.setText("Loading Event Details");
 
+
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override

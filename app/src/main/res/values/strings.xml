@@ -22,7 +22,7 @@
     <string name="brand">Brand</string>
     <string name="model">Model</string>
     <string name="power">Power</string>
-    <string name="price">Price</string>
+    <string name="price">$</string>
     <string name="ticket_id_column">Ticket</string>
     <string name="address_column">Address</string>
     <string name="phone_number_column">Phone</string>
