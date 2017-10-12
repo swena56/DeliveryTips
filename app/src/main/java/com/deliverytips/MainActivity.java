@@ -59,10 +59,12 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+
     public static Intent getMapsIntent(String address, String city) {
 
         Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
             Uri.parse("google.navigation:q=an+"+address + "+"+city ));
+
 
         return intent;
     }
@@ -212,6 +214,10 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.phone_search) {
             fm.beginTransaction().replace(R.id.content_frame, new Search()).commit();
         } else if (id == R.id.settings) {
+
+//            Intent i = new Intent(getApplicationContext(), SettingsActivity.class);
+//            startActivity(i);
+
             fm.beginTransaction().replace(R.id.content_frame,new Settings()).commit();
         }
 

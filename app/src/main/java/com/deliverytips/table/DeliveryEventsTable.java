@@ -290,12 +290,6 @@ public class DeliveryEventsTable extends Fragment {
         username = sharedPref.getString("username", "" );
         password = sharedPref.getString("password", "" );
 
-//        cm = new java.net.CookieManager();
-//        cm.getCookieStore().add( URI.create("https://pwr.dominos.com"), new HttpCookie("ASP.NET_SessionID","jaaeyuginrabllyyhypquhk5"));;
-//
-//
-//        MainActivity.createToast(cm.getCookieStore().getCookies().toString());
-
         final SortableDeliveryEventsTableView carTableView = (SortableDeliveryEventsTableView) rootView.findViewById(R.id.tableView);
         if (carTableView != null) {
             tableDataAdapter = new TableDataAdapter(getContext(), DataFactory.createDeliveryEventsList(getContext()), carTableView);
@@ -361,9 +355,11 @@ public class DeliveryEventsTable extends Fragment {
             Toast.makeText(getContext(), carString, Toast.LENGTH_SHORT).show();
 
             Intent i = new Intent(getActivity(), DeliveryEventDetails.class);
+            Bundle bundle = new Bundle();
+            bundle.putString("ticket_id",clickedData.getTicketID().toString() );
+            i.putExtras(bundle);
+
             startActivity(i);
-
-
         }
     }
 
@@ -374,10 +370,7 @@ public class DeliveryEventsTable extends Fragment {
             final String carString = "Long Click: " + rowIndex + " " + clickedData.getAddress();
             Toast.makeText(getContext(), carString, Toast.LENGTH_SHORT).show();
 
-            //phone number
-//            Intent intent = new Intent(Intent.ACTION_DIAL);
-//            intent.setData(Uri.parse("tel:" + clickedData.getName()));
-//            startActivity(intent);
+
 
             //address nav
             Intent intent = new Intent(Intent.ACTION_VIEW);
