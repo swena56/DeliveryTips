@@ -37,14 +37,27 @@ dependencies {
     compile 'com.google.android.gms:play-services-vision:11.0.2'
     testCompile 'junit:junit:4.12'
     compile 'com.android.volley:volley:1.0.0'
-    //compile 'org.jsoup:jsoup:1.10.3'
+    compile 'junit:junit:4.12'
+    //compile 'org.jsoup:jsoup:1.10.3' // does not seem to work with poi
+    compile group: 'org.ccil.cowan.tagsoup', name: 'tagsoup', version: '1.2'
+
+
     compile group: 'org.apache.poi', name: 'poi', version: '3.9'
     compile group: 'net.sourceforge.jexcelapi', name: 'jxl', version: '2.6'
     compile 'com.obsez.android.lib.filechooser:filechooser:1.1.5'
     compile 'de.codecrafters.tableview:tableview:2.8.0'
+    compile group: 'com.google.code.gson', name: 'gson', version: '2.7'
+
+    //html parsers
+    compile group: 'net.htmlparser.jericho', name: 'jericho-html', version: '3.1'
+    compile group: 'org.htmlparser', name: 'htmlparser', version: '2.1'
+
+    //not used
+    //compile group: 'org.apache.httpcomponents' , name: 'httpclient-android' , version: '4.3.3'
     //compile 'com.github.alirezaaa:FilePickerLibrary:3.5.1'
     //compile 'com.blogspot.tonyatkins:picker:2.0.1'
     //compile 'com.droidninja:filepicker:2.0.8'
     //compile 'io.filepicker:filepicker-android:4.0.2'
    // compile 'com.nononsenseapps:filepicker:4.1.0'
+
 }

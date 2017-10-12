@@ -26,4 +26,7 @@
     <string name="ticket_id_column">Ticket</string>
     <string name="address_column">Address</string>
     <string name="phone_number_column">Phone</string>
+    <string name="title_activity_delivery_event_details">DeliveryEventDetails</string>
+
+    <string name="title_activity_sync_pwr">Syncing with PWR</string>
 </resources>

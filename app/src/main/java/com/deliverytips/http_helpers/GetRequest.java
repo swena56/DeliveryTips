@@ -4,6 +4,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.HTTP;
@@ -20,14 +21,17 @@ import java.net.URI;
 
 public class GetRequest{
 
-        public static String getRequest() {
+        public static String getRequest(String store_id) {
             StringBuffer stringBuffer = new StringBuffer("");
             BufferedReader bufferedReader = null;
             try {
                 HttpClient httpClient = new DefaultHttpClient();
                 HttpGet httpGet = new HttpGet();
 
-                URI uri = new URI("http://sample.campfirenow.com/rooms.xml");
+                HttpPost httpPost = new HttpPost();
+                String url = "https://pwr.dominos.com/PWR/Login.aspx?ReturnUrl=RealTimeOrderDetail.aspx?FilterCode=sr_"+store_id+"&FilterDesc=Store-"+store_id;
+                URI uri = new URI(url);
+
                 httpGet.setURI(uri);
                 httpGet.addHeader(BasicScheme.authenticate(
                         new UsernamePasswordCredentials("user", "password"),

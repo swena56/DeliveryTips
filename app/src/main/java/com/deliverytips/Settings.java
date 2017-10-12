@@ -14,6 +14,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.deliverytips.fragments.Import;
+import com.deliverytips.table.DeliveryEventsTable;
 
 
 public class Settings extends Fragment {
@@ -71,7 +72,7 @@ public class Settings extends Fragment {
 
                   //destory fragment
                   FragmentManager fm = getActivity().getFragmentManager();
-                  fm.beginTransaction().replace(R.id.content_frame, new DashboardTable()).commit();
+                  fm.beginTransaction().replace(R.id.content_frame, new DeliveryEventsTable()).commit();
               }
         });
 

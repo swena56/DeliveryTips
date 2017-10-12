@@ -43,7 +43,7 @@ public class TableDataAdapter extends LongPressAwareTableDataAdapter<DeliveryEve
                 renderedView = renderCatName(deliveryEvent);
                 break;
             case 2:
-                renderedView = renderPower(deliveryEvent, parentView);
+                renderedView = renderPower(deliveryEvent);
                 break;
             case 3:
                 renderedView = renderPrice(deliveryEvent);
@@ -64,14 +64,30 @@ public class TableDataAdapter extends LongPressAwareTableDataAdapter<DeliveryEve
         View renderedView = null;
 
         switch (columnIndex) {
-            case 1:
-                renderedView = renderEditableCatName(deliveryEvent);
+            case 0:
+                renderedView = renderTicketId(deliveryEvent);
+                break;
+//            case 1:
+//                renderedView = renderEditableCatName(deliveryEvent);
+//                break;
+            case 2:
+                renderedView = renderAddress(deliveryEvent);
                 break;
             default:
                 renderedView = getDefaultCellView(rowIndex, columnIndex, parentView);
         }
 
         return renderedView;
+    }
+
+    private View renderMapsIntent(final DeliveryEvent deliveryEvent) {
+        final EditText editText = new EditText(getContext());
+        editText.setText(deliveryEvent.getName());
+        editText.setPadding(20, 10, 20, 10);
+        editText.setTextSize(TEXT_SIZE);
+        editText.setSingleLine();
+        editText.addTextChangedListener(new CarNameUpdater(deliveryEvent));
+        return editText;
     }
 
     private View renderEditableCatName(final DeliveryEvent deliveryEvent) {
@@ -111,16 +127,19 @@ public class TableDataAdapter extends LongPressAwareTableDataAdapter<DeliveryEve
         return textView;
     }
 
-    private View renderPower(final DeliveryEvent deliveryEvent, final ViewGroup parentView) {
-        final View view = getLayoutInflater().inflate(R.layout.table_cell_power, parentView, false);
-        final TextView kwView = (TextView) view.findViewById(R.id.kw_view);
+    private View renderPower(final DeliveryEvent deliveryEvent) {
+        //final View view = getLayoutInflater().inflate(R.layout.table_cell_power, parentView, false);
+        //final TextView kwView = (TextView) view.findViewById(R.id.kw_view);
         //final TextView psView = (TextView) view.findViewById(R.id.ps_view);
-        kwView.setText(deliveryEvent.getAddress());
+        //kwView.setText(deliveryEvent.getAddress());
         //psView.setText(deliveryEvent.getAddress());
-        return view;
+
+        final TextView textView = new TextView(getContext());
+        textView.setText(deliveryEvent.getAddress());
+        textView.setPadding(20, 10, 20, 10);
+        textView.setTextSize(TEXT_SIZE);
+        return textView;
     }
-
-
 
     private View renderCatName(final DeliveryEvent deliveryEvent) {
         return renderString(deliveryEvent.getName());

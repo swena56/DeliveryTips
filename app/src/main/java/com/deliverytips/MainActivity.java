@@ -3,8 +3,11 @@ package com.deliverytips;
 import android.Manifest;
 import android.app.FragmentManager;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -18,16 +21,51 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.Volley;
 import com.deliverytips.fragments.Search;
 import com.deliverytips.table.DeliveryEventsTable;
+
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private static final String SET_COOKIE_KEY = "Set-Cookie";
+    private static final String COOKIE_KEY = "Cookie";
+    private static final String SESSION_COOKIE = "sessionid";
+
+    private static MainActivity _instance;
+    private RequestQueue _requestQueue;
+    private SharedPreferences _preferences;
+
     private static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 0;
     FragmentManager fm;
     Intent intent;
+
+    public static MainActivity get() {
+        return _instance;
+    }
+
+    public static void createToast(String content, Object... isShort) {
+        boolean flag = (isShort.length >= 1) ? true : false;
+
+        if( flag ){
+            Toast.makeText(_instance, content, Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(_instance, content, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public static Intent getMapsIntent(String address, String city) {
+
+        Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
+            Uri.parse("google.navigation:q=an+"+address + "+"+city ));
+
+        return intent;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +99,10 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        _instance = this;
+        _preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        _requestQueue = Volley.newRequestQueue(this);
 
         //load the default dashboard fragment
         fm = getFragmentManager();
@@ -177,6 +219,37 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    public final void checkSessionCookie(Map<String, String> headers) {
+        if (headers.containsKey(SET_COOKIE_KEY)
+                && headers.get(SET_COOKIE_KEY).startsWith(SESSION_COOKIE)) {
+            String cookie = headers.get(SET_COOKIE_KEY);
+            if (cookie.length() > 0) {
+                String[] splitCookie = cookie.split(";");
+                String[] splitSessionId = splitCookie[0].split("=");
+                cookie = splitSessionId[1];
+                SharedPreferences.Editor prefEditor = _preferences.edit();
+                prefEditor.putString(SESSION_COOKIE, cookie);
+                prefEditor.commit();
+            }
+        }
+    }
+
+    public final void addSessionCookie(Map<String, String> headers) {
+        String sessionId = _preferences.getString(SESSION_COOKIE, "");
+        if (sessionId.length() > 0) {
+            StringBuilder builder = new StringBuilder();
+            builder.append(SESSION_COOKIE);
+            builder.append("=");
+            builder.append(sessionId);
+            if (headers.containsKey(COOKIE_KEY)) {
+                builder.append("; ");
+                builder.append(headers.get(COOKIE_KEY));
+            }
+            headers.put(COOKIE_KEY, builder.toString());
+        }
+    }
+
 
     @Override
     protected void onResume() {
