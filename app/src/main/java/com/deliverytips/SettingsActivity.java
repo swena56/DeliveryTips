@@ -32,6 +32,11 @@ import java.util.List;
  * Android Design: Settings</a> for design guidelines and the <a
  * href="http://developer.android.com/guide/topics/ui/settings.html">Settings
  * API Guide</a> for more information on developing a Settings UI.
+ *
+ * NOTE from Andrew
+ * Intention behind this settings page, is to eventually migrate the current settings page into it,
+ * and use it as a high quality replacement.
+ *
  */
 public class SettingsActivity extends AppCompatPreferenceActivity {
     /**

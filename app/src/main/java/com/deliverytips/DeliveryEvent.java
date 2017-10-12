@@ -53,16 +53,16 @@ public class DeliveryEvent implements Chargable {
     public String _service = null;
 
     public static String COLUMN_NAME_CSR = "csr";
-    public String _csr = null;
+    public String _csr = "";
 
     public static String COLUMN_NAME_DRIVER = "driver";
-    public String _driver = null;
+    public String _driver = "";
 
     public static String COLUMN_NAME_DESCRIPTION = "description";
-    public String _description = null;
+    public String _description = "";
 
     public static String COLUMN_NAME_NOTES = "notes";
-    public String _notes = null;
+    public String _notes = "";
 
     public static String COLUMN_NAME_TIP = "tip";
     public Double _tip = 0.00;
@@ -98,6 +98,21 @@ public class DeliveryEvent implements Chargable {
             this._timestamp = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_TIMESTAMP));
             this._phone = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_PHONE_NUMBER));
             this._street = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_STREET));
+
+            //add driver
+            if( cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_DRIVER) != -1) {
+                this._driver = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_DRIVER));
+            }
+
+            //add descescription
+            if( cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_DESCRIPTION) != -1) {
+                this._description = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_DESCRIPTION));
+            }
+
+            //add notes
+            if( cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_NOTES) != -1) {
+                this._notes = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_NOTES));
+            }
             //this._person_id = Long.parseLong(cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_CUSTOMER_ID)));
         }
     }
@@ -158,6 +173,8 @@ public class DeliveryEvent implements Chargable {
         c.put(this.COLUMN_NAME_DESCRIPTION, this._description);
         c.put(this.COLUMN_NAME_PHONE_NUMBER, this._phone);
         c.put(this.COLUMN_NAME_STREET, this._street);
+        c.put(this.COLUMN_NAME_NOTES, this._notes);
+        c.put(this.COLUMN_NAME_DRIVER, this._driver);
 
 //       if( this._person != null  ){
 //           c.put(this.COLUMN_NAME_CUSTOMER_ID, this._person._id);

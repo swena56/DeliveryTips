@@ -273,7 +273,6 @@ public class Import extends Fragment {
                     deliveryEvent._phone = imported_data.get(i).get(3);
                     deliveryEvent._csr = imported_data.get(i).get(9);
                     deliveryEvent._description = imported_data.get(i).get(11);
-                    deliveryEvent._notes = "";
                     deliveryEvent._tip = 0.00;
                     deliveryEvent._street = address;
                     deliveryEvent._full_name = "";

@@ -16,10 +16,9 @@
         android:orientation="vertical"
         android:weightSum="1">
 
-
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="horizontal">
 
             <TextView
@@ -61,14 +60,49 @@
 
         </LinearLayout>
 
-        <TextClock
-            android:id="@+id/textClock"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/textViewTimestamp"
+                android:layout_width="87dp"
+                android:layout_height="wrap_content"
+                android:text="Time: "/>
+
+            <TextClock
+                android:id="@+id/textClock"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+        </LinearLayout>
 
         <Space
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/textViewDescriptionTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.42"
+                android:text="Order: "/>
+
+            <TextView
+                android:id="@+id/textViewDescription"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="2.63"
+                android:text="Unknown"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body2"/>
+
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -83,30 +117,23 @@
 
             <EditText
                 android:id="@+id/editTextTip"
-                android:layout_width="match_parent"
+                android:layout_width="240dp"
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:inputType="numberDecimal|phone"/>
 
-        </LinearLayout>
-
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
             <EditText
+                android:id="@+id/editTextTotal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="hint"/>
-        </android.support.design.widget.TextInputLayout>
+                android:layout_weight="1"
+                android:hint="Total"
+                android:inputType="numberDecimal"/>
 
-        <com.google.android.gms.maps.MapView
-            android:id="@+id/mapView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+        </LinearLayout>
 
         <EditText
-            android:id="@+id/editText"
+            android:id="@+id/editTextNotes"
             android:layout_width="match_parent"
             android:layout_height="102dp"
             android:ems="10"

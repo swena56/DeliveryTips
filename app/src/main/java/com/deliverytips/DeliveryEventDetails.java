@@ -28,7 +28,9 @@ public class DeliveryEventDetails extends AppCompatActivity {
 
     public Cursor cursor;
     public EditText editTextTip;
+    public EditText editTextTipTotal;
     public EditText editTextNotes;
+    public TextView textViewDescription;
     public SharedPreferences sharedPref;
 
     @Override
@@ -41,7 +43,11 @@ public class DeliveryEventDetails extends AppCompatActivity {
         //Initalize
         TextView ticket_id = (TextView) findViewById(R.id.textViewTicketID);
         TextView price = (TextView) findViewById(R.id.textViewPrice);
+        textViewDescription = (TextView) findViewById(R.id.textViewDescription);
         editTextTip = (EditText) findViewById(R.id.editTextTip);
+        editTextTipTotal = (EditText) findViewById(R.id.editTextTotal);
+        editTextNotes = (EditText) findViewById(R.id.editTextNotes);
+
         Button call_button = (Button) findViewById(R.id.buttonCall);
         Button nav_button = (Button) findViewById(R.id.buttonMaps);
 
@@ -85,57 +91,82 @@ public class DeliveryEventDetails extends AppCompatActivity {
         if (cursor.moveToFirst()) {
 
             //set tip
-            final String tip = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_TIP));
-            editTextTip.setText(tip);
+            Double tip = Double.parseDouble(cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_TIP)));
+            editTextTip.setText(tip.toString());
 
             final String phone = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_PHONE_NUMBER));
-            editTextTip.setText(tip);
-
             final String address = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_STREET));
 
+
+            String notes = (cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_NOTES) > -1 ) ? cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_NOTES)) : "";
+            String description = (cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_DESCRIPTION) > -1 ) ? cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_DESCRIPTION)) : "";
+            //cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_DESCRIPTION))
+
             //set price
-            price.setText(cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_PRICE)));
+            Double price_value = Double.parseDouble(cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_PRICE)));
+            price.setText(price_value.toString());
+
+            Double total = price_value + tip;
+            editTextTipTotal.setText(total.toString());
+
+            //set notes
+            editTextNotes.setText(notes);
+
+            //set description
+            textViewDescription.setText(description);
 
             //set call but action and button text
-            call_button.setText( "Call: " + phone );
-            call_button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+            call_button.setText( "PHONE: " + phone );
+            if( phone != null ) {
 
-                    Intent intent = new Intent(Intent.ACTION_DIAL);
-                    intent.setData(Uri.parse("tel:" + phone));
-                    startActivity(intent);
-                }
-            });
+                call_button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
 
-            //Navigation button
-            nav_button.setText( "Navigate: " + address );
-            nav_button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                    //get ZIP or CITY from shared Preferences
-                    String city = sharedPref.getString("city", String.valueOf(default_city));
-
-                    //address nav
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    String query = "";
-                    try {
-                        query = URLEncoder.encode(address + " " + city , "utf-8");
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
+                        Intent intent = new Intent(Intent.ACTION_DIAL);
+                        intent.setData(Uri.parse("tel:" + phone.toString()));
+                        startActivity(intent);
                     }
+                });
+            } else {
+                call_button.setText( "PHONE: N/A" );
+                //call_button.setVisibility(View.INVISIBLE);
+                call_button.setEnabled(false);
+            }
 
-                    Toast.makeText(getApplicationContext(),"Starting Navigation to " + address + " " + city, Toast.LENGTH_SHORT).show();
+            //Navigation button, hide it when dealing with no address
+            nav_button.setText( "Navigate: " + address );
+            if( address != null ) {
+                nav_button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
 
-                    Uri gmmIntentUri = Uri.parse("google.navigation:q="+query);
-                    Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
-                    mapIntent.setPackage("com.google.android.apps.maps");
-                    startActivity(mapIntent);
+                        //get ZIP or CITY from shared Preferences
+                        String city = sharedPref.getString("city", String.valueOf(default_city));
 
+                        //address nav
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        String query = "";
+                        try {
+                            query = URLEncoder.encode(address + " " + city, "utf-8");
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        }
 
-                }
-            });
+                        Toast.makeText(getApplicationContext(), "Starting Navigation to " + address + " " + city, Toast.LENGTH_SHORT).show();
+
+                        Uri gmmIntentUri = Uri.parse("google.navigation:q=" + query);
+                        Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                        mapIntent.setPackage("com.google.android.apps.maps");
+                        startActivity(mapIntent);
+                    }
+                });
+            } else {
+
+                nav_button.setText( "Navigate: N/A" );
+                nav_button.setEnabled(false);
+                //nav_button.setVisibility(View.INVISIBLE);
+            }
         }
 
         MapView mapView = (MapView) findViewById(R.id.mapView2);
@@ -158,9 +189,11 @@ public class DeliveryEventDetails extends AppCompatActivity {
                 SQLiteDatabase db = myDatabaseHelper.getWritableDatabase();
                 DeliveryEvent deliveryEvent = new DeliveryEvent(cursor);
                 deliveryEvent._tip = Double.parseDouble(editTextTip.getText().toString());
-                deliveryEvent._notes = "";
-                db.insert(deliveryEvent.TABLE_NAME, null, deliveryEvent.getContentValues());
+                deliveryEvent._notes = editTextNotes.getText().toString();
+                db.update(DeliveryEvent.TABLE_NAME,deliveryEvent.getContentValues(),DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + "=" + deliveryEvent._order_number, null);
                 db.close();
+
+                Toast.makeText(getApplicationContext(),"Delivery Event ( "+deliveryEvent._order_number+" ) Updated", Toast.LENGTH_SHORT).show();
 
                 Intent intent = new Intent(DeliveryEventDetails.this, MainActivity.class);
                 startActivity(intent);

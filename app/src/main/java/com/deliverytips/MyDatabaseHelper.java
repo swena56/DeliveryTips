@@ -20,7 +20,7 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "DB";
 
-    private static final int DATABASE_VERSION = 12;
+    private static final int DATABASE_VERSION = 15;
 
     // Database creation sql statement
     public static final String CREATE_DELIVERY_EVENT = "CREATE TABLE IF NOT EXISTS " + DeliveryEvent.TABLE_NAME +
@@ -37,7 +37,7 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
                 DeliveryEvent.COLUMN_NAME_TIP + "  double, " +
                 DeliveryEvent.COLUMN_NAME_DESCRIPTION + " text, " +
                 DeliveryEvent.COLUMN_NAME_NOTES + " text " +
-                //DeliveryEvent.COLUMN_NAME_CUSTOMER_ID + "  integer" +
+               // DeliveryEvent.COLUMN_NAME_CUSTOMER_ID + "  integer" +
             ");";
 
 
@@ -84,7 +84,6 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
 
         database.execSQL("DROP TABLE IF EXISTS " + DeliveryEvent.TABLE_NAME);
         database.execSQL("DROP TABLE IF EXISTS " + Person.TABLE_NAME);
-
         onCreate(database);
     }
 }
