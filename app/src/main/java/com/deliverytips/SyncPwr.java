@@ -20,7 +20,6 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.apache.http.client.CookieStore;
 
@@ -55,60 +54,42 @@ public class SyncPwr extends AppCompatActivity {
 
         sharedPref = getPreferences(Context.MODE_PRIVATE);
         text = (TextView) findViewById(R.id.log_text);
-       // swipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
         editText = (EditText) findViewById(R.id.EDIT_TEXT);
         webView = (WebView) findViewById(R.id.webview);
 
-        if( loaded == false ) {
-            doneParsing = false;
-            webView.getSettings().setLoadWithOverviewMode(true);
-            webView.getSettings().setUseWideViewPort(true);
-            webView.clearFormData();
-            webView.getSettings().getAllowFileAccessFromFileURLs();
-            webView.getSettings().getCacheMode();
-            webSettings = webView.getSettings();
-            webSettings.setJavaScriptEnabled(true);
-            webView.addJavascriptInterface(new MyJavaScriptInterface(), "HTMLOUT");
-            webView.loadUrl("https://pwr.dominos.com/PWR/RealTimeOrderDetail.aspx?FilterCode=sr_1953&FilterDesc=Store-1953");
-            CookieManager.getInstance().setAcceptCookie(true);
+        webView.getSettings().setLoadWithOverviewMode(true);
+        webView.getSettings().setUseWideViewPort(true);
+        webView.clearFormData();
+        webView.getSettings().getAllowFileAccessFromFileURLs();
+        webView.getSettings().getCacheMode();
+        webSettings = webView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        webView.addJavascriptInterface(new MyJavaScriptInterface(), "HTMLOUT");
+        webView.loadUrl("https://pwr.dominos.com/PWR/RealTimeOrderDetail.aspx?FilterCode=sr_1953&FilterDesc=Store-1953");
+        CookieManager.getInstance().setAcceptCookie(true);
 
-            webView.setWebViewClient(new WebViewClient() {
+        webView.setWebViewClient(new WebViewClient() {
 
-                @Override
-                public void onPageFinished(WebView view, String urlString) {
+            @Override
+            public void onPageFinished(WebView view, String urlString) {
 
-                    text.setText("Page Loaded");
-                    SystemClock.sleep(1000);
-                    text.setText(text.getText() + "\nWaiting until HTML is generated, then\n submit the results by pushing the pink button.");
+                text.setText("Page Loaded");
+                text.setText(text.getText() + "\nWaiting until HTML is generated, then\n submit the results by pushing the pink button.");
 
-                    //do work to automatically detect when the page completes generating html
-                    //then run javascript parser
-                }
+                //do work to automatically detect when the page completes generating html
+                //then run javascript parser
+            }
 
-                public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                    view.loadUrl(url);
-                    return true;
-                }
-            });
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                view.loadUrl(url);
+                return true;
+            }
+        });
 
-            webView.requestFocus();
+        webView.requestFocus();
 
-            //finished loading
-            loaded = true;
-        }
-
-
-//        swipeRefresh.setSwipeToRefreshListener(new SwipeToRefreshListener() {
-//            @Override
-//            public void onRefresh(final RefreshIndicator refreshIndicator) {
-//                swipeRefresh.postDelayed(new Runnable() {
-//                    @Override
-//                    public void run() {
-//
-//                        refreshIndicator.hide();
-//                    }
-//                }, 3000);
-//            }});
+        //finished loading
+        loaded = true;
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -117,8 +98,8 @@ public class SyncPwr extends AppCompatActivity {
                 Snackbar.make(view, "Parsing....", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
 
-                Toast.makeText(getApplicationContext(),"Starting Import", Toast.LENGTH_SHORT).show();
-
+               //Toast.makeText(getApplicationContext(),"Starting Import", Toast.LENGTH_SHORT).show();
+                text.setText(text.getText() + "\nStarting Import, please wait");
                 webView.loadUrl("javascript:window.HTMLOUT.processHTML('<head>'+document.getElementsByTagName('html')[0].innerHTML+'</head>');");
 
                 while( !doneParsing ){
@@ -184,9 +165,8 @@ public class SyncPwr extends AppCompatActivity {
                     cursor.close();
                     db.close();
 
-                    SystemClock.sleep(2000);
-
-                    Toast.makeText(getApplicationContext(),"Data Import Complete", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(),"Data Import Complete", Toast.LENGTH_SHORT).show();
+                    text.setText(text.getText() + "\nData Import Complete");
 
                     Intent i = new Intent(getApplicationContext(), MainActivity.class);
                     startActivity(i);
