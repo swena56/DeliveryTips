@@ -1,6 +1,7 @@
 package com.deliverytips.table;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 
@@ -42,14 +43,20 @@ public class SortableDeliveryEventsTableView extends SortableTableView<DeliveryE
         setDataRowBackgroundProvider(TableDataRowBackgroundProviders.alternatingRowColors(rowColorEven, rowColorOdd));
         setHeaderSortStateViewProvider(SortStateViewProviders.brightArrows());
 
+
         final TableColumnWeightModel tableColumnWeightModel = new TableColumnWeightModel(4);
         tableColumnWeightModel.setColumnWeight(0, 3);
+
         tableColumnWeightModel.setColumnWeight(1, 4);
         tableColumnWeightModel.setColumnWeight(2, 5);
         tableColumnWeightModel.setColumnWeight(3, 2);
         setColumnModel(tableColumnWeightModel);
 
         setColumnComparator(0, DeliveryEventComparators.getTicketComparator());
+
+        //set header color
+        //https://material.io/guidelines/style/color.html#color-color-palette
+        setHeaderBackgroundColor(Color.parseColor("#1E88E5"));
 
         setColumnComparator(1, DeliveryEventComparators.getCarNameComparator());
         setColumnComparator(2, DeliveryEventComparators.getCarPowerComparator());
