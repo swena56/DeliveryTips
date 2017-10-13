@@ -7,6 +7,8 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,8 +16,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,6 +39,7 @@ import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.deliverytips.DeliveryEventDetails;
+import com.deliverytips.MyDatabaseHelper;
 import com.deliverytips.R;
 import com.deliverytips.Settings;
 import com.deliverytips.SyncPwr;
@@ -76,6 +82,8 @@ public class DeliveryEventsTable extends Fragment {
     //public java.net.CookieManager cm;
 
     ProgressDialog pd;
+
+    public String selectedItem;
 
     //select driver list pull down
     ExpandableListAdapter listAdapter;
@@ -283,19 +291,36 @@ public class DeliveryEventsTable extends Fragment {
         username = sharedPref.getString("username", "" );
         password = sharedPref.getString("password", "" );
 
-        rootView.findViewById(R.id.select_driver_group);
-        rootView.findViewById(R.id.select_driver);
 
-        // get the listview
-        ExpandableListView expListView = (ExpandableListView) rootView.findViewById(R.id.select_driver);
+        Spinner spinner = (Spinner) rootView.findViewById(R.id.select_driver);
+        List<String> driver_list = prepareListData();
 
-        // preparing list data
-        prepareListData();
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getContext(),
+                android.R.layout.simple_spinner_item, driver_list);
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(dataAdapter);
 
-        ExpandableListAdapter listAdapter = new ExpandableListAdapter(getContext(), listDataHeader, listDataChild);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+        {
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+            {
+                selectedItem = parent.getItemAtPosition(position).toString();
 
-        // setting list adapter
-        expListView.setAdapter(listAdapter);
+                if(!selectedItem.equals("No Driver Selected."))
+                {
+                    Toast.makeText(getContext(),"Selected Driver: " + selectedItem,Toast.LENGTH_SHORT ).show();
+                    //tableDataAdapter = new TableDataAdapter(getContext(), DataFactory.createDeliveryEventsList(getContext(),selectedItem), carTableView);
+                    //carTableView.setDataAdapter(tableDataAdapter);
+                    //tableDataAdapter.getData();
+                }
+            } // to close the onItemSelected
+            public void onNothingSelected(AdapterView<?> parent)
+            {
+                Toast.makeText(getContext(),"No Driver Filter",Toast.LENGTH_SHORT ).show();
+                //selectedItem = null;
+            }
+        });
+
 
 
         final SortableDeliveryEventsTableView carTableView = (SortableDeliveryEventsTableView) rootView.findViewById(R.id.tableView);
@@ -353,21 +378,26 @@ public class DeliveryEventsTable extends Fragment {
         return rootView;
     }
 
-    private void prepareListData() {
+    private List<String> prepareListData() {
 
-        listDataHeader = new ArrayList<String>();
-        listDataChild = new HashMap<String, List<String>>();
-
-        // Adding child data
-        listDataHeader.add("Select A Driver");
-
-        // Adding child data
+        MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(getContext());
+        SQLiteDatabase db = myDatabaseHelper.getWritableDatabase();
+        Cursor cursor = db.rawQuery(
+                "SELECT " + com.deliverytips.DeliveryEvent.COLUMN_NAME_DRIVER + " FROM " + com.deliverytips.DeliveryEvent.TABLE_NAME +
+                        " WHERE " + com.deliverytips.DeliveryEvent.COLUMN_NAME_DRIVER + " IS NOT NULL " +
+                        " GROUP BY  " + com.deliverytips.DeliveryEvent.COLUMN_NAME_DRIVER,
+                null);
         List<String> selectedDriver = new ArrayList<String>();
-        selectedDriver.add("Driver 1");
-        selectedDriver.add("Driver 2");
-        selectedDriver.add("Driver 3");
-
-        listDataChild.put(listDataHeader.get(0), selectedDriver); // Header, Child data
+        selectedDriver.add("No Driver Selected.");
+        while( cursor.moveToNext() ){
+            String driver = cursor.getString(cursor.getColumnIndex(com.deliverytips.DeliveryEvent.COLUMN_NAME_DRIVER));
+            if( driver != null && driver != "" && driver.length() > 0 ){
+                selectedDriver.add(driver);
+            }
+        }
+        cursor.close();
+        db.close();
+        return selectedDriver;
     }
 
     private class CarClickListener implements TableDataClickListener<DeliveryEvent> {

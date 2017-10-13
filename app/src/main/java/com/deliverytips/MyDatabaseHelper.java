@@ -86,4 +86,9 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
         database.execSQL("DROP TABLE IF EXISTS " + Person.TABLE_NAME);
         onCreate(database);
     }
+
+    protected void finalize() throws Throwable {
+                this.close();
+                super.finalize();
+    }
 }

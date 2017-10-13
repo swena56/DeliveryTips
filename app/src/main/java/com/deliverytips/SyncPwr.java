@@ -134,9 +134,9 @@ public class SyncPwr extends AppCompatActivity {
                     deliveryEvent._status = row.get(6);
                     //deliveryEvent._type = row.get(7);
                     deliveryEvent._timestamp = row.get(2);
-                    deliveryEvent._driver = row.get(8);
+                    deliveryEvent._driver = row.get(10);
                     deliveryEvent._phone = phone;
-                    deliveryEvent._csr = row.get(10);
+                    deliveryEvent._csr = row.get(9);
                     deliveryEvent._description = row.get(11);
                     deliveryEvent._street = address;
                     deliveryEvent._full_name = row.get(1);
@@ -159,7 +159,7 @@ public class SyncPwr extends AppCompatActivity {
                         db.insert(deliveryEvent.TABLE_NAME, null, deliveryEvent.getContentValues());
                     } else {
                         text.setText(text.getText() + "\n\n(UPDATE) - not implemented " + row);
-                        //db.insert(deliveryEvent.TABLE_NAME, null, deliveryEvent.getContentValues());
+                        //db.update(DeliveryEvent.TABLE_NAME,deliveryEvent.getContentValues(),DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + "=" + deliveryEvent._order_number, null);
                     }
 
                     cursor.close();
