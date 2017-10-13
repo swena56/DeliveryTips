@@ -34,7 +34,7 @@ public final class DataFactory {
         String whereClause = com.deliverytips.DeliveryEvent.COLUMN_NAME_DRIVER + "= ? ";
         String[] whereArgs ={selectedItem};
 
-        Cursor cursor = db.rawQuery("SELECT count(*) AS count, sum("+ com.deliverytips.DeliveryEvent.COLUMN_NAME_PRICE+"), sum("+ com.deliverytips.DeliveryEvent.COLUMN_NAME_TIP+"), AVG("+ com.deliverytips.DeliveryEvent.COLUMN_NAME_TIP+") FROM "+ com.deliverytips.DeliveryEvent.TABLE_NAME
+        Cursor cursor = db.rawQuery("SELECT count(*) AS count, sum("+ com.deliverytips.DeliveryEvent.COLUMN_NAME_PRICE+"), sum("+ com.deliverytips.DeliveryEvent.COLUMN_NAME_TIP+"), printf(\"%.2f\", AVG("+ com.deliverytips.DeliveryEvent.COLUMN_NAME_TIP+")) FROM "+ com.deliverytips.DeliveryEvent.TABLE_NAME
                 +" WHERE "+ com.deliverytips.DeliveryEvent.COLUMN_NAME_DRIVER+" = ?",whereArgs);
 
         cursor.moveToFirst();

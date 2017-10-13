@@ -1,8 +1,6 @@
 package com.deliverytips.table.data;
 
 
-import com.deliverytips.R;
-
 /**
  * Data object representing a car.
  *
@@ -25,7 +23,7 @@ public class DeliveryEvent implements Chargable {
     }
 
     public DeliveryEventsProducer getProducer() {
-        return         new DeliveryEventsProducer(R.mipmap.bmw, "BMW");
+        return   null;//      new DeliveryEventsProducer(R.mipmap, "round");
     }
 
 

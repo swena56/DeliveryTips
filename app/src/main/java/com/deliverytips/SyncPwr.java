@@ -1,7 +1,6 @@
 package com.deliverytips;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -254,8 +253,7 @@ public class SyncPwr extends AppCompatActivity {
             //Toast.makeText(getApplicationContext(),"Data Import Complete", Toast.LENGTH_SHORT).show();
             text.setText(text.getText() + "\nData Import Complete");
 
-            Intent i = new Intent(getApplicationContext(), MainActivity.class);
-            startActivity(i);
+            this.finish();
         }
 
         return true;
