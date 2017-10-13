@@ -47,7 +47,7 @@
                 android:id="@+id/price_id_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1.42"
+                android:layout_weight="1.36"
                 android:text="Price:"/>
 
             <TextView
@@ -66,16 +66,17 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/textViewTimestamp"
-                android:layout_width="87dp"
+                android:id="@+id/textView6"
+                android:layout_width="124dp"
                 android:layout_height="wrap_content"
-                android:text="Time: "/>
+                android:text="Time:"/>
 
-            <TextClock
-                android:id="@+id/textClock"
+            <TextView
+                android:id="@+id/textViewTimestamp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"/>
+                android:text="Unknown"/>
+
         </LinearLayout>
 
         <Space
@@ -88,18 +89,44 @@
             android:orientation="horizontal">
 
             <TextView
+                android:id="@+id/textViewAddressTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Address: "
+                android:layout_weight="1.07"/>
+
+            <TextView
+                android:id="@+id/textViewAddress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="2.63"
+                android:text="Unknown"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                android:textSize="18sp"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
                 android:id="@+id/textViewDescriptionTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1.42"
+                android:layout_weight="0.34"
                 android:text="Order: "/>
 
             <TextView
                 android:id="@+id/textViewDescription"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="2.63"
+                android:layout_height="46dp"
+                android:layout_weight="3.75"
                 android:text="Unknown"
+                android:ellipsize="none"
+                android:maxLines="100"
+                android:scrollHorizontally="false"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body2"/>
 
         </LinearLayout>
@@ -113,20 +140,26 @@
                 android:id="@+id/tip_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Tip"/>
+                android:text="Tip:"/>
 
             <EditText
                 android:id="@+id/editTextTip"
-                android:layout_width="240dp"
+                android:layout_width="144dp"
                 android:layout_height="wrap_content"
                 android:ems="10"
+                android:hint="Tip"
                 android:inputType="numberDecimal|phone"/>
+
+            <TextView
+                android:id="@+id/textView8"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:text="Total:"/>
 
             <EditText
                 android:id="@+id/editTextTotal"
-                android:layout_width="match_parent"
+                android:layout_width="192dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:hint="Total"
                 android:inputType="numberDecimal"/>
 
@@ -145,7 +178,8 @@
             android:id="@+id/buttonMaps"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Navigate to XXX "/>
+            android:text="Navigate to XXX "
+            android:textSize="18sp"/>
 
         <Button
             android:id="@+id/buttonCall"

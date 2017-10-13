@@ -143,23 +143,46 @@ public class SyncPwr extends AppCompatActivity {
 
                     //parse delivery number
                     String[] arr = row.get(1).split("#");
+                    String ticket_id = "";
                     Long order_number;
                     if( arr.length > 0 ){
                         order_number = Long.parseLong( arr[1] );
                         deliveryEvent.setOrderNumber(order_number);
+                        ticket_id = arr[1];
                     }
+
 
                     MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(getApplicationContext());
                     SQLiteDatabase db = myDatabaseHelper.getWritableDatabase();
 
                     //check if already exists
-                    Cursor cursor = db.rawQuery("SELECT "+DeliveryEvent.COLUMN_NAME_ORDER_NUMBER+" FROM " + DeliveryEvent.TABLE_NAME + " WHERE " + DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + " = " + deliveryEvent._order_number, null);
+//                    Cursor cursor = db.rawQuery("SELECT "+
+//                            DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + ", " +
+//                            DeliveryEvent.COLUMN_NAME_TIP +
+//
+//                            " FROM " + DeliveryEvent.TABLE_NAME + " WHERE " + DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + " = ? ", new String[] {ticket_id});
+
+                    String[] whereArgs ={ticket_id};
+                    Cursor cursor = db.rawQuery("SELECT "+ DeliveryEvent.COLUMN_NAME_ORDER_NUMBER +"," +
+                            DeliveryEvent.COLUMN_NAME_TIP + "," +
+                            DeliveryEvent.COLUMN_NAME_NOTES +
+                            " FROM "+ com.deliverytips.DeliveryEvent.TABLE_NAME
+                            +" WHERE "+ DeliveryEvent.COLUMN_NAME_ORDER_NUMBER+" = ?",whereArgs);
+
                     if(cursor.getCount() <= 0){
                         text.setText(text.getText() + "\n\n(NEW) " + row);
                         db.insert(deliveryEvent.TABLE_NAME, null, deliveryEvent.getContentValues());
                     } else {
-                        text.setText(text.getText() + "\n\n(UPDATE) - not implemented " + row);
-                        db.update(DeliveryEvent.TABLE_NAME,deliveryEvent.getContentValues(),DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + "=" + deliveryEvent._order_number, null);
+                        text.setText(text.getText() + "\n\n(UPDATE) " + row);
+
+                        int tip_index = cursor.getColumnIndexOrThrow(DeliveryEvent.COLUMN_NAME_TIP);
+                        //deliveryEvent._notes = cursor.getString(3);
+
+//                        db.update(
+//                                DeliveryEvent.TABLE_NAME,
+//                                deliveryEvent.getContentValues(),
+//                                DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + "= ?",
+//                                new String[] {ticket_id});
                     }
 
                     cursor.close();

@@ -11,6 +11,9 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -19,11 +22,6 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.MapView;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
-import static com.deliverytips.R.string.default_city;
-
 public class DeliveryEventDetails extends AppCompatActivity {
 
     public Cursor cursor;
@@ -31,6 +29,10 @@ public class DeliveryEventDetails extends AppCompatActivity {
     public EditText editTextTipTotal;
     public EditText editTextNotes;
     public TextView textViewDescription;
+    public TextView textViewTimestamp;
+    public TextView textViewAddress;
+    public TextView price;
+
     public SharedPreferences sharedPref;
 
     @Override
@@ -42,11 +44,15 @@ public class DeliveryEventDetails extends AppCompatActivity {
 
         //Initalize
         TextView ticket_id = (TextView) findViewById(R.id.textViewTicketID);
-        TextView price = (TextView) findViewById(R.id.textViewPrice);
+        price = (TextView) findViewById(R.id.textViewPrice);
         textViewDescription = (TextView) findViewById(R.id.textViewDescription);
+        textViewAddress = (TextView) findViewById(R.id.textViewAddress);
+        textViewTimestamp = (TextView) findViewById(R.id.textViewTimestamp);
         editTextTip = (EditText) findViewById(R.id.editTextTip);
         editTextTipTotal = (EditText) findViewById(R.id.editTextTotal);
         editTextNotes = (EditText) findViewById(R.id.editTextNotes);
+
+
 
         Button call_button = (Button) findViewById(R.id.buttonCall);
         Button nav_button = (Button) findViewById(R.id.buttonMaps);
@@ -79,6 +85,7 @@ public class DeliveryEventDetails extends AppCompatActivity {
                 new String[]{
                         com.deliverytips.DeliveryEvent.COLUMN_NAME_ID,
                         com.deliverytips.DeliveryEvent.COLUMN_NAME_ORDER_NUMBER,
+                        DeliveryEvent.COLUMN_NAME_DESCRIPTION,
                         com.deliverytips.DeliveryEvent.COLUMN_NAME_PHONE_NUMBER,
                         com.deliverytips.DeliveryEvent.COLUMN_NAME_FULL_NAME,
                         com.deliverytips.DeliveryEvent.COLUMN_NAME_STREET,
@@ -95,9 +102,20 @@ public class DeliveryEventDetails extends AppCompatActivity {
             Double tip = Double.parseDouble(cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_TIP)));
             editTextTip.setText(tip.toString());
 
+            //Set Description
+            String description_str = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_TIP));
+            textViewDescription.setText(description_str);
+
+            //set address
+            final String address_str = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_STREET));
+            textViewAddress.setText(address_str);
+
+            //set timestamp
+            String timestamp = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_TIMESTAMP));
+            textViewTimestamp.setText(timestamp);
+
             final String phone = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_PHONE_NUMBER));
             final String address = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_STREET));
-
 
             String notes = (cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_NOTES) > -1 ) ? cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_NOTES)) : "";
             String description = (cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_DESCRIPTION) > -1 ) ? cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_DESCRIPTION)) : "";
@@ -107,8 +125,64 @@ public class DeliveryEventDetails extends AppCompatActivity {
             Double price_value = Double.parseDouble(cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_PRICE)));
             price.setText(price_value.toString());
 
+            price.addTextChangedListener(new TextWatcher() {
+
+                public void beforeTextChanged(CharSequence s, int start, int count,
+                                              int after) {
+                    // TODO Auto-generated method stub
+                    Log.d("BEFORE", s.toString() + " " + start + " " + after + " " + count );
+                }
+
+                public void onTextChanged(CharSequence s, int start, int before,
+                                          int count) {
+
+                    Log.d("total price auto calc", s.toString() + " " + start + " " + before + " " + count );
+                    //textViewResult.setText(addNumbers());
+                }
+
+                public void afterTextChanged(Editable s) {
+                    // TODO Auto-generated method stub
+                    Log.d("A total price auto calc", s.toString() + s.toString() );
+                }
+            });
+
             Double total = price_value + tip;
             editTextTipTotal.setText(total.toString());
+
+            //clear the total tip field when clicked
+            editTextTipTotal.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+
+                    if( editTextTipTotal.getText() != null ){
+                        String total_plus_tip = editTextTipTotal.getText().toString();
+                        Log.d("totaltip",editTextTipTotal.getText().toString());
+                        String actual_price = price.getText().toString();
+                        if( actual_price != null && total_plus_tip != null ){
+                            Double a_price = Double.parseDouble(actual_price);
+                            Double total = Double.parseDouble(total_plus_tip);
+                            Double calc_tip = total - a_price;
+
+                            Double rounded_tip = Math.round(calc_tip * 100.0) / 100.0;
+                            //set tip
+                            editTextTip.setText(rounded_tip.toString());
+                        }
+                    }
+
+
+                    //editTextTipTotal.getText().clear();
+                }
+            });
+
+            //clear the tip field when clicked
+            editTextTip.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    editTextTip.getText().clear();
+
+                }
+            });
 
             //set notes
             editTextNotes.setText(notes);
@@ -143,23 +217,10 @@ public class DeliveryEventDetails extends AppCompatActivity {
                     public void onClick(View v) {
 
                         //get ZIP or CITY from shared Preferences
-                        String city = sharedPref.getString("city", String.valueOf(default_city));
+                        String complete_address = address_str + " " + sharedPref.getString("city", String.valueOf(R.string.default_city));
 
-                        //address nav
-                        Intent intent = new Intent(Intent.ACTION_VIEW);
-                        String query = "";
-                        try {
-                            query = URLEncoder.encode(address + " " + city, "utf-8");
-                        } catch (UnsupportedEncodingException e) {
-                            e.printStackTrace();
-                        }
-
-                        Toast.makeText(getApplicationContext(), "Starting Navigation to " + address + " " + city, Toast.LENGTH_SHORT).show();
-
-                        Uri gmmIntentUri = Uri.parse("google.navigation:q=" + query);
-                        Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
-                        mapIntent.setPackage("com.google.android.apps.maps");
-                        startActivity(mapIntent);
+                        openMap(getApplicationContext(),complete_address);
+                        Toast.makeText(getApplicationContext(), "Starting Navigation to " + complete_address, Toast.LENGTH_SHORT).show();
                     }
                 });
             } else {
@@ -221,6 +282,19 @@ public class DeliveryEventDetails extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+    }
+
+    public static boolean openMap(Context context, String address) {
+        Uri.Builder uriBuilder = new Uri.Builder()
+                .scheme("geo")
+                .path("0,0")
+                .appendQueryParameter("q", address);
+        Intent intent = new Intent(Intent.ACTION_VIEW, uriBuilder.build());
+        if (intent.resolveActivity(context.getPackageManager()) != null) {
+            context.startActivity(intent);
+            return true;
+        }
+        return false;
     }
 
     @Override
