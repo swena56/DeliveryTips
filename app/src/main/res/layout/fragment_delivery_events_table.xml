@@ -112,7 +112,7 @@
         <com.deliverytips.table.SortableDeliveryEventsTableView
             android:id="@+id/tableView"
             android:layout_width="match_parent"
-            android:layout_height="444dp"
+            android:layout_height="wrap_content"
             android:layout_below="@id/toolbar"
             custom:tableView_columnCount="4"
             custom:tableView_headerColor="@color/primary"
