@@ -82,6 +82,7 @@ public class DeliveryEventDetails extends AppCompatActivity {
                         com.deliverytips.DeliveryEvent.COLUMN_NAME_PHONE_NUMBER,
                         com.deliverytips.DeliveryEvent.COLUMN_NAME_FULL_NAME,
                         com.deliverytips.DeliveryEvent.COLUMN_NAME_STREET,
+                        com.deliverytips.DeliveryEvent.COLUMN_NAME_DRIVER,
                         com.deliverytips.DeliveryEvent.COLUMN_NAME_PRICE,
                         com.deliverytips.DeliveryEvent.COLUMN_NAME_TIMESTAMP,
                         com.deliverytips.DeliveryEvent.COLUMN_NAME_TIP
@@ -174,6 +175,27 @@ public class DeliveryEventDetails extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Toast.makeText(getApplicationContext(),"Starting Maps", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        //Delcare Save Button
+        Button saveButton = (Button) findViewById(R.id.buttonSaveEvent);
+        saveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //save tips and notes
+                MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(getApplicationContext());
+                SQLiteDatabase db = myDatabaseHelper.getWritableDatabase();
+                DeliveryEvent deliveryEvent = new DeliveryEvent(cursor);
+                deliveryEvent._tip = Double.parseDouble(editTextTip.getText().toString());
+                deliveryEvent._notes = editTextNotes.getText().toString();
+                db.update(DeliveryEvent.TABLE_NAME,deliveryEvent.getContentValues(),DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + "=" + deliveryEvent._order_number, null);
+                db.close();
+
+                Toast.makeText(getApplicationContext(),"Delivery Event ( "+deliveryEvent._order_number+" ) Updated", Toast.LENGTH_SHORT).show();
+
+                Intent intent = new Intent(DeliveryEventDetails.this, MainActivity.class);
+                startActivity(intent);
             }
         });
 

@@ -159,7 +159,7 @@ public class SyncPwr extends AppCompatActivity {
                         db.insert(deliveryEvent.TABLE_NAME, null, deliveryEvent.getContentValues());
                     } else {
                         text.setText(text.getText() + "\n\n(UPDATE) - not implemented " + row);
-                        //db.update(DeliveryEvent.TABLE_NAME,deliveryEvent.getContentValues(),DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + "=" + deliveryEvent._order_number, null);
+                        db.update(DeliveryEvent.TABLE_NAME,deliveryEvent.getContentValues(),DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + "=" + deliveryEvent._order_number, null);
                     }
 
                     cursor.close();

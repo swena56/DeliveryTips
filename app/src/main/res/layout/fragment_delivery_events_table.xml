@@ -28,9 +28,8 @@
 
                 <TextView
                     android:id="@+id/textView2"
-                    android:layout_width="match_parent"
+                    android:layout_width="82dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:lineSpacingExtra="8sp"
                     android:text="Deliveries: "
                     android:textAlignment="textStart"
@@ -49,15 +48,14 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
                 <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="84dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:lineSpacingExtra="8sp"
-                    android:text="Total TIps:"
+                    android:text="Total Tips:"
                     android:textAlignment="textStart"
                     android:textColor="@android:color/white"/>
 
@@ -72,12 +70,36 @@
 
             </LinearLayout>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="83dp"
+                    android:layout_height="wrap_content"
+                    android:lineSpacingExtra="8sp"
+                    android:text="Avg Tip:"
+                    android:textAlignment="textStart"
+                    android:textColor="@android:color/white"/>
+
+                <TextView
+                    android:id="@+id/textViewAvgTips"
+                    android:layout_width="37dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="0"
+                    android:textColor="@android:color/white"
+                    android:textStyle="italic"/>
+
+            </LinearLayout>
+
         </LinearLayout>
 
         <Spinner
             android:id="@+id/select_driver"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:background="@drawable/common_google_signin_btn_text_light"/>
     </LinearLayout>
 
@@ -90,7 +112,7 @@
         <com.deliverytips.table.SortableDeliveryEventsTableView
             android:id="@+id/tableView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="444dp"
             android:layout_below="@id/toolbar"
             custom:tableView_columnCount="4"
             custom:tableView_headerColor="@color/primary"

@@ -92,12 +92,16 @@ public class DeliveryEvent implements Chargable {
         if( cursor != null ){
             this._id = Long.parseLong( cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_ID)));
             this._order_number = Long.parseLong( cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_ORDER_NUMBER)));
-            this._full_name = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_FULL_NAME));
             this._price = Double.parseDouble(cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_PRICE)));
             this._tip = Double.parseDouble(cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_TIP)));
             this._timestamp = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_TIMESTAMP));
             this._phone = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_PHONE_NUMBER));
             this._street = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_STREET));
+
+            //add full_name
+            if( cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_FULL_NAME) != -1) {
+                this._full_name = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_FULL_NAME));
+            }
 
             //add driver
             if( cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_DRIVER) != -1) {
