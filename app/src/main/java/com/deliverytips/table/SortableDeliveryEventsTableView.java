@@ -43,10 +43,8 @@ public class SortableDeliveryEventsTableView extends SortableTableView<DeliveryE
         setDataRowBackgroundProvider(TableDataRowBackgroundProviders.alternatingRowColors(rowColorEven, rowColorOdd));
         setHeaderSortStateViewProvider(SortStateViewProviders.brightArrows());
 
-
         final TableColumnWeightModel tableColumnWeightModel = new TableColumnWeightModel(4);
         tableColumnWeightModel.setColumnWeight(0, 3);
-
         tableColumnWeightModel.setColumnWeight(1, 4);
         tableColumnWeightModel.setColumnWeight(2, 5);
         tableColumnWeightModel.setColumnWeight(3, 2);
