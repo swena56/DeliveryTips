@@ -61,10 +61,12 @@ public class DeliveryEventsTable extends Fragment {
     public String store_id;
     public String username;
     public String password;
+    public String address;
     public RequestQueue queue;
     public String url;
     public DefaultHttpClient mDefaultHttpClient;
     public CookieStore cs;
+    public String city_state;
     public RequestQueue mRequestQueue; //for single function
     //public CookieManager cookieManager;
     //public java.net.CookieManager cm;
@@ -82,8 +84,6 @@ public class DeliveryEventsTable extends Fragment {
     List<String> listDataHeader;
     HashMap<String, List<String>> listDataChild;
 
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -94,6 +94,7 @@ public class DeliveryEventsTable extends Fragment {
         store_id = sharedPref.getString("store_id", "" );
         username = sharedPref.getString("username", "" );
         password = sharedPref.getString("password", "" );
+        address = sharedPref.getString("address", "" );
 
         numDeleliveries = (TextView) rootView.findViewById(R.id.textViewNumEvents);
         totalTips = (TextView) rootView.findViewById(R.id.textViewTotalTips);
@@ -106,7 +107,7 @@ public class DeliveryEventsTable extends Fragment {
                 android.R.layout.simple_spinner_item, driver_list);
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(dataAdapter);
-
+        city_state = sharedPref.getString("address", String.valueOf(R.string.default_city).toString());
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
         {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
@@ -191,6 +192,9 @@ public class DeliveryEventsTable extends Fragment {
 
                                 //pd = ProgressDialog.show(DeliveryEventsTable.th is,"Loading...", true, false);
                                 Intent i = new Intent(getActivity(), SyncPwr.class);
+                                i.putExtra("store_id",store_id);
+                                i.putExtra("username",username);
+                                i.putExtra("password",password);
                                 startActivity(i);
 
                                 tableDataAdapter = new TableDataAdapter(getContext(), DataFactory.createDeliveryEventsList(getContext(), selectedItem), carTableView);
@@ -234,17 +238,23 @@ public class DeliveryEventsTable extends Fragment {
 
         @Override
         public void onDataClicked(final int rowIndex, final DeliveryEvent clickedData) {
-            String city = "New Ulm";
-            String carString = clickedData.getAddress()  + ", " + city;
 
-            Toast.makeText(getContext(), carString, Toast.LENGTH_SHORT).show();
+            if( clickedData.getAddress() != null ) {
 
-            Intent i = new Intent(getActivity(), DeliveryEventDetails.class);
-            Bundle bundle = new Bundle();
-            bundle.putString("ticket_id",clickedData.getTicketID().toString() );
-            i.putExtras(bundle);
 
-            startActivity(i);
+                //currently need a way to get state and city from settings
+                String carString = clickedData.getAddress() + " New Ulm, MN";
+
+                Toast.makeText(getContext(), carString, Toast.LENGTH_SHORT).show();
+
+                Intent i = new Intent(getActivity(), DeliveryEventDetails.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("ticket_id", clickedData.getTicketID().toString());
+                bundle.putString("address", carString);
+                i.putExtras(bundle);
+
+                startActivity(i);
+            }
         }
     }
 
@@ -255,8 +265,6 @@ public class DeliveryEventsTable extends Fragment {
             final String carString = "Long Click: " + rowIndex + " " + clickedData.getAddress();
             Toast.makeText(getContext(), carString, Toast.LENGTH_SHORT).show();
 
-
-
             //address nav
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(Uri.parse("http://maps.google.co.in/maps?q=" + carString));
@@ -264,7 +272,6 @@ public class DeliveryEventsTable extends Fragment {
             return true;
         }
     }
-
 
     public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
@@ -359,8 +366,6 @@ public class DeliveryEventsTable extends Fragment {
             return true;
         }
     }
-
-
     public RequestQueue getRequestQueue() {
 
         if ( this.queue == null ) {

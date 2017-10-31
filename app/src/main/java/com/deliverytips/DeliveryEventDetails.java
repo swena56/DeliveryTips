@@ -52,8 +52,6 @@ public class DeliveryEventDetails extends AppCompatActivity {
         editTextTipTotal = (EditText) findViewById(R.id.editTextTotal);
         editTextNotes = (EditText) findViewById(R.id.editTextNotes);
 
-
-
         Button call_button = (Button) findViewById(R.id.buttonCall);
         Button nav_button = (Button) findViewById(R.id.buttonMaps);
 
@@ -74,7 +72,7 @@ public class DeliveryEventDetails extends AppCompatActivity {
         }
 
         //set Ticket Id
-        ticket_id.setText(ticket);
+        ticket_id.setText(ticket );
 
         MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(getApplicationContext());
         SQLiteDatabase db = myDatabaseHelper.getWritableDatabase();
@@ -85,7 +83,9 @@ public class DeliveryEventDetails extends AppCompatActivity {
                 new String[]{
                         com.deliverytips.DeliveryEvent.COLUMN_NAME_ID,
                         com.deliverytips.DeliveryEvent.COLUMN_NAME_ORDER_NUMBER,
-                        DeliveryEvent.COLUMN_NAME_DESCRIPTION,
+                        DeliveryEvent.COLUMN_NAME_SERVICE_METHOD,
+                        //DeliveryEvent.COLUMN_NAME_STATUS,
+                        com.deliverytips.DeliveryEvent.COLUMN_NAME_DESCRIPTION,
                         com.deliverytips.DeliveryEvent.COLUMN_NAME_PHONE_NUMBER,
                         com.deliverytips.DeliveryEvent.COLUMN_NAME_FULL_NAME,
                         com.deliverytips.DeliveryEvent.COLUMN_NAME_STREET,
@@ -97,6 +97,8 @@ public class DeliveryEventDetails extends AppCompatActivity {
         DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + "=" + i.getExtras().getString("ticket_id"), null, null, null, null);
 
         if (cursor.moveToFirst()) {
+
+            ticket_id.setText(ticket + " ("+cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_SERVICE_METHOD))+")" );
 
             //set tip
             Double tip = Double.parseDouble(cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_TIP)));
@@ -191,7 +193,8 @@ public class DeliveryEventDetails extends AppCompatActivity {
             textViewDescription.setText(description);
 
             //set call but action and button text
-            call_button.setText( "PHONE: " + phone );
+            String phone_str = (phone != null && phone.length() >= 9 ) ? phone.replaceFirst("(\\d{3})(\\d{3})(\\d+)", "($1)-$2-$3") : "N/A";
+            call_button.setText( "PHONE: " + phone_str );
             if( phone != null ) {
 
                 call_button.setOnClickListener(new View.OnClickListener() {
@@ -210,15 +213,18 @@ public class DeliveryEventDetails extends AppCompatActivity {
             }
 
             //Navigation button, hide it when dealing with no address
-            nav_button.setText( "Navigate: " + address );
+            String complete_address = address_str + "," + sharedPref.getString("address", String.valueOf(R.string.default_city).toString());
+
+            nav_button.setText( "Navigate: " + address_str );
             if( address != null ) {
                 nav_button.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
 
                         //get ZIP or CITY from shared Preferences
-                        String complete_address = address_str + " " + sharedPref.getString("city", String.valueOf(R.string.default_city));
-
+                        //String city_state = sharedPref.getString("address", String.valueOf(R.string.default_city).toString());
+                        String complete_address = getIntent().getExtras().getString("address");// + "," + city_state;
+                        //String complete_address = getIntent().getExtras().getString("address");
                         openMap(getApplicationContext(),complete_address);
                         Toast.makeText(getApplicationContext(), "Starting Navigation to " + complete_address, Toast.LENGTH_SHORT).show();
                     }

@@ -1,5 +1,6 @@
 package com.deliverytips;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -32,7 +33,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-
 public class SyncPwr extends AppCompatActivity {
 
     TextView text;
@@ -56,7 +56,8 @@ public class SyncPwr extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        sharedPref = getPreferences(Context.MODE_PRIVATE);
+        //sharedPref = getPreferences(Context.MODE_PRIVATE);
+        sharedPref = getSharedPreferences("", Context.MODE_PRIVATE);
         text = (TextView) findViewById(R.id.log_text);
         editText = (EditText) findViewById(R.id.EDIT_TEXT);
         webView = (WebView) findViewById(R.id.webview);
@@ -66,6 +67,7 @@ public class SyncPwr extends AppCompatActivity {
         boolean autoSaveSettings = sharedPref.getBoolean("auto_sync",false);
         enableAutoSubmitCheckbox.setChecked(autoSaveSettings);
 
+
         webView.getSettings().setLoadWithOverviewMode(true);
         webView.getSettings().setUseWideViewPort(true);
         webView.clearFormData();
@@ -74,7 +76,8 @@ public class SyncPwr extends AppCompatActivity {
         webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webView.addJavascriptInterface(new MyJavaScriptInterface(), "HTMLOUT");
-        webView.loadUrl("https://pwr.dominos.com/PWR/RealTimeOrderDetail.aspx?FilterCode=sr_1953&FilterDesc=Store-1953");
+        String store_id = getIntent().getExtras().getString("store_id");
+        webView.loadUrl("https://pwr.dominos.com/PWR/RealTimeOrderDetail.aspx?PrintMode=true&FilterCode=sr_"+store_id+"&FilterDesc=Store-"+store_id);
         CookieManager.getInstance().setAcceptCookie(true);
 
         webView.setWebViewClient(new WebViewClient() {
@@ -97,6 +100,19 @@ public class SyncPwr extends AppCompatActivity {
                     SystemClock.sleep(8000);
 
                     SaveImport();
+                }
+
+                String username = getIntent().getExtras().getString("username");
+                String password = getIntent().getExtras().getString("password");
+
+                //add username and password to forum, then click
+                if( username != null && password != null ){
+                    String javaScript ="javascript:(function() {" +
+                            "document.getElementById(\"txtUsername\").value = \""+username+"\";\n" +
+                            "document.getElementById(\"txtPassword\").value = \""+password+"\";\n" +
+                            "document.getElementById(\"btnLogin\").click();\n" +
+                            "})()";
+                    webView.loadUrl(javaScript);
                 }
 
                 //do work to automatically detect when the page completes generating html
@@ -194,6 +210,7 @@ public class SyncPwr extends AppCompatActivity {
             DeliveryEvent deliveryEvent = new DeliveryEvent();
             deliveryEvent._price = price.doubleValue();
             deliveryEvent._status = row.get(6);
+            deliveryEvent._service = row.get(8);
             //deliveryEvent._type = row.get(7);
             deliveryEvent._timestamp = row.get(2);
             deliveryEvent._driver = row.get(10);
@@ -221,7 +238,6 @@ public class SyncPwr extends AppCompatActivity {
 //                    Cursor cursor = db.rawQuery("SELECT "+
 //                            DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + ", " +
 //                            DeliveryEvent.COLUMN_NAME_TIP +
-//
 //                            " FROM " + DeliveryEvent.TABLE_NAME + " WHERE " + DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + " = ? ", new String[] {ticket_id});
 
             String[] whereArgs ={ticket_id};
@@ -240,11 +256,15 @@ public class SyncPwr extends AppCompatActivity {
                 int tip_index = cursor.getColumnIndexOrThrow(DeliveryEvent.COLUMN_NAME_TIP);
                 //deliveryEvent._notes = cursor.getString(3);
 
-//                        db.update(
-//                                DeliveryEvent.TABLE_NAME,
-//                                deliveryEvent.getContentValues(),
-//                                DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + "= ?",
-//                                new String[] {ticket_id});
+                ContentValues contentValues = deliveryEvent.getContentValues();
+                contentValues.remove(DeliveryEvent.COLUMN_NAME_TIP);
+                contentValues.remove(DeliveryEvent.COLUMN_NAME_DRIVER);
+
+                        db.update(
+                                DeliveryEvent.TABLE_NAME,
+                                contentValues,
+                                DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + "= ?",
+                                new String[] {ticket_id});
             }
 
             cursor.close();

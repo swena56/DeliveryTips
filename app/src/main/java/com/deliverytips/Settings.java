@@ -22,6 +22,7 @@ public class Settings extends Fragment {
     EditText editTextStoreId;
     EditText editTextUsername;
     EditText editTextPassword;
+    EditText editTextAddress;
     Button saveButton;
     Button resetDBButton;
     View rootView;
@@ -39,6 +40,7 @@ public class Settings extends Fragment {
         editTextStoreId = (EditText) rootView.findViewById(R.id.editTextStoreId);
         editTextUsername = (EditText) rootView.findViewById(R.id.editTextUsername);
         editTextPassword = (EditText) rootView.findViewById(R.id.editTextPassword);
+        editTextAddress = (EditText) rootView.findViewById(R.id.editTextCity);
         saveButton = (Button) rootView.findViewById(R.id.buttonSaveSettings);
         resetDBButton = (Button) rootView.findViewById(R.id.buttonClearDB);
         sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
@@ -46,6 +48,7 @@ public class Settings extends Fragment {
         editTextStoreId.setText( sharedPref.getString("store_id", null) );
         editTextUsername.setText( sharedPref.getString("username", null) );
         editTextPassword.setText( sharedPref.getString("password", null) );
+        editTextAddress.setText( sharedPref.getString("address", null) );
 
         Button import_button = (Button) rootView.findViewById(R.id.buttonImport);
 
@@ -67,6 +70,8 @@ public class Settings extends Fragment {
                   editor.putString("store_id", editTextStoreId.getText().toString());
                   editor.putString("username", editTextUsername.getText().toString());
                   editor.putString("password", editTextPassword.getText().toString());
+                  editor.putString("address", editTextAddress.getText().toString());
+
                   editor.commit();
                   Toast.makeText(getActivity(),"Saved Settings", Toast.LENGTH_SHORT).show();
 

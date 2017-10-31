@@ -34,7 +34,7 @@ public class SortableDeliveryEventsTableView extends SortableTableView<DeliveryE
         super(context, attributes, styleAttributes);
 
         final SimpleTableHeaderAdapter simpleTableHeaderAdapter = new SimpleTableHeaderAdapter(
-                context, R.string.ticket_id_column, R.string.phone_number_column, R.string.address_column, R.string.price);
+                context, R.string.ticket_id_column, R.string.status_column, R.string.address_column, R.string.price);
         simpleTableHeaderAdapter.setTextColor(ContextCompat.getColor(context, R.color.table_header_text));
         setHeaderAdapter(simpleTableHeaderAdapter);
 
@@ -45,9 +45,9 @@ public class SortableDeliveryEventsTableView extends SortableTableView<DeliveryE
 
         final TableColumnWeightModel tableColumnWeightModel = new TableColumnWeightModel(4);
         tableColumnWeightModel.setColumnWeight(0, 3);
-        tableColumnWeightModel.setColumnWeight(1, 4);
+        tableColumnWeightModel.setColumnWeight(1, 3);
         tableColumnWeightModel.setColumnWeight(2, 5);
-        tableColumnWeightModel.setColumnWeight(3, 2);
+        tableColumnWeightModel.setColumnWeight(3, 3);
         setColumnModel(tableColumnWeightModel);
 
         setColumnComparator(0, DeliveryEventComparators.getTicketComparator());

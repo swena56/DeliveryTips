@@ -50,7 +50,7 @@ public class DeliveryEvent implements Chargable {
     public String _source = null;
 
     public static String COLUMN_NAME_SERVICE_METHOD = "service_method";
-    public String _service = null;
+    public String _service = "";
 
     public static String COLUMN_NAME_CSR = "csr";
     public String _csr = "";
@@ -92,6 +92,7 @@ public class DeliveryEvent implements Chargable {
         if( cursor != null ){
             this._id = Long.parseLong( cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_ID)));
             this._order_number = Long.parseLong( cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_ORDER_NUMBER)));
+            this._service = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_SERVICE_METHOD));
             this._price = Double.parseDouble(cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_PRICE)));
             this._tip = Double.parseDouble(cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_TIP)));
             this._timestamp = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_TIMESTAMP));
@@ -117,6 +118,12 @@ public class DeliveryEvent implements Chargable {
             if( cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_NOTES) != -1) {
                 this._notes = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_NOTES));
             }
+
+            //add service method
+//            if( cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_SERVICE_METHOD) != -1) {
+//                this._service = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_SERVICE_METHOD));
+//            }
+
             //this._person_id = Long.parseLong(cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_CUSTOMER_ID)));
         }
     }
@@ -170,6 +177,7 @@ public class DeliveryEvent implements Chargable {
         ContentValues c = new ContentValues();
         c.put(this.COLUMN_NAME_PRICE, this._price);
         c.put(this.COLUMN_NAME_TIP, this._tip);
+        c.put(this.COLUMN_NAME_SERVICE_METHOD, this._service);
         c.put(this.COLUMN_NAME_ORDER_NUMBER, this._order_number);
         c.put(this.COLUMN_NAME_TIMESTAMP, this._timestamp);
         c.put(this.COLUMN_NAME_FULL_NAME, this._full_name);

@@ -8,7 +8,10 @@ import android.util.Log;
 
 import com.deliverytips.MyDatabaseHelper;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,10 +80,27 @@ public final class DataFactory {
 
         final List<DeliveryEvent> deliveryEvents = new ArrayList<>();
 
-        if( selectedItem != null && selectedItem != "No Driver Selected." && selectedItem != "" && selectedItem != " ()" ){
+        if( selectedItem != null && selectedItem != "" ){
 
-            String whereClause = com.deliverytips.DeliveryEvent.COLUMN_NAME_DRIVER + "= ? ";
+            String whereClause = "";
+            //com.deliverytips.DeliveryEvent.COLUMN_NAME_DRIVER + "= ? " +
+            //" AND " + com.deliverytips.DeliveryEvent.COLUMN_NAME_SERVICE_METHOD + "= ? ";;
+
             String[] whereArgs = {selectedItem};
+
+            if( selectedItem == "No Driver Selected." ){
+                whereClause = com.deliverytips.DeliveryEvent.COLUMN_NAME_SERVICE_METHOD + "= ? ";
+                whereArgs = new String[]{"Carry-Out"};
+            } else {
+                whereArgs = new String[]{selectedItem,"Delivery"};
+
+
+                whereClause = com.deliverytips.DeliveryEvent.COLUMN_NAME_DRIVER + "= ? " +
+                        " OR " + com.deliverytips.DeliveryEvent.COLUMN_NAME_DRIVER + "= \" ()\" " +
+                        " AND " + com.deliverytips.DeliveryEvent.COLUMN_NAME_SERVICE_METHOD + "= ? ";
+
+            }
+
             //search to see if person exists
             Cursor cursor = db.query(
                     com.deliverytips.DeliveryEvent.TABLE_NAME,
@@ -88,21 +108,28 @@ public final class DataFactory {
                             com.deliverytips.DeliveryEvent.COLUMN_NAME_ID,
                             com.deliverytips.DeliveryEvent.COLUMN_NAME_ORDER_NUMBER,
                             com.deliverytips.DeliveryEvent.COLUMN_NAME_PHONE_NUMBER,
+                            com.deliverytips.DeliveryEvent.COLUMN_NAME_SERVICE_METHOD,
                             com.deliverytips.DeliveryEvent.COLUMN_NAME_STREET,
                             com.deliverytips.DeliveryEvent.COLUMN_NAME_PRICE,
                             com.deliverytips.DeliveryEvent.COLUMN_NAME_TIMESTAMP,
                             com.deliverytips.DeliveryEvent.COLUMN_NAME_TIP
                     },
-                    whereClause, whereArgs, null, null, null);
+                    whereClause, whereArgs, null, null,com.deliverytips.DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + " DESC"
+                    );
 
             //
 
             while (cursor.moveToNext()) {
                 // your calculation goes here
                 com.deliverytips.DeliveryEvent event = new com.deliverytips.DeliveryEvent(cursor);
-                deliveryEvents.add(
-                        new DeliveryEvent(event._order_number, event._phone, event._street, event._price)
-                );
+                Double price = Double.valueOf(String.valueOf(event._price));
+                Double tax = price * 0.075;
+                Double total = price + tax;
+
+                    deliveryEvents.add(
+
+                            new DeliveryEvent(event._order_number, event._phone, event._street, total, event._tip)
+                    );
             }
         } else {
             Cursor cursor = db.query(
@@ -110,6 +137,7 @@ public final class DataFactory {
                     new String[]{
                             com.deliverytips.DeliveryEvent.COLUMN_NAME_ID,
                             com.deliverytips.DeliveryEvent.COLUMN_NAME_ORDER_NUMBER,
+                            com.deliverytips.DeliveryEvent.COLUMN_NAME_SERVICE_METHOD,
                             com.deliverytips.DeliveryEvent.COLUMN_NAME_PHONE_NUMBER,
                             com.deliverytips.DeliveryEvent.COLUMN_NAME_STREET,
                             com.deliverytips.DeliveryEvent.COLUMN_NAME_PRICE,
@@ -123,9 +151,23 @@ public final class DataFactory {
             while (cursor.moveToNext()) {
                 // your calculation goes here
                 com.deliverytips.DeliveryEvent event = new com.deliverytips.DeliveryEvent(cursor);
-                deliveryEvents.add(
-                        new DeliveryEvent(event._order_number, event._phone, event._street, event._price)
-                );
+
+                DateFormat f = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss a");
+                Date d = null;
+
+//                d = f.parse(event._timestamp);
+//
+//                DateFormat date = new SimpleDateFormat("MM/dd/yyyy");
+//                DateFormat time = new SimpleDateFormat("hh:mm:ss a");
+//                System.out.println("Date: " + date.format(d));
+//                System.out.println("Time: " + time.format(d));
+
+                if( event._service == "Delivery" ) {
+                    deliveryEvents.add(
+                            //new DeliveryEvent(event._order_number, time.format(d).toString(), event._street, event._price)
+                            new DeliveryEvent(event._order_number, event._phone, event._street, event._price, event._tip  )
+                    );
+                }
             }
         }
 

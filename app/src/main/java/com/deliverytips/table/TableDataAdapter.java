@@ -1,6 +1,7 @@
 package com.deliverytips.table;
 
 import android.content.Context;
+import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.support.v4.content.ContextCompat;
 import android.text.Editable;
@@ -9,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.deliverytips.R;
@@ -22,8 +24,8 @@ import de.codecrafters.tableview.toolkit.LongPressAwareTableDataAdapter;
 
 public class TableDataAdapter extends LongPressAwareTableDataAdapter<DeliveryEvent> {
 
-    private static final int TEXT_SIZE = 13;
-    private static final int SMALL_TEXT_SIZE = 8;
+    private static final int TEXT_SIZE = 15;
+    private static final int SMALL_TEXT_SIZE = 13;
     private static final NumberFormat PRICE_FORMATTER = NumberFormat.getNumberInstance();
 
 
@@ -113,32 +115,60 @@ public class TableDataAdapter extends LongPressAwareTableDataAdapter<DeliveryEve
     }
 
     private View renderTicketId(final DeliveryEvent deliveryEvent) {
-        return renderString(
-                Long.toString( deliveryEvent.getTicketID() )
-        );
-    }
-
-    private View renderPrice(final DeliveryEvent deliveryEvent) {
-        final String priceString = "$" + PRICE_FORMATTER.format(deliveryEvent.getPrice());
 
         TextView textView = new TextView(getContext());
-        textView.setText(priceString);
+        textView.setText(Long.toString( deliveryEvent.getTicketID() ));
         textView.setPadding(20, 10, 20, 10);
-        textView.setTextSize(TEXT_SIZE);
-
-        if (deliveryEvent.getPrice() < 10) {
-            textView.setTextColor(ContextCompat.getColor(getContext(), R.color.table_price_high));
-        } else if (deliveryEvent.getPrice()<=10) {
-            textView.setTextColor(ContextCompat.getColor(getContext(), R.color.table_price_low));
-        }
-
+        textView.setTypeface(null, Typeface.BOLD_ITALIC);
+        textView.setPaintFlags(textView.getPaintFlags() |   Paint.UNDERLINE_TEXT_FLAG);
+        textView.setTextSize(TEXT_SIZE+2);
         return textView;
     }
 
+    private View renderPrice(final DeliveryEvent deliveryEvent) {
+        final String priceString = "$" + PRICE_FORMATTER.format(deliveryEvent.getPrice()) + " / " +
+                "$" + PRICE_FORMATTER.format(deliveryEvent.getTip());
+
+        TextView textViewPrice = new TextView(getContext());
+        textViewPrice.setText("$" + PRICE_FORMATTER.format(deliveryEvent.getPrice()));
+        textViewPrice.setPadding(20, 10, 20, 10);
+        textViewPrice.setPaintFlags(textViewPrice.getPaintFlags() |   Paint.UNDERLINE_TEXT_FLAG);
+        textViewPrice.setTextSize(SMALL_TEXT_SIZE);
+
+        TextView textViewTip = new TextView(getContext());
+        textViewTip.setText("$" + PRICE_FORMATTER.format(deliveryEvent.getTip()));
+        textViewTip.setPadding(20, 10, 20, 10);
+        textViewTip.setTextSize(SMALL_TEXT_SIZE);
+
+        LinearLayout linearLayout = new LinearLayout(getContext());
+        //linearLayout
+        linearLayout.addView(textViewPrice);
+        linearLayout.addView(textViewTip);
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
+
+        //20 percent of higher is green
+        Double percent = 0.0;
+
+        if( deliveryEvent.getPrice() > 0 ){
+         percent = deliveryEvent.getTip() / deliveryEvent.getPrice();
+            percent = percent * 100;
+        }
+
+        if( percent >= 20 ){
+            textViewTip.setTextColor(ContextCompat.getColor(getContext(), R.color.table_price_low));
+        } else {
+            textViewTip.setTextColor(ContextCompat.getColor(getContext(), R.color.table_price_high));
+        }
+
+        return linearLayout;
+    }
+
+    //Address id column
     private View renderPower(final DeliveryEvent deliveryEvent) {
         TextView textView = new TextView(getContext());
         textView.setText(deliveryEvent.getAddress());
         textView.setPadding(20, 10, 20, 10);
+        textView.setTypeface(null, Typeface.BOLD_ITALIC);
         textView.setTextSize(TEXT_SIZE);
         return textView;
     }
@@ -152,7 +182,7 @@ public class TableDataAdapter extends LongPressAwareTableDataAdapter<DeliveryEve
         final TextView textView = new TextView(getContext());
         textView.setText(phone_str);
         textView.setPadding(20, 10, 20, 10);
-        textView.setTextSize(TEXT_SIZE);
+        textView.setTextSize(SMALL_TEXT_SIZE);
 
         //show if the phone number is invalid
         if (deliveryEvent.getName().length() > 10 || deliveryEvent.getName().length() < 10 ) {

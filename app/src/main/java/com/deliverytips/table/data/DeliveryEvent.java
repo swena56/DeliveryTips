@@ -12,13 +12,15 @@ public class DeliveryEvent implements Chargable {
     //private final DeliveryEventsProducer producer;  // for adding a image in the column
     private String Address;
     private double price;
+    private double tip;
     private String name;
 
-    public DeliveryEvent(final long ticket_id, final String name, final String Address, final double price) {
+    public DeliveryEvent(final long ticket_id, final String name, final String Address, final double price, final double tip) {
         this.ticket_id = ticket_id;
         this.name = name;
         this.Address = Address;
         this.price = price;
+        this.tip = tip;
         //this.producer = null;
     }
 
@@ -58,6 +60,9 @@ public class DeliveryEvent implements Chargable {
 
     public double getPrice() {
         return price;
+    }
+    public double getTip() {
+        return tip;
     }
 
     @Override

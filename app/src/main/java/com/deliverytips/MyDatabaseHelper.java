@@ -20,7 +20,7 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "DB";
 
-    private static final int DATABASE_VERSION = 15;
+    private static final int DATABASE_VERSION = 16;
 
     // Database creation sql statement
     public static final String CREATE_DELIVERY_EVENT = "CREATE TABLE IF NOT EXISTS " + DeliveryEvent.TABLE_NAME +
@@ -30,6 +30,7 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
                 DeliveryEvent.COLUMN_NAME_TIMESTAMP + " text, " +
                 DeliveryEvent.COLUMN_NAME_STREET + " text, " +
                 DeliveryEvent.COLUMN_NAME_FULL_NAME + " text, " +
+                DeliveryEvent.COLUMN_NAME_SERVICE_METHOD + "  text, " +
                 DeliveryEvent.COLUMN_NAME_CSR + "  text, " +
                 DeliveryEvent.COLUMN_NAME_DRIVER + "  text, " +
                 DeliveryEvent.COLUMN_NAME_PHONE_NUMBER + "  text, " +
