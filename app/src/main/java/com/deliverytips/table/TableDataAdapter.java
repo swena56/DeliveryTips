@@ -43,10 +43,11 @@ public class TableDataAdapter extends LongPressAwareTableDataAdapter<DeliveryEve
                 renderedView = renderTicketId(deliveryEvent);
                 break;
             case 1:
-                renderedView = renderCatName(deliveryEvent);
+                //renderedView = renderPhoneNumber(deliveryEvent);
+                renderedView = renderTimeAndStatus(deliveryEvent);
                 break;
             case 2:
-                renderedView = renderPower(deliveryEvent);
+                renderedView = renderAddress(deliveryEvent);
                 break;
             case 3:
                 renderedView = renderPrice(deliveryEvent);
@@ -58,8 +59,6 @@ public class TableDataAdapter extends LongPressAwareTableDataAdapter<DeliveryEve
 
         return renderedView;
     }
-
-
 
     @Override
     public View getLongPressCellView(int rowIndex, int columnIndex, ViewGroup parentView) {
@@ -85,7 +84,7 @@ public class TableDataAdapter extends LongPressAwareTableDataAdapter<DeliveryEve
 
     private View renderMapsIntent(final DeliveryEvent deliveryEvent) {
         final EditText editText = new EditText(getContext());
-        editText.setText(deliveryEvent.getName());
+        editText.setText(deliveryEvent.getPhoneNumber());
         editText.setPadding(20, 10, 20, 10);
         editText.setTextSize(TEXT_SIZE);
         editText.setSingleLine();
@@ -94,8 +93,8 @@ public class TableDataAdapter extends LongPressAwareTableDataAdapter<DeliveryEve
     }
 
     private View renderEditableCatName(final DeliveryEvent deliveryEvent) {
-        final EditText editText = new EditText(getContext());
-        editText.setText(deliveryEvent.getName());
+        EditText editText = new EditText(getContext());
+        editText.setText(deliveryEvent.getTicketID().toString());
         editText.setPadding(20, 10, 20, 10);
         editText.setTextSize(TEXT_SIZE);
         editText.setSingleLine();
@@ -108,7 +107,7 @@ public class TableDataAdapter extends LongPressAwareTableDataAdapter<DeliveryEve
         TextView textView = new TextView(getContext());
         textView.setText(deliveryEvent.getAddress());
         textView.setPadding(20, 10, 20, 10);
-        textView.setTextSize(TEXT_SIZE);
+        textView.setTextSize(TEXT_SIZE - 1);
         textView.setTypeface(Typeface.DEFAULT_BOLD);
         textView.setTextColor(ContextCompat.getColor(getContext(), R.color.colorPrimaryDark));
         return textView;
@@ -116,68 +115,120 @@ public class TableDataAdapter extends LongPressAwareTableDataAdapter<DeliveryEve
 
     private View renderTicketId(final DeliveryEvent deliveryEvent) {
 
+        String ticket_id = Long.toString( deliveryEvent.getTicketID() );
+        String pre = "A";
+        String num = "B";
+        if( ticket_id.length() > 3 ){
+            pre = ticket_id.substring(0,2);
+            num = ticket_id.substring(3,ticket_id.length());
+        }
+
+        TextView textViewPrice = new TextView(getContext());
+        textViewPrice.setText(pre);
+        textViewPrice.setPadding(20, 10, 20, 10);
+        textViewPrice.setPaintFlags(textViewPrice.getPaintFlags() |   Paint.UNDERLINE_TEXT_FLAG);
+        textViewPrice.setTextSize(SMALL_TEXT_SIZE);
+
         TextView textView = new TextView(getContext());
-        textView.setText(Long.toString( deliveryEvent.getTicketID() ));
+        textView.setText(num);
         textView.setPadding(20, 10, 20, 10);
         textView.setTypeface(null, Typeface.BOLD_ITALIC);
         textView.setPaintFlags(textView.getPaintFlags() |   Paint.UNDERLINE_TEXT_FLAG);
         textView.setTextSize(TEXT_SIZE+2);
-        return textView;
+
+        LinearLayout linearLayout = new LinearLayout(getContext());
+        linearLayout.addView(textViewPrice);
+        linearLayout.addView(textView);
+        linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+        return linearLayout;
     }
 
     private View renderPrice(final DeliveryEvent deliveryEvent) {
         final String priceString = "$" + PRICE_FORMATTER.format(deliveryEvent.getPrice()) + " / " +
                 "$" + PRICE_FORMATTER.format(deliveryEvent.getTip());
 
-        TextView textViewPrice = new TextView(getContext());
-        textViewPrice.setText("$" + PRICE_FORMATTER.format(deliveryEvent.getPrice()));
-        textViewPrice.setPadding(20, 10, 20, 10);
-        textViewPrice.setPaintFlags(textViewPrice.getPaintFlags() |   Paint.UNDERLINE_TEXT_FLAG);
-        textViewPrice.setTextSize(SMALL_TEXT_SIZE);
-
-        TextView textViewTip = new TextView(getContext());
-        textViewTip.setText("$" + PRICE_FORMATTER.format(deliveryEvent.getTip()));
-        textViewTip.setPadding(20, 10, 20, 10);
-        textViewTip.setTextSize(SMALL_TEXT_SIZE);
-
-        LinearLayout linearLayout = new LinearLayout(getContext());
-        //linearLayout
-        linearLayout.addView(textViewPrice);
-        linearLayout.addView(textViewTip);
-        linearLayout.setOrientation(LinearLayout.VERTICAL);
+        NumberFormat numberFormat = NumberFormat.getCurrencyInstance();
+        NumberFormat percentFormat = NumberFormat.getPercentInstance();
+        String price = numberFormat.format(deliveryEvent.getPrice());
+        String tip = numberFormat.format(deliveryEvent.getTip());
 
         //20 percent of higher is green
         Double percent = 0.0;
 
         if( deliveryEvent.getPrice() > 0 ){
-         percent = deliveryEvent.getTip() / deliveryEvent.getPrice();
-            percent = percent * 100;
+            percent = deliveryEvent.getTip() / deliveryEvent.getPrice();
         }
 
-        if( percent >= 20 ){
-            textViewTip.setTextColor(ContextCompat.getColor(getContext(), R.color.table_price_low));
+        //percent = Double.parseDouble(numberFormat.format(percent));
+
+        //set price
+        TextView textViewPrice = new TextView(getContext());
+        textViewPrice.setText(price);
+        textViewPrice.setPadding(20, 10, 20, 10);
+        textViewPrice.setPaintFlags(textViewPrice.getPaintFlags() |   Paint.UNDERLINE_TEXT_FLAG);
+        textViewPrice.setTextSize(SMALL_TEXT_SIZE);
+
+        //tip
+        TextView textViewTip = new TextView(getContext());
+        textViewTip.setText(tip + " ("+percentFormat.format(percent)+")" );
+        textViewTip.setPadding(20, 10, 20, 10);
+        textViewTip.setTextSize(SMALL_TEXT_SIZE);
+
+//        TextView textViewPercent = new TextView(getContext());
+//        textViewPercent.setText();
+//        textViewPercent.setPadding(20, 10, 20, 10);
+//        textViewPercent.setTextSize(SMALL_TEXT_SIZE);
+
+        LinearLayout linearLayout = new LinearLayout(getContext());
+        //linearLayout
+        linearLayout.addView(textViewPrice);
+        linearLayout.addView(textViewTip);
+       // linearLayout.addView(textViewPercent);
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
+
+
+        if( ( percent * 100 )>= 20 ){
+            textViewTip.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
+        } else if( (percent * 100 ) > 10  ) {
+            textViewTip.setTextColor(ContextCompat.getColor(getContext(), R.color.orange));
         } else {
-            textViewTip.setTextColor(ContextCompat.getColor(getContext(), R.color.table_price_high));
+            textViewTip.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
         }
 
         return linearLayout;
     }
 
-    //Address id column
-    private View renderPower(final DeliveryEvent deliveryEvent) {
+    //time and status
+    private View renderTimeAndStatus(final DeliveryEvent deliveryEvent) {
+
         TextView textView = new TextView(getContext());
-        textView.setText(deliveryEvent.getAddress());
+        textView.setText(deliveryEvent.getTime());
         textView.setPadding(20, 10, 20, 10);
-        textView.setTypeface(null, Typeface.BOLD_ITALIC);
-        textView.setTextSize(TEXT_SIZE);
-        return textView;
+        textView.setPaintFlags(textView.getPaintFlags() |   Paint.UNDERLINE_TEXT_FLAG);
+        textView.setTextSize(SMALL_TEXT_SIZE);
+
+        TextView textView2 = new TextView(getContext());
+        textView2.setText(deliveryEvent._status);
+        textView2.setPadding(20, 10, 20, 10);
+        textView2.setPaintFlags(textView.getPaintFlags() |   Paint.UNDERLINE_TEXT_FLAG);
+        textView2.setTextSize(SMALL_TEXT_SIZE);
+
+        LinearLayout linearLayout = new LinearLayout(getContext());
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
+        linearLayout.addView(textView);
+        linearLayout.addView(textView2);
+
+        return linearLayout;
     }
 
     //phone number
-    private View renderCatName(final DeliveryEvent deliveryEvent) {
-        //TODO renmae variables
+    private View renderPhoneNumber(final DeliveryEvent deliveryEvent) {
 
-        String phone_str = deliveryEvent.getName().replaceFirst("(\\d{3})(\\d{3})(\\d+)", "($1)-$2-$3");
+        String phone_str = "";
+
+        if( deliveryEvent.getPhoneNumber() != null && deliveryEvent.getPhoneNumber().length() > 6){
+            phone_str = deliveryEvent.getPhoneNumber().replaceFirst("(\\d{3})(\\d{3})(\\d+)", "($1)-$2-$3");
+        }
 
         final TextView textView = new TextView(getContext());
         textView.setText(phone_str);
@@ -185,7 +236,7 @@ public class TableDataAdapter extends LongPressAwareTableDataAdapter<DeliveryEve
         textView.setTextSize(SMALL_TEXT_SIZE);
 
         //show if the phone number is invalid
-        if (deliveryEvent.getName().length() > 10 || deliveryEvent.getName().length() < 10 ) {
+        if ( deliveryEvent.getPhoneNumber() != null && ( deliveryEvent.getPhoneNumber().length() > 10 || deliveryEvent.getPhoneNumber().length() < 10 ) ) {
             textView.setTextColor(ContextCompat.getColor(getContext(), R.color.table_price_high));
         } else {
             textView.setTextColor(ContextCompat.getColor(getContext(), R.color.table_price_low));
@@ -194,7 +245,7 @@ public class TableDataAdapter extends LongPressAwareTableDataAdapter<DeliveryEve
         return textView;
     }
 
-    private View renderProducerLogo(final DeliveryEvent deliveryEvent, final ViewGroup parentView) {
+    private View renderStatus(final DeliveryEvent deliveryEvent, final ViewGroup parentView) {
         final View view = getLayoutInflater().inflate(R.layout.table_cell_image, parentView, false);
         final ImageView imageView = (ImageView) view.findViewById(R.id.imageView);
         imageView.setImageResource(deliveryEvent.getProducer().getLogo());
@@ -229,7 +280,7 @@ public class TableDataAdapter extends LongPressAwareTableDataAdapter<DeliveryEve
 
         @Override
         public void afterTextChanged(Editable s) {
-            deliveryEventToUpdate.setName(s.toString());
+            deliveryEventToUpdate.setPhoneNumber(s.toString());
         }
     }
 

@@ -6,6 +6,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.deliverytips.table.data.DeliveryEvent;
+
 /**
  * Created by Andrew Swenson on 7/15/2017.
  *
@@ -20,7 +22,7 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "DB";
 
-    private static final int DATABASE_VERSION = 16;
+    private static final int DATABASE_VERSION = 17;
 
     // Database creation sql statement
     public static final String CREATE_DELIVERY_EVENT = "CREATE TABLE IF NOT EXISTS " + DeliveryEvent.TABLE_NAME +
@@ -32,6 +34,7 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
                 DeliveryEvent.COLUMN_NAME_FULL_NAME + " text, " +
                 DeliveryEvent.COLUMN_NAME_SERVICE_METHOD + "  text, " +
                 DeliveryEvent.COLUMN_NAME_CSR + "  text, " +
+                DeliveryEvent.COLUMN_NAME_STATUS + "  text, " +
                 DeliveryEvent.COLUMN_NAME_DRIVER + "  text, " +
                 DeliveryEvent.COLUMN_NAME_PHONE_NUMBER + "  text, " +
                 DeliveryEvent.COLUMN_NAME_PRICE + "  double, " +

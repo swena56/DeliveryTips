@@ -9,5 +9,6 @@ package com.deliverytips.table.data;
 public interface Chargable {
 
     double getPrice();
+    double getTip();
 
 }

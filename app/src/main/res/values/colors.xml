@@ -11,6 +11,10 @@
     <color name="table_price_low">#FF2E7D32</color>
     <color name="table_price_high">#FFC62828</color>
 
+    <color name="green">#49b030</color>
+    <color name="orange">#e2a338</color>
+    <color name="red">#ff2414</color>
+
     <color name="primaryDark">#FF283593</color>
     <color name="primary">#FF3F51B5</color>
     <color name="transparent">#00000000</color>

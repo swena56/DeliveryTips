@@ -16,7 +16,6 @@ public final class DeliveryEventComparators {
         //no instance
     }
 
-
     public static Comparator<DeliveryEvent> getCarPowerComparator() {
         return new NameComparator();
     }
@@ -55,7 +54,7 @@ public final class DeliveryEventComparators {
 
         @Override
         public int compare(final DeliveryEvent deliveryEvent1, final DeliveryEvent deliveryEvent2) {
-            return deliveryEvent1.getName().compareTo(deliveryEvent2.getName());
+            return deliveryEvent1.getPhoneNumber().compareTo(deliveryEvent2.getPhoneNumber());
         }
     }
 

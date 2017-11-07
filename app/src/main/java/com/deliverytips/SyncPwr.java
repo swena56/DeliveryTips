@@ -25,6 +25,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.deliverytips.table.data.DeliveryEvent;
+
 import org.apache.http.client.CookieStore;
 
 import java.text.NumberFormat;
@@ -93,26 +95,31 @@ public class SyncPwr extends AppCompatActivity {
                 saveImportButton.setEnabled(true);
 
                 Boolean auto_sync = sharedPref.getBoolean("auto_sync",false);
-
-                if( auto_sync ){
-
-                    //wait 8 seconds, then start import
-                    SystemClock.sleep(8000);
-
-                    SaveImport();
-                }
+                text.setText(text.getText() + "\nAuto Load is ON, waiting for 8 seconds.");
 
                 String username = getIntent().getExtras().getString("username");
                 String password = getIntent().getExtras().getString("password");
 
                 //add username and password to forum, then click
                 if( username != null && password != null ){
+
+                    SystemClock.sleep(4000);
+
                     String javaScript ="javascript:(function() {" +
                             "document.getElementById(\"txtUsername\").value = \""+username+"\";\n" +
                             "document.getElementById(\"txtPassword\").value = \""+password+"\";\n" +
                             "document.getElementById(\"btnLogin\").click();\n" +
+                            "$('#btnLogin').click();\n" +
                             "})()";
                     webView.loadUrl(javaScript);
+
+                    if( auto_sync ){
+
+                        //wait 8 seconds, then start import
+                        SystemClock.sleep(8000);
+
+                        SaveImport();
+                    }
                 }
 
                 //do work to automatically detect when the page completes generating html
@@ -214,7 +221,7 @@ public class SyncPwr extends AppCompatActivity {
             //deliveryEvent._type = row.get(7);
             deliveryEvent._timestamp = row.get(2);
             deliveryEvent._driver = row.get(10);
-            deliveryEvent._phone = phone;
+            deliveryEvent._phone_number = phone;
             deliveryEvent._csr = row.get(9);
             deliveryEvent._description = row.get(11);
             deliveryEvent._street = address;
@@ -226,10 +233,9 @@ public class SyncPwr extends AppCompatActivity {
             Long order_number;
             if( arr.length > 0 ){
                 order_number = Long.parseLong( arr[1] );
-                deliveryEvent.setOrderNumber(order_number);
+                deliveryEvent._order_number = order_number;
                 ticket_id = arr[1];
             }
-
 
             MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(getApplicationContext());
             SQLiteDatabase db = myDatabaseHelper.getWritableDatabase();
@@ -244,7 +250,7 @@ public class SyncPwr extends AppCompatActivity {
             Cursor cursor = db.rawQuery("SELECT "+ DeliveryEvent.COLUMN_NAME_ORDER_NUMBER +"," +
                     DeliveryEvent.COLUMN_NAME_TIP + "," +
                     DeliveryEvent.COLUMN_NAME_NOTES +
-                    " FROM "+ com.deliverytips.DeliveryEvent.TABLE_NAME
+                    " FROM "+ DeliveryEvent.TABLE_NAME
                     +" WHERE "+ DeliveryEvent.COLUMN_NAME_ORDER_NUMBER+" = ?",whereArgs);
 
             if(cursor.getCount() <= 0){

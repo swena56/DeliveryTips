@@ -21,11 +21,11 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.deliverytips.DeliveryEvent;
 import com.deliverytips.MyDatabaseHelper;
 import com.deliverytips.R;
 import com.deliverytips.Settings;
 import com.deliverytips.table.DeliveryEventsTable;
+import com.deliverytips.table.data.DeliveryEvent;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -178,9 +178,8 @@ public class Import extends Fragment {
                         //create delivery event if not exists
                         DeliveryEvent deliveryEvent = new DeliveryEvent();
                         deliveryEvent._price = price;
-                        deliveryEvent.setTimestampNow();
                         deliveryEvent._driver = imported_data.get(i).get(10);
-                        deliveryEvent._phone = imported_data.get(i).get(3);
+                        deliveryEvent._phone_number = imported_data.get(i).get(3);
                         deliveryEvent._csr = imported_data.get(i).get(9);
                         deliveryEvent._description = imported_data.get(i).get(11);
                         deliveryEvent._notes = "";
@@ -193,7 +192,7 @@ public class Import extends Fragment {
                         Long order_number;
                         if( arr.length > 0 ){
                             order_number = Long.parseLong( arr[1] );
-                            deliveryEvent.setOrderNumber(order_number);
+                            deliveryEvent._order_number = order_number;
                         }
 
                         db.insert(deliveryEvent.TABLE_NAME, null, deliveryEvent.getContentValues());
@@ -268,9 +267,8 @@ public class Import extends Fragment {
                     //create delivery event if not exists
                     DeliveryEvent deliveryEvent = new DeliveryEvent();
                     deliveryEvent._price = price;
-                    deliveryEvent.setTimestampNow();
                     deliveryEvent._driver = imported_data.get(i).get(10);
-                    deliveryEvent._phone = imported_data.get(i).get(3);
+                    deliveryEvent._phone_number = imported_data.get(i).get(3);
                     deliveryEvent._csr = imported_data.get(i).get(9);
                     deliveryEvent._description = imported_data.get(i).get(11);
                     deliveryEvent._tip = 0.00;
@@ -282,7 +280,7 @@ public class Import extends Fragment {
                     Long order_number;
                     if( arr.length > 0 ){
                         order_number = Long.parseLong( arr[1] );
-                        deliveryEvent.setOrderNumber(order_number);
+                        deliveryEvent._order_number = order_number;
                     }
 
                     db.insert(deliveryEvent.TABLE_NAME, null, deliveryEvent.getContentValues());

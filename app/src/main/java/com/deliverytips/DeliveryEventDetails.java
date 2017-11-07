@@ -20,6 +20,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.deliverytips.table.data.DeliveryEvent;
 import com.google.android.gms.maps.MapView;
 
 public class DeliveryEventDetails extends AppCompatActivity {
@@ -72,49 +73,90 @@ public class DeliveryEventDetails extends AppCompatActivity {
         }
 
         //set Ticket Id
-        ticket_id.setText(ticket );
+        ticket_id.setText( ticket );
 
         MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(getApplicationContext());
         SQLiteDatabase db = myDatabaseHelper.getWritableDatabase();
 
         //search to see if person exists
-       cursor = db.query(
-                com.deliverytips.DeliveryEvent.TABLE_NAME,
-                new String[]{
-                        com.deliverytips.DeliveryEvent.COLUMN_NAME_ID,
-                        com.deliverytips.DeliveryEvent.COLUMN_NAME_ORDER_NUMBER,
-                        DeliveryEvent.COLUMN_NAME_SERVICE_METHOD,
-                        //DeliveryEvent.COLUMN_NAME_STATUS,
-                        com.deliverytips.DeliveryEvent.COLUMN_NAME_DESCRIPTION,
-                        com.deliverytips.DeliveryEvent.COLUMN_NAME_PHONE_NUMBER,
-                        com.deliverytips.DeliveryEvent.COLUMN_NAME_FULL_NAME,
-                        com.deliverytips.DeliveryEvent.COLUMN_NAME_STREET,
-                        com.deliverytips.DeliveryEvent.COLUMN_NAME_DRIVER,
-                        com.deliverytips.DeliveryEvent.COLUMN_NAME_PRICE,
-                        com.deliverytips.DeliveryEvent.COLUMN_NAME_TIMESTAMP,
-                        com.deliverytips.DeliveryEvent.COLUMN_NAME_TIP
-                },
-        DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + "=" + i.getExtras().getString("ticket_id"), null, null, null, null);
+        DeliveryEvent deliveryEvent = new DeliveryEvent(Long.parseLong(ticket));
+        ticket_id.setText( ticket + " ("+deliveryEvent._service+")");
+        textViewDescription.setText(deliveryEvent._description);
+        editTextNotes.setText(deliveryEvent._notes);
+        editTextTip.setText(deliveryEvent._tip.toString());
+        textViewAddress.setText(deliveryEvent._street);
+        textViewTimestamp.setText(deliveryEvent._timestamp);
+        price.setText(deliveryEvent._price.toString());
+        price.addTextChangedListener(new TextWatcher() {
 
-        if (cursor.moveToFirst()) {
+            public void beforeTextChanged(CharSequence s, int start, int count,
+                                          int after) {
+                // TODO Auto-generated method stub
+                Log.d("BEFORE", s.toString() + " " + start + " " + after + " " + count );
+            }
 
-            ticket_id.setText(ticket + " ("+cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_SERVICE_METHOD))+")" );
+            public void onTextChanged(CharSequence s, int start, int before,
+                                      int count) {
+
+                Log.d("total price auto calc", s.toString() + " " + start + " " + before + " " + count );
+                //textViewResult.setText(addNumbers());
+            }
+
+            public void afterTextChanged(Editable s) {
+                // TODO Auto-generated method stub
+                Log.d("A total price auto calc", s.toString() + s.toString() );
+            }
+        });
+        editTextTip.setText(deliveryEvent._tip.toString());
+
+        //set total
+        Double total = deliveryEvent._price + deliveryEvent._tip;
+        editTextTipTotal.setText(total.toString());
+
+        //clear the total tip field when clicked
+        editTextTipTotal.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if( editTextTipTotal.getText() != null ){
+                    String total_plus_tip = editTextTipTotal.getText().toString();
+                    Log.d("totaltip",editTextTipTotal.getText().toString());
+                    String actual_price = price.getText().toString();
+                    if( actual_price != null && total_plus_tip != null ){
+                        Double a_price = Double.parseDouble(actual_price);
+                        Double total = Double.parseDouble(total_plus_tip);
+                        Double calc_tip = total - a_price;
+
+                        Double rounded_tip = Math.round(calc_tip * 100.0) / 100.0;
+                        //set tip
+                        editTextTip.setText(rounded_tip.toString());
+                    }
+                }
+
+
+                //editTextTipTotal.getText().clear();
+            }
+        });
+
+        //clear the tip field when clicked
+
+           //ticket_id.setText(ticket + " ("+cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_SERVICE_METHOD))+")" );
 
             //set tip
             Double tip = Double.parseDouble(cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_TIP)));
-            editTextTip.setText(tip.toString());
+
 
             //Set Description
             String description_str = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_TIP));
-            textViewDescription.setText(description_str);
+            //textViewDescription.setText(description_str);
 
             //set address
             final String address_str = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_STREET));
-            textViewAddress.setText(address_str);
+
 
             //set timestamp
             String timestamp = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_TIMESTAMP));
-            textViewTimestamp.setText(timestamp);
+
 
             final String phone = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_PHONE_NUMBER));
             final String address = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_STREET));
@@ -122,75 +164,6 @@ public class DeliveryEventDetails extends AppCompatActivity {
             String notes = (cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_NOTES) > -1 ) ? cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_NOTES)) : "";
             String description = (cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_DESCRIPTION) > -1 ) ? cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_DESCRIPTION)) : "";
             //cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_DESCRIPTION))
-
-            //set price
-            Double price_value = Double.parseDouble(cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_PRICE)));
-            price.setText(price_value.toString());
-
-            price.addTextChangedListener(new TextWatcher() {
-
-                public void beforeTextChanged(CharSequence s, int start, int count,
-                                              int after) {
-                    // TODO Auto-generated method stub
-                    Log.d("BEFORE", s.toString() + " " + start + " " + after + " " + count );
-                }
-
-                public void onTextChanged(CharSequence s, int start, int before,
-                                          int count) {
-
-                    Log.d("total price auto calc", s.toString() + " " + start + " " + before + " " + count );
-                    //textViewResult.setText(addNumbers());
-                }
-
-                public void afterTextChanged(Editable s) {
-                    // TODO Auto-generated method stub
-                    Log.d("A total price auto calc", s.toString() + s.toString() );
-                }
-            });
-
-            Double total = price_value + tip;
-            editTextTipTotal.setText(total.toString());
-
-            //clear the total tip field when clicked
-            editTextTipTotal.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-
-                    if( editTextTipTotal.getText() != null ){
-                        String total_plus_tip = editTextTipTotal.getText().toString();
-                        Log.d("totaltip",editTextTipTotal.getText().toString());
-                        String actual_price = price.getText().toString();
-                        if( actual_price != null && total_plus_tip != null ){
-                            Double a_price = Double.parseDouble(actual_price);
-                            Double total = Double.parseDouble(total_plus_tip);
-                            Double calc_tip = total - a_price;
-
-                            Double rounded_tip = Math.round(calc_tip * 100.0) / 100.0;
-                            //set tip
-                            editTextTip.setText(rounded_tip.toString());
-                        }
-                    }
-
-
-                    //editTextTipTotal.getText().clear();
-                }
-            });
-
-            //clear the tip field when clicked
-            editTextTip.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    editTextTip.getText().clear();
-
-                }
-            });
-
-            //set notes
-            editTextNotes.setText(notes);
-
-            //set description
-            textViewDescription.setText(description);
 
             //set call but action and button text
             String phone_str = (phone != null && phone.length() >= 9 ) ? phone.replaceFirst("(\\d{3})(\\d{3})(\\d+)", "($1)-$2-$3") : "N/A";
@@ -233,9 +206,7 @@ public class DeliveryEventDetails extends AppCompatActivity {
 
                 nav_button.setText( "Navigate: N/A" );
                 nav_button.setEnabled(false);
-                //nav_button.setVisibility(View.INVISIBLE);
             }
-        }
 
         MapView mapView = (MapView) findViewById(R.id.mapView2);
         mapView.setOnClickListener(new View.OnClickListener() {

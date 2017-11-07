@@ -217,14 +217,14 @@ public class DeliveryEventsTable extends Fragment {
         MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(getContext());
         SQLiteDatabase db = myDatabaseHelper.getWritableDatabase();
         Cursor cursor = db.rawQuery(
-                "SELECT " + com.deliverytips.DeliveryEvent.COLUMN_NAME_DRIVER + " FROM " + com.deliverytips.DeliveryEvent.TABLE_NAME +
-                        " WHERE " + com.deliverytips.DeliveryEvent.COLUMN_NAME_DRIVER + " IS NOT NULL " +
-                        " GROUP BY  " + com.deliverytips.DeliveryEvent.COLUMN_NAME_DRIVER,
+                "SELECT " + DeliveryEvent.COLUMN_NAME_DRIVER + " FROM " + DeliveryEvent.TABLE_NAME +
+                        " WHERE " + DeliveryEvent.COLUMN_NAME_DRIVER + " IS NOT NULL " +
+                        " GROUP BY  " + DeliveryEvent.COLUMN_NAME_DRIVER,
                 null);
         List<String> selectedDriver = new ArrayList<String>();
         selectedDriver.add("No Driver Selected.");
         while( cursor.moveToNext() ){
-            String driver = cursor.getString(cursor.getColumnIndex(com.deliverytips.DeliveryEvent.COLUMN_NAME_DRIVER));
+            String driver = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_DRIVER));
             if( driver != null && driver != "" && driver.length() > 0 ){
                 selectedDriver.add(driver);
             }

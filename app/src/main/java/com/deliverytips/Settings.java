@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.deliverytips.fragments.Import;
 import com.deliverytips.table.DeliveryEventsTable;
+import com.deliverytips.table.data.DeliveryEvent;
 
 
 public class Settings extends Fragment {

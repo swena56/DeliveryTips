@@ -20,6 +20,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.deliverytips.table.data.DeliveryEvent;
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.text.TextBlock;
@@ -101,10 +102,10 @@ public class NewDeliveryActivity extends AppCompatActivity {
 
                 //save deliveryEvent object
                 DeliveryEvent deliveryEvent = new DeliveryEvent();
-                deliveryEvent.setPrice(Double.parseDouble(editTextPrice.getText().toString()));
-                deliveryEvent.setTimestampNow();
+                deliveryEvent._price = Double.parseDouble(editTextPrice.getText().toString());
+
                 deliveryEvent._driver = "DRIVER";
-                deliveryEvent._phone = phone;
+                deliveryEvent._phone_number = phone;
                 deliveryEvent._csr = "CSR";
                 deliveryEvent._description = "description";
                 deliveryEvent._notes = "notes";
@@ -112,7 +113,7 @@ public class NewDeliveryActivity extends AppCompatActivity {
                 deliveryEvent._street = "STREET";
                 deliveryEvent._full_name = "FULL NAME";
 
-                deliveryEvent.setOrderNumber(Long.parseLong(editTextOrderNumber.getText().toString()));
+                deliveryEvent._order_number = Long.parseLong(editTextOrderNumber.getText().toString());
 
                     //TODO check if delivery order already exists
 

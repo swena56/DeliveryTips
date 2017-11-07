@@ -11,6 +11,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.deliverytips.table.data.DeliveryEvent;
+
 /**
  * A simple {@link Fragment} subclass.
  */
@@ -49,8 +51,7 @@ public class NewDelivery extends Fragment implements View.OnClickListener {
             SQLiteDatabase db = myDatabaseHelper.getWritableDatabase();
 
             DeliveryEvent deliveryEvent = new DeliveryEvent();
-                deliveryEvent.setPrice(Double.parseDouble(editTextPrice.getText().toString()));
-                deliveryEvent.setTimestampNow();
+                deliveryEvent._price = Double.parseDouble(editTextPrice.getText().toString());
                 db.insert(deliveryEvent.TABLE_NAME, null, deliveryEvent.getContentValues());
                 Toast.makeText(getContext(), "Delivery Event: " + deliveryEvent.getContentValues().toString(), Toast.LENGTH_SHORT).show();
 
