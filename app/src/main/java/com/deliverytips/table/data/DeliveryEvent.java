@@ -3,7 +3,6 @@ package com.deliverytips.table.data;
 
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
@@ -20,7 +19,7 @@ import java.util.HashMap;
  */
 public class DeliveryEvent implements Chargable {
 
-    private long ticket_id;
+    public long ticket_id;
     //private final DeliveryEventsProducer producer;  // for adding a image in the column
 
     public static String TABLE_NAME = "DeliveryEvents";
@@ -75,93 +74,39 @@ public class DeliveryEvent implements Chargable {
 
     public static String COLUMN_NAME_CUSTOMER_ID = "customer_id";
 
-    //public Person _person = null;
-    public long _person_id;
-
-    public DeliveryEvent(){
-
-    }
-
-    public DeliveryEvent( final long ticket_id ){
-
-        MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(MainActivity.get());
-        SQLiteDatabase db = myDatabaseHelper.getWritableDatabase();
-
-        String[] whereArgs = {Long.toString(ticket_id)};
-
-        Log.d("Delivery Event Query", "ticket_id: " + Long.toString(ticket_id));
-        String whereClause = DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + "= ? ";
-
-        String selectQuery = "SELECT * FROM " + DeliveryEvent.TABLE_NAME +
-                " WHERE " + DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + " = " + ticket_id;
-
-        ArrayList<HashMap<String, String>> results = makeQuery(selectQuery);
-        Log.d( "R", results.toString());
-
-        //search to see if person exists
-        Cursor cursor = db.query(
-                DeliveryEvent.TABLE_NAME,
-                new String[]{
-                        DeliveryEvent.COLUMN_NAME_ID,
-                        DeliveryEvent.COLUMN_NAME_ORDER_NUMBER,
-                        DeliveryEvent.COLUMN_NAME_PHONE_NUMBER,
-                        DeliveryEvent.COLUMN_NAME_SERVICE_METHOD,
-                        DeliveryEvent.COLUMN_NAME_STREET,
-                        DeliveryEvent.COLUMN_NAME_STATUS,
-                        DeliveryEvent.COLUMN_NAME_PRICE,
-                        DeliveryEvent.COLUMN_NAME_TIMESTAMP,
-                        DeliveryEvent.COLUMN_NAME_TIP
-                },
-                whereClause, whereArgs, null, null,null
-        );
-
-        //
-        if( cursor.getCount() <= -1 ){
-            return;
-        }
-
-        cursor.moveToFirst();
-
-
-        Log.d("Results", DatabaseUtils.dumpCursorToString(cursor));
-
-        ContentValues contentValues = new ContentValues();
-        DatabaseUtils.cursorRowToContentValues(cursor,contentValues);
-
-        Log.d( "dump", contentValues.toString() );
+    public DeliveryEvent(){}
+    public DeliveryEvent( Long ticket_id ){
 
         //note properly labeled
         this.ticket_id = ticket_id;
 
+        Log.d("Init Delivery Event", "ticket_id: " + Long.toString(ticket_id));
+
+        //create query string and ARGS
+        String selectQuery = "SELECT * FROM " + DeliveryEvent.TABLE_NAME +
+                " WHERE " + DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + " = ?";
+
+        String[] whereArgs = {Long.toString(ticket_id)};
+
+        ArrayList<HashMap<String, String>> results = makeQuery(selectQuery, whereArgs);
+
         if( results.size() > 0 ){
+
+            this._order_number = this.ticket_id;
             this._phone_number = results.get(0).get(DeliveryEvent.COLUMN_NAME_PHONE_NUMBER);
             this._street = results.get(0).get(DeliveryEvent.COLUMN_NAME_STREET);
             this._driver = results.get(0).get(DeliveryEvent.COLUMN_NAME_DRIVER);
             this._timestamp = results.get(0).get(DeliveryEvent.COLUMN_NAME_TIMESTAMP);
+            this._notes = results.get(0).get(DeliveryEvent.COLUMN_NAME_NOTES);
+            this._description = results.get(0).get(DeliveryEvent.COLUMN_NAME_DESCRIPTION);
+            this._service = results.get(0).get(DeliveryEvent.COLUMN_NAME_SERVICE_METHOD);
+            this._status = results.get(0).get(DeliveryEvent.COLUMN_NAME_STATUS);
+            this._tip = Double.parseDouble(results.get(0).get(DeliveryEvent.COLUMN_NAME_TIP));
+            this._price = Double.parseDouble(results.get(0).get(DeliveryEvent.COLUMN_NAME_PRICE));
+
+            //calc tax
+            this._tax = this._price * 0.075;
         }
-
-        //this.name = results
-        this._phone_number = contentValues.getAsString(DeliveryEvent.COLUMN_NAME_PHONE_NUMBER);
-        this._street = contentValues.getAsString(DeliveryEvent.COLUMN_NAME_STREET);
-        this._driver = contentValues.getAsString(DeliveryEvent.COLUMN_NAME_DRIVER);
-        this._timestamp = contentValues.getAsString(DeliveryEvent.COLUMN_NAME_TIMESTAMP);
-        this._description = contentValues.getAsString(DeliveryEvent.COLUMN_NAME_DESCRIPTION);
-        this._service = contentValues.getAsString(DeliveryEvent.COLUMN_NAME_SERVICE_METHOD);
-        this._price = contentValues.getAsDouble(DeliveryEvent.COLUMN_NAME_PRICE);
-        this._tax = this._price * 0.075;
-        this._tip = contentValues.getAsDouble(DeliveryEvent.COLUMN_NAME_TIP);
-        this._notes = contentValues.getAsString(DeliveryEvent.COLUMN_NAME_NOTES);
-
-        //add status
-        if( cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_STATUS) != -1) {
-            this._status = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_STATUS));
-        }
-
-        cursor.close();
-
-        //clean up and clear out.
-        myDatabaseHelper.close();
-        db.close();
 
     }
 
@@ -204,7 +149,6 @@ public class DeliveryEvent implements Chargable {
             }
         }
     }
-
     public ContentValues getContentValues(){
 
         ContentValues c = new ContentValues();
@@ -224,12 +168,11 @@ public class DeliveryEvent implements Chargable {
 
         return c;
     }
-
-    public ArrayList<HashMap<String, String>> makeQuery(String selectQuery){
+    public ArrayList<HashMap<String, String>> makeQuery(String selectQuery, String[] whereArgs){
         MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(MainActivity.get());
         SQLiteDatabase db = myDatabaseHelper.getWritableDatabase();
 
-        Cursor cursor = db.rawQuery(selectQuery, null);
+        Cursor cursor = db.rawQuery(selectQuery, whereArgs);
         ArrayList<HashMap<String, String>> maplist = new ArrayList<HashMap<String, String>>();
         // looping through all rows and adding to list
 
@@ -252,7 +195,6 @@ public class DeliveryEvent implements Chargable {
 
         return maplist;
     }
-
     public String getTime(){
         if( this._timestamp != null && this._timestamp.contains(" ") ){
             String[] splited = this._timestamp.split("\\s+");
@@ -264,7 +206,6 @@ public class DeliveryEvent implements Chargable {
 
         return "N/A";
     }
-
     public String getDate(){
         if( this._timestamp != null && this._timestamp.contains(" ") ){
             String[] splited = this._timestamp.split("\\s+");
@@ -276,8 +217,6 @@ public class DeliveryEvent implements Chargable {
 
         return "N/A";
     }
-
-
     public DeliveryEvent(final long ticket_id, final String name, final String Address, final double price, final double tip) {
         this.ticket_id = ticket_id;
         this._phone_number = name;
@@ -285,11 +224,34 @@ public class DeliveryEvent implements Chargable {
         this._price = price;
         this._tip = tip;
     }
-
-    public DeliveryEventsProducer getProducer() {
-        return   null;//      new DeliveryEventsProducer(R.mipmap, "round");
+    public void printToLogs(String... optionalLogs){
+        Log.d("Delivery Dump", getContentValues().toString() + "\n" + optionalLogs.toString());
     }
+    public DeliveryEventsProducer getProducer() {
+        return   null;
+    }
+    public boolean save(){
 
+        MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(MainActivity.get());
+        SQLiteDatabase db = myDatabaseHelper.getWritableDatabase();
+
+        String[] whereArgs = { Long.toString(ticket_id)};
+
+        String updateQuery = "UPDATE " + TABLE_NAME +
+                " SET " + COLUMN_NAME_TIP + " = ?," +
+                " SET " + COLUMN_NAME_DRIVER + " = ?," +
+                " SET " + COLUMN_NAME_NOTES + " = ?," +
+                " SET " + COLUMN_NAME_TIMESTAMP + " = ?," +
+                " WHERE " + COLUMN_NAME_ORDER_NUMBER + "= ?"
+                ;
+
+        db.update(TABLE_NAME,getContentValues(),COLUMN_NAME_ORDER_NUMBER + "= ?",whereArgs );
+
+        myDatabaseHelper.close();
+        db.close();
+
+        return false;
+    }
 
     public Long getTicketID() {
         return ticket_id;
@@ -306,7 +268,14 @@ public class DeliveryEvent implements Chargable {
     public void setAddress(final String address) {
         this._street = address;
     }
+    public double getBasePrice() {
+
+        return _price;
+    }
+
     public double getPrice() {
+
+        Double total = ( _price * 0.075 ) + _price;
         return _price;
     }
     public double getTip() { return _tip; }

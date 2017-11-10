@@ -186,13 +186,14 @@ public class TableDataAdapter extends LongPressAwareTableDataAdapter<DeliveryEve
        // linearLayout.addView(textViewPercent);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
 
-
         if( ( percent * 100 )>= 20 ){
             textViewTip.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
         } else if( (percent * 100 ) > 10  ) {
             textViewTip.setTextColor(ContextCompat.getColor(getContext(), R.color.orange));
-        } else {
+        } else if( (percent * 100 ) < 10 && (percent * 100 ) > 0   ) {
             textViewTip.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
+        } else {
+            textViewTip.setTextColor(ContextCompat.getColor(getContext(), R.color.black_overlay));
         }
 
         return linearLayout;
@@ -212,6 +213,16 @@ public class TableDataAdapter extends LongPressAwareTableDataAdapter<DeliveryEve
         textView2.setPadding(20, 10, 20, 10);
         textView2.setPaintFlags(textView.getPaintFlags() |   Paint.UNDERLINE_TEXT_FLAG);
         textView2.setTextSize(SMALL_TEXT_SIZE);
+
+        if( deliveryEvent._status.equals("Complete")){
+            textView2.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
+        } else if( deliveryEvent._status.equals("Oven")) {
+            textView2.setTextColor(ContextCompat.getColor(getContext(), R.color.orange));
+        } else if( deliveryEvent._status.equals("Abandoned") || deliveryEvent._status.equals("Void")) {
+            textView2.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
+        } else if( deliveryEvent._status.equals("Future") || deliveryEvent._status.equals("Makeline")) {
+            textView2.setTextColor(ContextCompat.getColor(getContext(), R.color.blue));
+        }
 
         LinearLayout linearLayout = new LinearLayout(getContext());
         linearLayout.setOrientation(LinearLayout.VERTICAL);

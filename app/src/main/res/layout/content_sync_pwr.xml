@@ -16,6 +16,12 @@
         android:weightSum="1">
 
         <WebView
+            android:id="@+id/webviewLogin"
+            android:layout_width="match_parent"
+            android:layout_height="100px"
+            android:layout_weight="0.14"/>
+
+        <WebView
             android:id="@+id/webview"
             android:layout_width="match_parent"
             android:layout_height="1000px"
@@ -45,10 +51,19 @@
             <Button
                 android:id="@+id/buttonSubmitImport"
                 style="@style/Widget.AppCompat.Button.Colored"
-                android:layout_width="220dp"
+                android:layout_width="140dp"
                 android:layout_height="wrap_content"
                 android:text="Submit"
                 android:enabled="false"
+                android:textSize="18sp"
+                android:layout_weight="0.12"/>
+
+            <Button
+                android:id="@+id/buttonImportCancel"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:text="Cancel"
                 android:textSize="18sp"
                 android:layout_weight="0.12"/>
         </LinearLayout>

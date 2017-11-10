@@ -114,26 +114,24 @@ public class DeliveryEventsTable extends Fragment {
             {
                 selectedItem = parent.getItemAtPosition(position).toString();
 
-                if(!selectedItem.equals("No Driver Selected."))
-                {
-                    Toast.makeText(getContext(),"Selected Driver: " + selectedItem,Toast.LENGTH_SHORT ).show();
+                Toast.makeText(getContext(),"Selected Driver: " + selectedItem,Toast.LENGTH_SHORT ).show();
 
-                    //Save driver to preferences
-                    SharedPreferences.Editor editor = sharedPref.edit();
-                    editor.putString("selected_driver", selectedItem);
-                    editor.commit();
+                //Save driver to preferences
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putString("selected_driver", selectedItem);
+                editor.commit();
 
-                    //Set Dealer Stats
-                    Map<String,String> map =  DataFactory.GetDriverStats(getContext(),selectedItem);
-                    numDeleliveries.setText(map.get("size") + "   ( $"+map.get("total_price") +" ) " );
-                    totalTips.setText("$" + map.get("total_tip"));
-                    averageTips.setText("$" + map.get("avg_tip"));
+                //Set Dealer Stats
+                Map<String,String> map =  DataFactory.GetDriverStats(getContext(),selectedItem);
+                numDeleliveries.setText(map.get("size") + "   ( $"+map.get("total_price") +" ) " );
+                totalTips.setText("$" + map.get("total_tip"));
+                averageTips.setText("$" + map.get("avg_tip"));
 
-                    tableDataAdapter = new TableDataAdapter(getContext(), DataFactory.createDeliveryEventsList(getContext(),selectedItem), carTableView);
-                    carTableView.setDataAdapter(tableDataAdapter);
-                    //tableDataAdapter.getData();
-                }
+                tableDataAdapter = new TableDataAdapter(getContext(), DataFactory.createDeliveryEventsList(getContext(),selectedItem), carTableView);
+                carTableView.setDataAdapter(tableDataAdapter);
+                //tableDataAdapter.getData();
             } // to close the onItemSelected
+
             public void onNothingSelected(AdapterView<?> parent)
             {
                 Toast.makeText(getContext(),"No Driver Filter",Toast.LENGTH_SHORT ).show();
@@ -225,7 +223,7 @@ public class DeliveryEventsTable extends Fragment {
         selectedDriver.add("No Driver Selected.");
         while( cursor.moveToNext() ){
             String driver = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_DRIVER));
-            if( driver != null && driver != "" && driver.length() > 0 ){
+            if( driver != null && driver != "" && driver.length() > 0 && !driver.equals(" ()") ){
                 selectedDriver.add(driver);
             }
         }
@@ -240,7 +238,6 @@ public class DeliveryEventsTable extends Fragment {
         public void onDataClicked(final int rowIndex, final DeliveryEvent clickedData) {
 
             if( clickedData.getAddress() != null ) {
-
 
                 //currently need a way to get state and city from settings
                 String carString = clickedData.getAddress() + " New Ulm, MN";

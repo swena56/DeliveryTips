@@ -26,6 +26,8 @@ import com.google.android.gms.maps.MapView;
 public class DeliveryEventDetails extends AppCompatActivity {
 
     public Cursor cursor;
+    public String ticket;
+    public TextView ticket_id;
     public EditText editTextTip;
     public EditText editTextTipTotal;
     public EditText editTextNotes;
@@ -44,7 +46,7 @@ public class DeliveryEventDetails extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         //Initalize
-        TextView ticket_id = (TextView) findViewById(R.id.textViewTicketID);
+        ticket_id = (TextView) findViewById(R.id.textViewTicketID);
         price = (TextView) findViewById(R.id.textViewPrice);
         textViewDescription = (TextView) findViewById(R.id.textViewDescription);
         textViewAddress = (TextView) findViewById(R.id.textViewAddress);
@@ -60,7 +62,7 @@ public class DeliveryEventDetails extends AppCompatActivity {
 
         Intent i = getIntent();
         Bundle bundle = i.getExtras();
-        String ticket = null;
+        ticket = bundle.getString("ticket_id");
 
         if( bundle.isEmpty() ){
 
@@ -68,8 +70,8 @@ public class DeliveryEventDetails extends AppCompatActivity {
             return;
 
         } else {
-            ticket = bundle.getString("ticket_id");
-            Toast.makeText(getApplicationContext(),"Loading " + ticket,Toast.LENGTH_SHORT).show();
+           // ticket = bundle.getString("ticket_id");
+            //Toast.makeText(getApplicationContext(),"Loading " + ticket,Toast.LENGTH_SHORT).show();
         }
 
         //set Ticket Id
@@ -79,14 +81,18 @@ public class DeliveryEventDetails extends AppCompatActivity {
         SQLiteDatabase db = myDatabaseHelper.getWritableDatabase();
 
         //search to see if person exists
-        DeliveryEvent deliveryEvent = new DeliveryEvent(Long.parseLong(ticket));
+        final DeliveryEvent deliveryEvent = new DeliveryEvent(Long.parseLong(ticket));
         ticket_id.setText( ticket + " ("+deliveryEvent._service+")");
         textViewDescription.setText(deliveryEvent._description);
         editTextNotes.setText(deliveryEvent._notes);
         editTextTip.setText(deliveryEvent._tip.toString());
         textViewAddress.setText(deliveryEvent._street);
         textViewTimestamp.setText(deliveryEvent._timestamp);
-        price.setText(deliveryEvent._price.toString());
+
+        Double tot = (deliveryEvent._price + deliveryEvent._tax);
+        tot = Math.round(tot * 100.0) / 100.0;
+        price.setText( tot.toString() );
+
         price.addTextChangedListener(new TextWatcher() {
 
             public void beforeTextChanged(CharSequence s, int start, int count,
@@ -110,7 +116,7 @@ public class DeliveryEventDetails extends AppCompatActivity {
         editTextTip.setText(deliveryEvent._tip.toString());
 
         //set total
-        Double total = deliveryEvent._price + deliveryEvent._tip;
+        Double total = tot + deliveryEvent._tip;
         editTextTipTotal.setText(total.toString());
 
         //clear the total tip field when clicked
@@ -138,58 +144,37 @@ public class DeliveryEventDetails extends AppCompatActivity {
             }
         });
 
-        //clear the tip field when clicked
-
-           //ticket_id.setText(ticket + " ("+cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_SERVICE_METHOD))+")" );
-
-            //set tip
-            Double tip = Double.parseDouble(cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_TIP)));
-
-
-            //Set Description
-            String description_str = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_TIP));
-            //textViewDescription.setText(description_str);
-
-            //set address
-            final String address_str = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_STREET));
-
-
-            //set timestamp
-            String timestamp = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_TIMESTAMP));
-
-
-            final String phone = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_PHONE_NUMBER));
-            final String address = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_STREET));
-
-            String notes = (cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_NOTES) > -1 ) ? cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_NOTES)) : "";
-            String description = (cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_DESCRIPTION) > -1 ) ? cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_DESCRIPTION)) : "";
-            //cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_DESCRIPTION))
-
             //set call but action and button text
-            String phone_str = (phone != null && phone.length() >= 9 ) ? phone.replaceFirst("(\\d{3})(\\d{3})(\\d+)", "($1)-$2-$3") : "N/A";
-            call_button.setText( "PHONE: " + phone_str );
-            if( phone != null ) {
+            String phone = deliveryEvent._phone_number;
+            String phone_str = (phone != null && phone.length() >= 9) ? phone.replaceFirst("(\\d{3})(\\d{3})(\\d+)", "($1)-$2-$3") : "N/A";
+            call_button.setText("PHONE: " + phone_str);
+            if (phone != null) {
 
                 call_button.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
 
                         Intent intent = new Intent(Intent.ACTION_DIAL);
-                        intent.setData(Uri.parse("tel:" + phone.toString()));
+
+                        String phone = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_PHONE_NUMBER));
+                        intent.setData(Uri.parse("tel:" + deliveryEvent._phone_number));
                         startActivity(intent);
                     }
                 });
+
             } else {
-                call_button.setText( "PHONE: N/A" );
+
+                call_button.setText("PHONE: N/A");
                 //call_button.setVisibility(View.INVISIBLE);
                 call_button.setEnabled(false);
             }
 
             //Navigation button, hide it when dealing with no address
-            String complete_address = address_str + "," + sharedPref.getString("address", String.valueOf(R.string.default_city).toString());
+            String address = deliveryEvent._street;
+            String complete_address = address + " New Ulm, MN"; //+ sharedPref.getString("address", String.valueOf(R.string.default_city).toString());
 
-            nav_button.setText( "Navigate: " + address_str );
-            if( address != null ) {
+            nav_button.setText("Navigate: " + complete_address);
+            if (address != null) {
                 nav_button.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -198,44 +183,43 @@ public class DeliveryEventDetails extends AppCompatActivity {
                         //String city_state = sharedPref.getString("address", String.valueOf(R.string.default_city).toString());
                         String complete_address = getIntent().getExtras().getString("address");// + "," + city_state;
                         //String complete_address = getIntent().getExtras().getString("address");
-                        openMap(getApplicationContext(),complete_address);
+                        openMap(getApplicationContext(), complete_address);
                         Toast.makeText(getApplicationContext(), "Starting Navigation to " + complete_address, Toast.LENGTH_SHORT).show();
                     }
                 });
             } else {
 
-                nav_button.setText( "Navigate: N/A" );
+                nav_button.setText("Navigate: N/A");
                 nav_button.setEnabled(false);
             }
 
-        MapView mapView = (MapView) findViewById(R.id.mapView2);
-        mapView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(getApplicationContext(),"Starting Maps", Toast.LENGTH_SHORT).show();
-            }
-        });
+            MapView mapView = (MapView) findViewById(R.id.mapView2);
+            mapView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(getApplicationContext(), "Starting Maps", Toast.LENGTH_SHORT).show();
+                }
+            });
 
-        //Delcare Save Button
-        Button saveButton = (Button) findViewById(R.id.buttonSaveEvent);
-        saveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //save tips and notes
-                MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(getApplicationContext());
-                SQLiteDatabase db = myDatabaseHelper.getWritableDatabase();
-                DeliveryEvent deliveryEvent = new DeliveryEvent(cursor);
-                deliveryEvent._tip = Double.parseDouble(editTextTip.getText().toString());
-                deliveryEvent._notes = editTextNotes.getText().toString();
-                db.update(DeliveryEvent.TABLE_NAME,deliveryEvent.getContentValues(),DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + "=" + deliveryEvent._order_number, null);
-                db.close();
+            //Delcare Save Button
+            Button saveButton = (Button) findViewById(R.id.buttonSaveEvent);
+            saveButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
 
-                Toast.makeText(getApplicationContext(),"Delivery Event ( "+deliveryEvent._order_number+" ) Updated", Toast.LENGTH_SHORT).show();
+                    //save tips and notes
+                    DeliveryEvent deliveryEvent = new DeliveryEvent(Long.parseLong(ticket));
+                    deliveryEvent._tip = Double.parseDouble(editTextTip.getText().toString());
+                    deliveryEvent._notes = editTextNotes.getText().toString();
+                    deliveryEvent.printToLogs();
+                    deliveryEvent.save();
 
-                Intent intent = new Intent(DeliveryEventDetails.this, MainActivity.class);
-                startActivity(intent);
-            }
-        });
+                    //Toast.makeText(getApplicationContext(), "Delivery Event ( " + deliveryEvent._order_number + " ) Updated", Toast.LENGTH_SHORT).show();
+
+                    Intent intent = new Intent(DeliveryEventDetails.this, MainActivity.class);
+                    startActivity(intent);
+                }
+            });
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -245,14 +229,13 @@ public class DeliveryEventDetails extends AppCompatActivity {
                         .setAction("Action", null).show();
 
                 //save tips and notes
-                MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(getApplicationContext());
-                SQLiteDatabase db = myDatabaseHelper.getWritableDatabase();
-                DeliveryEvent deliveryEvent = new DeliveryEvent(cursor);
+                DeliveryEvent deliveryEvent = new DeliveryEvent(Long.parseLong(ticket));
                 deliveryEvent._tip = Double.parseDouble(editTextTip.getText().toString());
                 deliveryEvent._notes = editTextNotes.getText().toString();
-                db.update(DeliveryEvent.TABLE_NAME,deliveryEvent.getContentValues(),DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + "=" + deliveryEvent._order_number, null);
-                db.close();
+                deliveryEvent.printToLogs("SAVING");
+                deliveryEvent.save();
 
+                //Toast.makeText(getApplicationContext(),"Delivery Event ( "+deliveryEvent._order_number+" ) Updated", Toast.LENGTH_SHORT).show();
                 Toast.makeText(getApplicationContext(),"Delivery Event ( "+deliveryEvent._order_number+" ) Updated", Toast.LENGTH_SHORT).show();
 
                 Intent intent = new Intent(DeliveryEventDetails.this, MainActivity.class);
@@ -277,7 +260,12 @@ public class DeliveryEventDetails extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
         //close connection
-        cursor.close();
+        if( cursor != null ){
+            cursor.close();
+        }
+
+
     }
 }
