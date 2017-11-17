@@ -31,7 +31,7 @@ import com.deliverytips.DeliveryEventDetails;
 import com.deliverytips.MyDatabaseHelper;
 import com.deliverytips.R;
 import com.deliverytips.Settings;
-import com.deliverytips.SyncPwr;
+import com.deliverytips.SyncPwrLogin;
 import com.deliverytips.table.data.DataFactory;
 import com.deliverytips.table.data.DeliveryEvent;
 
@@ -189,7 +189,7 @@ public class DeliveryEventsTable extends Fragment {
                                 Toast.makeText(getContext(), "Syncing with PWR", Toast.LENGTH_SHORT).show();
 
                                 //pd = ProgressDialog.show(DeliveryEventsTable.th is,"Loading...", true, false);
-                                Intent i = new Intent(getActivity(), SyncPwr.class);
+                                Intent i = new Intent(getActivity(), SyncPwrLogin.class);
                                 i.putExtra("store_id",store_id);
                                 i.putExtra("username",username);
                                 i.putExtra("password",password);

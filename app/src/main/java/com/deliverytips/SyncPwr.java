@@ -170,35 +170,20 @@ public class SyncPwr extends AppCompatActivity {
 
         webView.loadUrl("javascript:window.HTMLOUT.processHTML('<head>'+document.getElementsByTagName('html')[0].innerHTML+'</head>');");
 
-            if (username != null && password != null) {
-
-                String javaScript = "javascript:(function() {" +
-                        "document.getElementById(\"txtUsername\").value = \"" + username + "\";\n" +
-                        "document.getElementById(\"txtPassword\").value = \"" + password + "\";\n" +
-                        "var submit = document.getElementById(\"btnLogin\");\n" +
-                        "submit.click();\n" +
-                        "})()";
-
-                webView.loadUrl(javaScript);
-
-                while (!doneParsing) {
-                    if( stopProcessing){
-                        break;
-                    }
-                    SystemClock.sleep(1000);
-                }
-
-                Toast.makeText(getApplicationContext(), "Logged in.", Toast.LENGTH_SHORT).show();
-
-                doneParsing = false;
-                StartImport();
-                // webView.loadUrl(loadURL);
-                return true;
-            } else {
-                Toast.makeText(getApplicationContext(), "Need login credentials", Toast.LENGTH_SHORT).show();
+        while (!doneParsing) {
+            if( stopProcessing){
+                break;
             }
+            SystemClock.sleep(1000);
+        }
 
-        return false;
+        Toast.makeText(getApplicationContext(), "Logged in.", Toast.LENGTH_SHORT).show();
+
+        doneParsing = false;
+        StartImport();
+        // webView.loadUrl(loadURL);
+        return true;
+
     }
 
     protected void StopAll(){
