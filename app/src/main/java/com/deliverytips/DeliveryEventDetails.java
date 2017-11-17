@@ -249,7 +249,17 @@ public class DeliveryEventDetails extends AppCompatActivity {
                 .scheme("geo")
                 .path("0,0")
                 .appendQueryParameter("q", address);
-        Intent intent = new Intent(Intent.ACTION_VIEW, uriBuilder.build());
+        //Intent intent = new Intent(Intent.ACTION_VIEW, uriBuilder.build());
+
+//        Intent intent1 = getLaunchIntentForPackage("com.google.android.apps.maps");
+//        intent.setAction(Intent.ACTION_VIEW);
+//        intent.setData(Uri.parse("google.navigation:/?free=1&mode=d&entry=fnls"));
+//        startActivity(intent);
+
+        String URL = "https://www.google.com/maps/dir/?api=1&travelmode=driving&dir_action=navigate&destination="+address;
+        Uri location = Uri.parse(URL);
+        Intent intent = new Intent(Intent.ACTION_VIEW, location);
+
         if (intent.resolveActivity(context.getPackageManager()) != null) {
             context.startActivity(intent);
             return true;

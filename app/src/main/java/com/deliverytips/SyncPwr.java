@@ -52,6 +52,7 @@ public class SyncPwr extends AppCompatActivity {
     public Boolean needsLogin = true;
     public String loadURL;
     public Boolean stopProcessing = false;
+    public int fail_count = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,8 +96,6 @@ public class SyncPwr extends AppCompatActivity {
 
             @Override
             public void onPageFinished(WebView view, String urlString) {
-
-
                 text.setText(text.getText() + "\nLoggin in, please wait");
 
                 if( Login() ){
@@ -213,6 +212,15 @@ public class SyncPwr extends AppCompatActivity {
     public Boolean SaveImport(){
         if (data.size() == 0) {
             Toast.makeText(getApplicationContext(), "No Data available", Toast.LENGTH_SHORT).show();
+            fail_count++;
+
+            //multiple fails in a row, turn off auto.
+            if( fail_count > 5 ){
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putBoolean("auto_sync", false);
+                editor.commit();
+                StopAll();
+            }
             // webView.loadUrl(loadURL);
             return false;
         }

@@ -74,7 +74,7 @@ public class SyncPwrLogin extends AppCompatActivity {
         webView.getSettings().getCacheMode();
         webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
-        webView.addJavascriptInterface(new LoginJavasriptInterface(), "HTMLOUT");
+        //webView.addJavascriptInterface(new LoginJavasriptInterface(), "HTMLOUT");
 
         String store_id = getIntent().getExtras().getString("store_id");
         //loadURL = "https://pwr.dominos.com/PWR/RealTimeOrderDetail.aspx?PrintMode=true&FilterCode=sr_"+store_id+"&FilterDesc=Store-"+store_id;
@@ -84,6 +84,7 @@ public class SyncPwrLogin extends AppCompatActivity {
         CookieManager.getInstance().setAcceptCookie(true);
 
         text.setText("Loading...please wait");
+
 
         webView.setWebViewClient(new WebViewClient() {
 
@@ -100,7 +101,7 @@ public class SyncPwrLogin extends AppCompatActivity {
                     progress = webView.getProgress();
                 }
 
-                text.setText(text.getText() + "\nDone Loading");
+                text.setText(text.getText() + "\nInjecting Login Creds");
                 if (username != null && password != null ) {
 
                     String javaScript = "javascript:(function() {" +
@@ -113,10 +114,27 @@ public class SyncPwrLogin extends AppCompatActivity {
 
                     webView.loadUrl(javaScript);
 
-                    //wait 5 seconds
-                    SystemClock.sleep(5000);
+                    boolean autoSaveSettings = sharedPref.getBoolean("auto_sync",false);
+                    text.setText(text.getText() + "\nDone Loading");
+                    if( autoSaveSettings ) {
 
-                    StopAll();
+                        //wait 5 seconds
+                        SystemClock.sleep(5000);
+
+                        progress = webView.getProgress();
+                        while (progress < 100) {
+                            text.setText(text.getText() + "\nProgress: " + progress);
+                            SystemClock.sleep(1000);
+                            progress = webView.getProgress();
+                        }
+
+                        StopAll();
+
+                        Intent i2 = new Intent(MainActivity.get(), SyncPwr.class);
+                        i2.putExtra("store_id",getIntent().getExtras().getString("store_id"));
+                        startActivity(i2);
+                    }
+
 
                     saveImportButton.setEnabled(true);
                 }
@@ -155,9 +173,18 @@ public class SyncPwrLogin extends AppCompatActivity {
             public void onClick(View view) {
                 Snackbar.make(view, "Parsing....", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-                webView.loadUrl("javascript:window.HTMLOUT.processHTML('<head>'+document.getElementsByTagName('html')[0].innerHTML+'</head>");
 
-                //StopAll();
+                stopProcessing = true;
+
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putBoolean("auto_sync", true);
+                editor.commit();
+
+                StopAll();
+
+                Intent i2 = new Intent(MainActivity.get(), SyncPwr.class);
+                i2.putExtra("store_id",getIntent().getExtras().getString("store_id"));
+                startActivity(i2);
             }
 
         });
@@ -168,7 +195,16 @@ public class SyncPwrLogin extends AppCompatActivity {
                 Snackbar.make(v, "Parsing....", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
                 //webView.loadUrl("javascript:window.HTMLOUT.processHTML('<head>'+document.getElementsByTagName('html')[0].innerHTML+'</head>");
+                stopProcessing = true;
+
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putBoolean("auto_sync", true);
+                editor.commit();
+
                 StopAll();
+                Intent i2 = new Intent(MainActivity.get(), SyncPwr.class);
+                i2.putExtra("store_id",getIntent().getExtras().getString("store_id"));
+                startActivity(i2);
 
             }
         });
@@ -187,9 +223,6 @@ public class SyncPwrLogin extends AppCompatActivity {
     public void StopAll(){
         stopProcessing = true;
         this.finish();
-        Intent i2 = new Intent(MainActivity.get(), SyncPwr.class);
-        i2.putExtra("store_id",getIntent().getExtras().getString("store_id"));
-        startActivity(i2);
     }
 
     public class LoginJavasriptInterface

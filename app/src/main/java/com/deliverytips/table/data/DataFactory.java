@@ -52,7 +52,7 @@ public final class DataFactory {
 
             final ArrayList<HashMap<String, String>> hashMaps = deliveryEvent.makeQuery("SELECT " +
                     "count(*) AS count, " +
-                    "sum( (" + DeliveryEvent.COLUMN_NAME_PRICE + " * 0.075 )) + SUM(" + DeliveryEvent.COLUMN_NAME_PRICE + " ) AS price, " +
+                    "printf(\"%.2f\", sum( (" + DeliveryEvent.COLUMN_NAME_PRICE + " * 0.075 )) + SUM(" + DeliveryEvent.COLUMN_NAME_PRICE + " ),'N2') AS price, " +
                     "sum(" + DeliveryEvent.COLUMN_NAME_TIP + ") AS tips, " +
                     //"printf(\"%.2f\", AVG(" + DeliveryEvent.COLUMN_NAME_TIP + ")) AS avg_tips " +
                     "AVG(" + DeliveryEvent.COLUMN_NAME_TIP + ") AS avg_tips " +
