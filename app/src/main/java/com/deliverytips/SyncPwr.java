@@ -277,10 +277,13 @@ public class SyncPwr extends AppCompatActivity {
 
             if (recordCount <= 0) {
                 text.setText(text.getText() + "\n\n(NEW) " + row);
+                Log.d("INSERTING",ticket_id);
                 db.insert(deliveryEvent.TABLE_NAME, null, deliveryEvent.getContentValues());
             } else {
                 text.setText(text.getText() + "\n\n(UPDATE) " + row);
-                deliveryEvent.save();
+                Log.d("UPDATING",ticket_id);
+                //deliveryEvent.save();
+                db.update(deliveryEvent.TABLE_NAME,deliveryEvent.getContentValues(),deliveryEvent.COLUMN_NAME_ORDER_NUMBER + "= ?",whereArgs );
             }
 
             db.close();

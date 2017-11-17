@@ -45,6 +45,7 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
             ");";
 
 
+
     public static final String CREATE_PERSON_TABLE = "CREATE TABLE IF NOT EXISTS " + Person.TABLE_NAME +
             "(" +  Person.COLUMN_NAME_ID + " integer primary key , " +
             Person.COLUMN_NAME_PHONE_NUMBER + " text, " +

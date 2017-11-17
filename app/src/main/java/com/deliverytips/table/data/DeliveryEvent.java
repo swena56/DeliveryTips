@@ -235,16 +235,17 @@ public class DeliveryEvent implements Chargable {
         MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(MainActivity.get());
         SQLiteDatabase db = myDatabaseHelper.getWritableDatabase();
 
-        String[] whereArgs = { Long.toString(ticket_id)};
+        String[] whereArgs = { Double.toString(_tip),_driver,_notes,_timestamp,Long.toString(ticket_id)};
 
         String updateQuery = "UPDATE " + TABLE_NAME +
                 " SET " + COLUMN_NAME_TIP + " = ?," +
                 " SET " + COLUMN_NAME_DRIVER + " = ?," +
                 " SET " + COLUMN_NAME_NOTES + " = ?," +
-                " SET " + COLUMN_NAME_TIMESTAMP + " = ?," +
+                " SET " + COLUMN_NAME_TIMESTAMP + " = ? " +
                 " WHERE " + COLUMN_NAME_ORDER_NUMBER + "= ?"
                 ;
 
+        //db.execSQL(updateQuery,whereArgs);
         db.update(TABLE_NAME,getContentValues(),COLUMN_NAME_ORDER_NUMBER + "= ?",whereArgs );
 
         myDatabaseHelper.close();
