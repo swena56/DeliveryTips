@@ -3,6 +3,7 @@ package com.deliverytips.table.data;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.deliverytips.MyDatabaseHelper;
 
@@ -22,27 +23,50 @@ public final class DataFactory {
 
     public static Map<String,String> GetDriverStats(Context context, String selectedItem) {
 
+        Log.d("Driver Stats","SelectedItem: " + selectedItem);
 
         String[] whereArgs = {selectedItem};
 
         DeliveryEvent deliveryEvent = new DeliveryEvent();
         Map<String,String> map=new HashMap<String,String>();
-        final ArrayList<HashMap<String, String>> hashMaps = deliveryEvent.makeQuery("SELECT " +
-                "count(*) AS count, " +
-                "sum( (" + DeliveryEvent.COLUMN_NAME_PRICE + " * 0.075 )) + SUM(" + DeliveryEvent.COLUMN_NAME_PRICE + " ) AS price, " +
-                "sum(" + DeliveryEvent.COLUMN_NAME_TIP + ") AS tips, " +
-                //"printf(\"%.2f\", AVG(" + DeliveryEvent.COLUMN_NAME_TIP + ")) AS avg_tips " +
-                "AVG(" + DeliveryEvent.COLUMN_NAME_TIP + ") AS avg_tips " +
-                "FROM " + DeliveryEvent.TABLE_NAME
-                + " WHERE " + DeliveryEvent.COLUMN_NAME_DRIVER + " = ?", whereArgs);
 
-        if( hashMaps.size() > 0 ){
-            map.put("size", hashMaps.get(0).get("count"));
-            map.put("total_price", hashMaps.get(0).get("price"));
-            map.put("total_tip", hashMaps.get(0).get("tips"));
-            map.put("avg_tip", hashMaps.get(0).get("avg_tips"));
+        if( selectedItem.equals("No Driver Selected.") ){
+
+            final ArrayList<HashMap<String, String>> hashMaps = deliveryEvent.makeQuery("SELECT " +
+                    "count(*) AS count, " +
+                    "sum( (" + DeliveryEvent.COLUMN_NAME_PRICE + " * 0.075 )) + SUM(" + DeliveryEvent.COLUMN_NAME_PRICE + " ) AS price, " +
+                    "sum(" + DeliveryEvent.COLUMN_NAME_TIP + ") AS tips, " +
+                    //"printf(\"%.2f\", AVG(" + DeliveryEvent.COLUMN_NAME_TIP + ")) AS avg_tips " +
+                    "AVG(" + DeliveryEvent.COLUMN_NAME_TIP + ") AS avg_tips " +
+                    "FROM " + DeliveryEvent.TABLE_NAME
+                    , null);
+
+            if( hashMaps.size() > 0 ){
+                map.put("size", hashMaps.get(0).get("count"));
+                map.put("total_price", hashMaps.get(0).get("price"));
+                map.put("total_tip", hashMaps.get(0).get("tips"));
+                map.put("avg_tip", hashMaps.get(0).get("avg_tips"));
+            }
+        } else {
+
+
+            final ArrayList<HashMap<String, String>> hashMaps = deliveryEvent.makeQuery("SELECT " +
+                    "count(*) AS count, " +
+                    "sum( (" + DeliveryEvent.COLUMN_NAME_PRICE + " * 0.075 )) + SUM(" + DeliveryEvent.COLUMN_NAME_PRICE + " ) AS price, " +
+                    "sum(" + DeliveryEvent.COLUMN_NAME_TIP + ") AS tips, " +
+                    //"printf(\"%.2f\", AVG(" + DeliveryEvent.COLUMN_NAME_TIP + ")) AS avg_tips " +
+                    "AVG(" + DeliveryEvent.COLUMN_NAME_TIP + ") AS avg_tips " +
+                    "FROM " + DeliveryEvent.TABLE_NAME
+                    + " WHERE " + DeliveryEvent.COLUMN_NAME_DRIVER + " = ?", whereArgs);
+
+            if (hashMaps.size() > 0) {
+                map.put("size", hashMaps.get(0).get("count"));
+                map.put("total_price", hashMaps.get(0).get("price"));
+                map.put("total_tip", hashMaps.get(0).get("tips"));
+                map.put("avg_tip", hashMaps.get(0).get("avg_tips"));
+            }
+
         }
-
         return map;
     }
 

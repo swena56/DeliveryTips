@@ -89,7 +89,7 @@ public class SyncPwr extends AppCompatActivity {
         webView.loadUrl(loadURL);
         CookieManager.getInstance().setAcceptCookie(true);
 
-        text.setText("Loading... may require login click, followed by cancel button.");
+        text.setText("Loading...please wait");
 
         webView.setWebViewClient(new WebViewClient() {
 
