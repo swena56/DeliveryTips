@@ -156,7 +156,7 @@ public class DeliveryEventDetails extends AppCompatActivity {
 
                         Intent intent = new Intent(Intent.ACTION_DIAL);
 
-                        String phone = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_PHONE_NUMBER));
+                        Log.d("Calling", deliveryEvent._phone_number);
                         intent.setData(Uri.parse("tel:" + deliveryEvent._phone_number));
                         startActivity(intent);
                     }
