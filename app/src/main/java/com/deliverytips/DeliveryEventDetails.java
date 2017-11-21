@@ -84,6 +84,10 @@ public class DeliveryEventDetails extends AppCompatActivity {
         final DeliveryEvent deliveryEvent = new DeliveryEvent(Long.parseLong(ticket));
         ticket_id.setText( ticket + " ("+deliveryEvent._service+")");
         textViewDescription.setText(deliveryEvent._description);
+
+        //Need to parse the description
+        //Toast.makeText(getApplicationContext(), deliveryEvent._description, Toast.LENGTH_LONG).show();
+
         editTextNotes.setText(deliveryEvent._notes);
         editTextTip.setText(deliveryEvent._tip.toString());
         textViewAddress.setText(deliveryEvent._street);
@@ -113,6 +117,7 @@ public class DeliveryEventDetails extends AppCompatActivity {
                 Log.d("A total price auto calc", s.toString() + s.toString() );
             }
         });
+
         editTextTip.setText(deliveryEvent._tip.toString());
 
         //set total

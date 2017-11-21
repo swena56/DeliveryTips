@@ -17,6 +17,7 @@ import com.deliverytips.R;
 import com.deliverytips.table.data.DeliveryEvent;
 
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import de.codecrafters.tableview.TableView;
@@ -29,8 +30,34 @@ public class TableDataAdapter extends LongPressAwareTableDataAdapter<DeliveryEve
     private static final NumberFormat PRICE_FORMATTER = NumberFormat.getNumberInstance();
 
 
-    public TableDataAdapter(final Context context, final List<DeliveryEvent> data, final TableView<DeliveryEvent> tableView) {
+    private List<DeliveryEvent> data_filtered;
+
+    public TableDataAdapter(Context context, List<DeliveryEvent> data, TableView<DeliveryEvent> tableView) {
         super(context, data, tableView);
+    }
+
+    public List<DeliveryEvent> ApplyFilter( Boolean isFiltered ){
+
+        if( isFiltered == true ){
+
+            if( this.data_filtered == null ) {
+
+                this.data_filtered = new ArrayList<DeliveryEvent>();
+
+                for (DeliveryEvent deliveryEvent : this.getData()) {
+
+                    if (!deliveryEvent._status.equals("Complete")) {
+                        this.data_filtered.add(deliveryEvent);
+                    }
+                }
+            }
+
+            return this.data_filtered;
+
+        } else {
+
+            return this.getData();
+        }
     }
 
     @Override
@@ -106,35 +133,51 @@ public class TableDataAdapter extends LongPressAwareTableDataAdapter<DeliveryEve
 
         TextView textView = new TextView(getContext());
         textView.setText(deliveryEvent.getAddress());
-        textView.setPadding(20, 10, 20, 10);
+        textView.setPadding(20, 20, 20, 10);
         textView.setTextSize(TEXT_SIZE - 1);
         textView.setTypeface(Typeface.DEFAULT_BOLD);
         textView.setTextColor(ContextCompat.getColor(getContext(), R.color.colorPrimaryDark));
-        return textView;
+
+        LinearLayout linearLayout = new LinearLayout(getContext());
+        linearLayout.addView(textView);
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
+
+        if( deliveryEvent._notes != "" ){
+            TextView textViewNotes = new TextView(getContext());
+            textViewNotes.setText(deliveryEvent._notes);
+            textViewNotes.setPadding(20, 10, 20, 10);
+            textViewNotes.setTypeface(Typeface.SANS_SERIF);
+            textViewNotes.setTextSize(SMALL_TEXT_SIZE - 4);
+            linearLayout.addView(textViewNotes);
+        }
+
+        return linearLayout;
     }
 
     private View renderTicketId(final DeliveryEvent deliveryEvent) {
 
         String ticket_id = Long.toString( deliveryEvent.getTicketID() );
-        String pre = "A";
-        String num = "B";
+        String pre = "";
+        String num = "";
         if( ticket_id.length() > 3 ){
-            pre = ticket_id.substring(0,2);
+            pre = ticket_id.substring(0,3);
             num = ticket_id.substring(3,ticket_id.length());
         }
 
         TextView textViewPrice = new TextView(getContext());
         textViewPrice.setText(pre);
-        textViewPrice.setPadding(20, 10, 20, 10);
-        textViewPrice.setPaintFlags(textViewPrice.getPaintFlags() |   Paint.UNDERLINE_TEXT_FLAG);
+        textViewPrice.setSingleLine();
+        textViewPrice.setPadding(20, 10, 20, 0);
+        //textViewPrice.setPaintFlags(textViewPrice.getPaintFlags() |   Paint.UNDERLINE_TEXT_FLAG);
         textViewPrice.setTextSize(SMALL_TEXT_SIZE);
 
         TextView textView = new TextView(getContext());
         textView.setText(num);
-        textView.setPadding(20, 10, 20, 10);
+        textView.setSingleLine();
+        textView.setPadding(0, 10, 20, 10);
         textView.setTypeface(null, Typeface.BOLD_ITALIC);
         textView.setPaintFlags(textView.getPaintFlags() |   Paint.UNDERLINE_TEXT_FLAG);
-        textView.setTextSize(TEXT_SIZE+2);
+        textView.setTextSize(TEXT_SIZE+6);
 
         LinearLayout linearLayout = new LinearLayout(getContext());
         linearLayout.addView(textViewPrice);
@@ -294,5 +337,4 @@ public class TableDataAdapter extends LongPressAwareTableDataAdapter<DeliveryEve
             deliveryEventToUpdate.setPhoneNumber(s.toString());
         }
     }
-
 }

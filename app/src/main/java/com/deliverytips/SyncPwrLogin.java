@@ -1,8 +1,12 @@
 package com.deliverytips;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.design.widget.FloatingActionButton;
@@ -23,8 +27,12 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.deliverytips.table.data.DeliveryEvent;
+
 import org.apache.http.client.CookieStore;
 
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,71 +82,85 @@ public class SyncPwrLogin extends AppCompatActivity {
         webView.getSettings().getCacheMode();
         webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
-        //webView.addJavascriptInterface(new LoginJavasriptInterface(), "HTMLOUT");
+        webView.addJavascriptInterface(new MyJavaScriptInterface(), "HTMLOUT");
+
+        //getWindow().requestFeature(Window.FEATURE_PROGRESS);
+        webView.enableSlowWholeDocumentDraw();
 
         String store_id = getIntent().getExtras().getString("store_id");
-        //loadURL = "https://pwr.dominos.com/PWR/RealTimeOrderDetail.aspx?PrintMode=true&FilterCode=sr_"+store_id+"&FilterDesc=Store-"+store_id;
-        //loadURL = "https://pwr.dominos.com/PWR/RealTimeOrderDetail.aspx?FilterCode=sr_"+store_id+"&FilterDesc=Store-"+store_id;
-        loadURL = "https://pwr.dominos.com/PWR/Login.aspx";
+        loadURL = "https://pwr.dominos.com/PWR/RealTimeOrderDetail.aspx?PrintMode=true&FilterCode=sr_"+store_id+"&FilterDesc=Store-"+store_id;
+        loadURL = "https://pwr.dominos.com/PWR/RealTimeOrderDetail.aspx?FilterCode=sr_"+store_id+"&FilterDesc=Store-"+store_id;
+        //loadURL = "https://pwr.dominos.com/PWR/Login.aspx";
         webView.loadUrl(loadURL);
         CookieManager.getInstance().setAcceptCookie(true);
 
         text.setText("Loading...please wait");
+        webView.findAllAsync("Store Order Detail");
+        webView.setFindListener(new WebView.FindListener() {
 
+            @Override
+            public void onFindResultReceived(int activeMatchOrdinal, int numberOfMatches, boolean isDoneCounting) {
 
+                if( isDoneCounting && numberOfMatches > 0 ){
+                    text.setText(text.getText() + "\nReal: " + numberOfMatches + ", " + isDoneCounting);
+                    text.setText(text.getText() + "\nGenerating html");
+
+                    StartImport();
+                    launchParser();
+                    saveImportButton.setEnabled(true);
+                }
+            }
+
+            public void launchParser(){
+
+                boolean autoSaveSettings = sharedPref.getBoolean("auto_sync",false);
+
+                StopAll();
+
+                Intent i2 = new Intent(MainActivity.get(), SyncPwr.class);
+                i2.putExtra("store_id",getIntent().getExtras().getString("store_id"));
+                startActivity(i2);
+            }
+        });
+
+        //stopLoading
         webView.setWebViewClient(new WebViewClient() {
+
+            @Override
+            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                super.onPageStarted(view, url, favicon);
+                //text.setText(text.getText() + "\nPage started");
+            }
 
             @Override
             public void onPageFinished(WebView view, String urlString) {
 
+                injectCredentials(view);
+                text.setText(text.getText() + "\nPage finished");
+                text.setText(text.getText() + "\nContent Height: "+view.getContentHeight());
+            }
+
+            public void injectCredentials(WebView view){
                 String username = getIntent().getExtras().getString("username");
                 String password = getIntent().getExtras().getString("password");
 
-                int progress = webView.getProgress();
-                while (progress < 100) {
-                    text.setText(text.getText() + "\nProgress: " + progress);
-                    SystemClock.sleep(1000);
-                    progress = webView.getProgress();
-                }
-
-                text.setText(text.getText() + "\nInjecting Login Creds");
                 if (username != null && password != null ) {
 
+                    text.setText(text.getText() + "\nInjecting Login Creds");
                     String javaScript = "javascript:(function() {" +
                             "document.getElementById(\"txtUsername\").value = \"" + username + "\";\n" +
                             "document.getElementById(\"txtPassword\").value = \"" + password + "\";\n" +
                             "var submit = document.getElementById(\"txtPassword\");\n" +
-                            "submit.click();\n"+
+                            //"submit.click();\n" +
                             //"$(\".btnLogin\").click();\n" +
                             "})()";
 
-                    webView.loadUrl(javaScript);
-
-                    boolean autoSaveSettings = sharedPref.getBoolean("auto_sync",false);
-                    text.setText(text.getText() + "\nDone Loading");
-                    if( autoSaveSettings ) {
-
-                        //wait 5 seconds
-                        SystemClock.sleep(5000);
-
-                        progress = webView.getProgress();
-                        while (progress < 100) {
-                            text.setText(text.getText() + "\nProgress: " + progress);
-                            SystemClock.sleep(1000);
-                            progress = webView.getProgress();
-                        }
-
-                        StopAll();
-
-                        Intent i2 = new Intent(MainActivity.get(), SyncPwr.class);
-                        i2.putExtra("store_id",getIntent().getExtras().getString("store_id"));
-                        startActivity(i2);
-                    }
-
-
-                    saveImportButton.setEnabled(true);
+                    view.loadUrl(javaScript);
+                } else {
+                    text.setText(text.getText() + "\nInjecting Login Creds...failed");
                 }
             }
+
 
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 view.loadUrl(url);
@@ -180,11 +202,11 @@ public class SyncPwrLogin extends AppCompatActivity {
                 editor.putBoolean("auto_sync", true);
                 editor.commit();
 
-                StopAll();
-
-                Intent i2 = new Intent(MainActivity.get(), SyncPwr.class);
-                i2.putExtra("store_id",getIntent().getExtras().getString("store_id"));
-                startActivity(i2);
+//                StopAll();
+//
+//                Intent i2 = new Intent(MainActivity.get(), SyncPwr.class);
+//                i2.putExtra("store_id",getIntent().getExtras().getString("store_id"));
+//                startActivity(i2);
             }
 
         });
@@ -201,6 +223,7 @@ public class SyncPwrLogin extends AppCompatActivity {
                 editor.putBoolean("auto_sync", true);
                 editor.commit();
 
+                SaveImport();
                 StopAll();
                 Intent i2 = new Intent(MainActivity.get(), SyncPwr.class);
                 i2.putExtra("store_id",getIntent().getExtras().getString("store_id"));
@@ -225,8 +248,10 @@ public class SyncPwrLogin extends AppCompatActivity {
         this.finish();
     }
 
-    public class LoginJavasriptInterface
+
+    public class MyJavaScriptInterface
     {
+
         @JavascriptInterface
         @SuppressWarnings("unused")
         public void processHTML(String html)
@@ -235,14 +260,141 @@ public class SyncPwrLogin extends AppCompatActivity {
             String[] lines = html.split("\\n");
             for (String line : lines)
             {
-                if( line.contains("<input name=\"txtUsername\"")){
-                    needsLogin = true;
-                    text.setText(text.getText() + "\nNeeds Login");
-                    Log.d("Parsing","Needs working");
+
+                if( line.contains("<td class=\"dxgv\" align=\"center\">") ) {
+                    Log.i("S", line);
+
+                    List<String> row = new ArrayList<String>();
+                    String[] values = line.split("</td>");
+                    if( values.length >= 11) {
+
+                        for (String cell : values) {
+
+                            String[] cut_str = cell.split(">");
+                            if (cut_str.length > 0) {
+                                row.add(cut_str[1]);
+                            }
+                        }
+                    }
+
+                    data.add((ArrayList<String>) row);
                 }
             }
+
             doneParsing = true;
         }
+    }
+
+    protected Boolean StartImport() {
+
+        Toast.makeText(getApplicationContext(), "Starting Import", Toast.LENGTH_SHORT).show();
+
+        text.setText(text.getText() + "\nStarting Import, please wait");
+        webView.loadUrl("javascript:window.HTMLOUT.processHTML('<head>'+document.getElementsByTagName('html')[0].innerHTML+'</head>');");
+
+        while (!doneParsing) {
+            if( stopProcessing){
+                break;
+            } else {
+                SystemClock.sleep(1000);
+            }
+        }
+
+        SaveImport();
+
+        return true;
+    }
+
+    public Boolean SaveImport(){
+        if (data.size() == 0 ) {
+            //Toast.makeText(getApplicationContext(), "No Data available", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+
+        text.setText(text.getText() + "\nNumber of entries detected: " + data.size() + "\n");
+
+        for (ArrayList<String> row : data) {
+
+            String address = row.get(4);
+            if (address.contains("&nbsp;") || address == "") {
+                address = null;
+            }
+
+            String phone = row.get(3);
+            if (phone.contains("&nbsp;") || phone == "") {
+                phone = null;
+            }
+
+            Number price = 0;
+            NumberFormat format = NumberFormat.getCurrencyInstance();
+            try {
+                price = format.parse(row.get(5));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            //Create Delivery event
+            DeliveryEvent deliveryEvent = new DeliveryEvent();
+            deliveryEvent._price = price.doubleValue();
+            deliveryEvent._status = row.get(6);
+            deliveryEvent._service = row.get(8);
+            deliveryEvent._timestamp = row.get(2);
+            deliveryEvent._driver = row.get(10);
+            deliveryEvent._phone_number = phone;
+            deliveryEvent._csr = row.get(9);
+            deliveryEvent._description = row.get(11);
+            deliveryEvent._street = address;
+            deliveryEvent._full_name = row.get(1);
+
+            //parse delivery number
+            String[] arr = row.get(1).split("#");
+            String ticket_id = "";
+            Long order_number;
+            if (arr.length > 0) {
+                order_number = Long.parseLong(arr[1]);
+                deliveryEvent._order_number = order_number;
+                ticket_id = arr[1];
+            }
+
+            MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(getApplicationContext());
+            SQLiteDatabase db = myDatabaseHelper.getWritableDatabase();
+
+            String[] whereArgs = {ticket_id};
+            Cursor cursor = db.rawQuery("SELECT " + DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + "," +
+                    DeliveryEvent.COLUMN_NAME_TIP + "," +
+                    DeliveryEvent.COLUMN_NAME_NOTES +
+                    " FROM " + DeliveryEvent.TABLE_NAME
+                    + " WHERE " + DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + " = ?", whereArgs);
+
+            int recordCount = cursor.getCount();
+            cursor.close();
+
+            if (recordCount <= 0) {
+                text.setText(text.getText() + "\n\n(NEW) " + row);
+                Log.d("INSERTING",ticket_id);
+                db.insert(deliveryEvent.TABLE_NAME, null, deliveryEvent.getContentValues());
+            } else {
+                text.setText(text.getText() + "\n\n(UPDATE) " + row);
+                Log.d("UPDATING",ticket_id);
+                ContentValues cv = deliveryEvent.getContentValues();
+                cv.remove(DeliveryEvent.COLUMN_NAME_TIP);
+                cv.remove(DeliveryEvent.COLUMN_NAME_NOTES);
+                db.update(deliveryEvent.TABLE_NAME,cv,deliveryEvent.COLUMN_NAME_ORDER_NUMBER + "= ?",whereArgs );
+            }
+
+            db.close();
+
+            //Toast.makeText(getApplicationContext(),"Data Import Complete", Toast.LENGTH_SHORT).show();
+            text.setText(text.getText() + "\nData Import Complete");
+
+            //logout
+            //webView.loadUrl("javascript:PWRLogout()");
+
+                   this.finish();
+        }
+
+        return true;
     }
 }
 

@@ -1,5 +1,6 @@
 package com.deliverytips;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -178,8 +179,8 @@ public class SyncPwr extends AppCompatActivity {
 
         Toast.makeText(getApplicationContext(), "Logged in.", Toast.LENGTH_SHORT).show();
 
-        doneParsing = false;
         StartImport();
+
         // webView.loadUrl(loadURL);
         return true;
 
@@ -204,26 +205,32 @@ public class SyncPwr extends AppCompatActivity {
             }
         }
 
-        SaveImport();
+        SystemClock.sleep(3000);
 
-        return true;
+       return SaveImport();
     }
 
     public Boolean SaveImport(){
         if (data.size() == 0) {
-            Toast.makeText(getApplicationContext(), "No Data available", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(), "No Data available", Toast.LENGTH_SHORT).show();
+            //loop until successful sync
             fail_count++;
 
-            //multiple fails in a row, turn off auto.
-            if( fail_count > 5 ){
-                SharedPreferences.Editor editor = sharedPref.edit();
-                editor.putBoolean("auto_sync", false);
-                editor.commit();
-                StopAll();
-            }
-            // webView.loadUrl(loadURL);
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putBoolean("auto_sync", false);
+            editor.putString("last_sync_date", "FAILED" );
+            editor.commit();
+
+            StopAll();
+            Toast.makeText(getApplicationContext(), "FAILED", Toast.LENGTH_SHORT).show();
+
             return false;
         }
+
+        //add update time to shared pref
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("last_sync_date", "DATE" );
+        editor.commit();
 
         text.setText(text.getText() + "\nNumber of entries detected: " + data.size() + "\n");
 
@@ -290,8 +297,10 @@ public class SyncPwr extends AppCompatActivity {
             } else {
                 text.setText(text.getText() + "\n\n(UPDATE) " + row);
                 Log.d("UPDATING",ticket_id);
-                //deliveryEvent.save();
-                db.update(deliveryEvent.TABLE_NAME,deliveryEvent.getContentValues(),deliveryEvent.COLUMN_NAME_ORDER_NUMBER + "= ?",whereArgs );
+                ContentValues cv = deliveryEvent.getContentValues();
+                cv.remove(DeliveryEvent.COLUMN_NAME_TIP);
+                cv.remove(DeliveryEvent.COLUMN_NAME_NOTES);
+                db.update(deliveryEvent.TABLE_NAME,cv,deliveryEvent.COLUMN_NAME_ORDER_NUMBER + "= ?",whereArgs );
             }
 
             db.close();

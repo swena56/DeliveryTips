@@ -18,7 +18,10 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ExpandableListView;
+import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,7 +44,9 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.HttpParams;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,6 +105,28 @@ public class DeliveryEventsTable extends Fragment {
         totalTips = (TextView) rootView.findViewById(R.id.textViewTotalTips);
         averageTips = (TextView) rootView.findViewById(R.id.textViewAvgTips);
 
+        //hide complete checkbox
+        final CheckBox auto_hide = (CheckBox) rootView.findViewById(R.id.checkboxHideComplete);
+        auto_hide.setChecked(sharedPref.getBoolean("hide_complete",false));
+        auto_hide.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                //tableDataAdapter.getFilter();
+
+                //Save driver to preferences
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putBoolean("hide_complete", isChecked);
+                editor.commit();
+
+                tableDataAdapter = new TableDataAdapter(getContext(), DataFactory.createDeliveryEventsList(getContext(), selectedItem,null, isChecked ), carTableView );
+                carTableView.setDataAdapter(tableDataAdapter);
+            }
+        });
+
+        //set last sync date from shared preferences
+        TextView sync_date = (TextView) rootView.findViewById(R.id.textViewSyncDate);
+        sync_date.setText(sharedPref.getString("last_sync_date","never"));
+
         Spinner spinner = (Spinner) rootView.findViewById(R.id.select_driver);
         List<String> driver_list = prepareListData();
 
@@ -123,11 +150,11 @@ public class DeliveryEventsTable extends Fragment {
 
                 //Set Dealer Stats
                 Map<String,String> map =  DataFactory.GetDriverStats(getContext(),selectedItem);
-                numDeleliveries.setText(map.get("size") + "   ( $"+map.get("total_price") +" ) " );
+                numDeleliveries.setText(map.get("size") + " ( $"+map.get("total_price") +" )" );
                 totalTips.setText("$" + map.get("total_tip"));
                 averageTips.setText("$" + map.get("avg_tip"));
 
-                tableDataAdapter = new TableDataAdapter(getContext(), DataFactory.createDeliveryEventsList(getContext(),selectedItem), carTableView);
+                tableDataAdapter = new TableDataAdapter(getContext(), DataFactory.createDeliveryEventsList(getContext(),selectedItem,null, auto_hide.isChecked()  ), carTableView);
                 carTableView.setDataAdapter(tableDataAdapter);
                 //tableDataAdapter.getData();
             } // to close the onItemSelected
@@ -136,6 +163,48 @@ public class DeliveryEventsTable extends Fragment {
             {
                 Toast.makeText(getContext(),"No Driver Filter",Toast.LENGTH_SHORT ).show();
                 //selectedItem = null;
+            }
+        });
+
+        //search
+        SearchView searchInput = (SearchView) rootView.findViewById(R.id.editTextSearch);
+        searchInput.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                // do something when the focus of the query text field changes
+                Toast.makeText(getContext(),"Search Selected",Toast.LENGTH_SHORT ).show();
+            }
+        });
+
+        //search listener
+        searchInput.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                // do something on text submit
+
+                Toast.makeText(getContext(),"Search: "+query,Toast.LENGTH_SHORT ).show();
+                //tableDataAdapter.
+                tableDataAdapter = new TableDataAdapter(getContext(), DataFactory.createDeliveryEventsList(getContext(), selectedItem, query,auto_hide.isChecked()), carTableView);
+                carTableView.setDataAdapter(tableDataAdapter);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                // do something when text changes
+                //
+                if( newText.equals("") ){
+
+                    Toast.makeText(getContext(),"Clear Search",Toast.LENGTH_SHORT ).show();
+                    tableDataAdapter = new TableDataAdapter(getContext(), DataFactory.createDeliveryEventsList(getContext(), selectedItem,null,auto_hide.isChecked()), carTableView);
+                    carTableView.setDataAdapter(tableDataAdapter);
+
+                } else {
+                    //Toast.makeText(getContext(),"Search Change: "+newText,Toast.LENGTH_SHORT ).show();
+                    tableDataAdapter = new TableDataAdapter(getContext(), DataFactory.createDeliveryEventsList(getContext(), selectedItem,newText, auto_hide.isChecked()), carTableView);
+                    carTableView.setDataAdapter(tableDataAdapter);
+                }
+                return false;
             }
         });
 
@@ -154,9 +223,10 @@ public class DeliveryEventsTable extends Fragment {
 
         carTableView = (SortableDeliveryEventsTableView) rootView.findViewById(R.id.tableView);
         if (carTableView != null) {
-            tableDataAdapter = new TableDataAdapter(getContext(), DataFactory.createDeliveryEventsList(getContext(), selectedItem), carTableView);
+            tableDataAdapter = new TableDataAdapter(getContext(), DataFactory.createDeliveryEventsList(getContext(), selectedItem,null,auto_hide.isChecked()), carTableView);
             carTableView.setDataAdapter(tableDataAdapter);
             carTableView.addDataClickListener(new CarClickListener());
+            
             carTableView.addDataLongClickListener(new CarLongClickListener());
             carTableView.setSwipeToRefreshEnabled(true);
             carTableView.setSwipeToRefreshListener(new SwipeToRefreshListener() {
@@ -185,20 +255,17 @@ public class DeliveryEventsTable extends Fragment {
                                 FragmentManager fm = getActivity().getFragmentManager();
                                 fm.beginTransaction().replace(R.id.content_frame, new Settings()).commit();
                             } else {
-
-                                Toast.makeText(getContext(), "Syncing with PWR", Toast.LENGTH_SHORT).show();
-
-                                //pd = ProgressDialog.show(DeliveryEventsTable.th is,"Loading...", true, false);
-                                Intent i = new Intent(getActivity(), SyncPwrLogin.class);
-                                i.putExtra("store_id",store_id);
-                                i.putExtra("username",username);
-                                i.putExtra("password",password);
-                                startActivity(i);
-
-                                tableDataAdapter = new TableDataAdapter(getContext(), DataFactory.createDeliveryEventsList(getContext(), selectedItem), carTableView);
+                                sync();
+                                tableDataAdapter = new TableDataAdapter(getContext(), DataFactory.createDeliveryEventsList(getContext(), selectedItem,null,auto_hide.isChecked()), carTableView);
                                 tableDataAdapter.notifyDataSetChanged();
-                            }
 
+                                SharedPreferences.Editor editor = sharedPref.edit();
+                                SimpleDateFormat s = new SimpleDateFormat("MM/dd hh:mm");
+                                String format = s.format(new Date());
+                                editor.putString("last_sync_date", format.toString() );
+                                editor.commit();
+
+                            }
                             refreshIndicator.hide();
                         }
                     }, 3000);
@@ -208,6 +275,17 @@ public class DeliveryEventsTable extends Fragment {
 
         // Inflate the layout for this fragment
         return rootView;
+    }
+
+    public void sync(){
+        Toast.makeText(getContext(), "Syncing with PWR", Toast.LENGTH_SHORT).show();
+
+        //pd = ProgressDialog.show(DeliveryEventsTable.th is,"Loading...", true, false);
+        Intent i = new Intent(getActivity(), SyncPwrLogin.class);
+        i.putExtra("store_id",store_id);
+        i.putExtra("username",username);
+        i.putExtra("password",password);
+        startActivity(i);
     }
 
     private List<String> prepareListData() {

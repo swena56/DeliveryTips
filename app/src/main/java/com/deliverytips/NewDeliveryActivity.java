@@ -3,6 +3,7 @@ package com.deliverytips;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -221,6 +222,16 @@ public class NewDeliveryActivity extends AppCompatActivity {
                                                 if (order.length() == 6) {
                                                     Log.w("Detected Order", order);
                                                     editTextOrderNumber.setText(order);
+
+                                                    //open order number
+                                                    Intent intent = new Intent(MainActivity.get(), DeliveryEventDetails.class);
+                                                    Bundle bundle = new Bundle();
+                                                    DeliveryEvent deliveryEvent = new DeliveryEvent(Long.parseLong(order));
+                                                    bundle.putString("ticket_id", order);
+                                                    bundle.putString("address", deliveryEvent._street);
+                                                    intent.putExtras(bundle);
+
+                                                    startActivity(intent);
                                                 }
 
                                             }

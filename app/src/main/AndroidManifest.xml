@@ -52,13 +52,13 @@
         <activity
             android:name=".SyncPwr"
             android:configChanges="orientation"
-            android:label="Pwr Login"
+            android:label="@string/title_activity_sync_pwr"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
             android:name=".SyncPwrLogin"
             android:configChanges="orientation"
-            android:label="@string/title_activity_sync_pwr"
+            android:label="Pwr Login"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
