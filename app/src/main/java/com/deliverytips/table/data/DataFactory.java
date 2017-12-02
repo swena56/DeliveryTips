@@ -61,7 +61,8 @@ public final class DataFactory {
                     //"printf(\"%.2f\", AVG(" + DeliveryEvent.COLUMN_NAME_TIP + ")) AS avg_tips " +
                     "printf(\"%.2f\", AVG(" + DeliveryEvent.COLUMN_NAME_TIP + ")) AS avg_tips " +
                     "FROM " + DeliveryEvent.TABLE_NAME
-                    + " WHERE " + DeliveryEvent.COLUMN_NAME_DRIVER + " = ?", whereArgs);
+                    + " WHERE " + DeliveryEvent.COLUMN_NAME_DRIVER + " = ? " +
+                    " OR " + DeliveryEvent.COLUMN_NAME_STATUS + " = 'Out the Door'", whereArgs);
 
             if (hashMaps.size() > 0) {
                 map.put("size", hashMaps.get(0).get("count"));
@@ -92,6 +93,8 @@ public final class DataFactory {
         DeliveryEvent deliveryEvent = new DeliveryEvent();
         String[] args = {selectedItem};
 
+
+        //TODO create a generated sql for search.
         if( search != null ){
 
             hashMaps = deliveryEvent.makeQuery(
@@ -117,11 +120,13 @@ public final class DataFactory {
 
                 hashMaps = deliveryEvent.makeQuery(
                         "SELECT " + DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + "," +DeliveryEvent.COLUMN_NAME_STATUS + " FROM " + DeliveryEvent.TABLE_NAME +
-                                " ORDER BY " +DeliveryEvent.COLUMN_NAME_ORDER_NUMBER+ " DESC"
+                                " ORDER BY CASE WHEN "+DeliveryEvent.COLUMN_NAME_STATUS+" = 'Routing Station' THEN '1' " +
+                                " WHEN "+DeliveryEvent.COLUMN_NAME_STATUS+" = 'Out the Door' THEN '2' " +
+                                " WHEN "+DeliveryEvent.COLUMN_NAME_STATUS+" = 'Being Taken' THEN '3' " +
+                                " ELSE '4' "+
+                                " END, " +DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + " DESC"
                         , null
                 );
-
-
             } else {
 
                 hashMaps = deliveryEvent.makeQuery(
@@ -129,14 +134,19 @@ public final class DataFactory {
                                 " WHERE " + DeliveryEvent.COLUMN_NAME_SERVICE_METHOD + " = \"Delivery\" " +
                                 " AND " + DeliveryEvent.COLUMN_NAME_STATUS + " != \"Abandoned\" " +
                                 " AND " + DeliveryEvent.COLUMN_NAME_STATUS + " != \"Bad\" " +
-                                " AND " + DeliveryEvent.COLUMN_NAME_STATUS + " != \"Future\" " +
+                                " AND " + DeliveryEvent.COLUMN_NAME_STATUS + " != \"Void\" " +
+                                " AND " + DeliveryEvent.COLUMN_NAME_STATUS + " != \"Being Taken\" " +
+                                //" AND " + DeliveryEvent.COLUMN_NAME_STATUS + " != \"Future\" " +
+                                //" AND " + DeliveryEvent.COLUMN_NAME_STATUS + " == \"Routing Station\""
                                 " AND (" +
-                                DeliveryEvent.COLUMN_NAME_DRIVER + " = ?  OR " + DeliveryEvent.COLUMN_NAME_DRIVER + " = \" ()\" "
-                                + " OR " +
-                                DeliveryEvent.COLUMN_NAME_STATUS + " == \"Routing Station\""
+                                DeliveryEvent.COLUMN_NAME_DRIVER + " = ? OR " + DeliveryEvent.COLUMN_NAME_DRIVER + " = \" ()\" "
                                 + " )" +
                                 //" OR " + DeliveryEvent.COLUMN_NAME_DRIVER + " = ? " +
-                                "ORDER BY " +DeliveryEvent.COLUMN_NAME_ORDER_NUMBER+ " DESC"
+                                "ORDER BY CASE WHEN "+DeliveryEvent.COLUMN_NAME_STATUS+" = 'Routing Station' THEN '1' " +
+                                " WHEN "+DeliveryEvent.COLUMN_NAME_STATUS+" = 'Out the Door' THEN '2' " +
+                                " WHEN "+DeliveryEvent.COLUMN_NAME_STATUS+" = 'Being Taken' THEN '3' " +
+                                " ELSE '4' "+
+                                    " END, " +DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + " DESC"
                         , args
                 );
             }
@@ -147,7 +157,14 @@ public final class DataFactory {
         for (int i = 0; i < size; i++) {
 
             Boolean include = true;
-            if( isFiltered && hashMaps.get(i).get(DeliveryEvent.COLUMN_NAME_STATUS).equals("Complete") ){
+            if( isFiltered &&
+                    (
+                            hashMaps.get(i).get(DeliveryEvent.COLUMN_NAME_STATUS).equals("Complete") ||
+                            hashMaps.get(i).get(DeliveryEvent.COLUMN_NAME_STATUS).equals("Abandoned") ||
+                            hashMaps.get(i).get(DeliveryEvent.COLUMN_NAME_STATUS).equals("Bad")) ||
+                            hashMaps.get(i).get(DeliveryEvent.COLUMN_NAME_STATUS).equals("Canceled") ||
+                            hashMaps.get(i).get(DeliveryEvent.COLUMN_NAME_STATUS).equals("Void")
+                    ){
                 include = false;
             }
 

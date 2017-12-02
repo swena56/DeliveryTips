@@ -235,6 +235,8 @@ public class TableDataAdapter extends LongPressAwareTableDataAdapter<DeliveryEve
             textViewTip.setTextColor(ContextCompat.getColor(getContext(), R.color.orange));
         } else if( (percent * 100 ) < 10 && (percent * 100 ) > 0   ) {
             textViewTip.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
+        } else if( (percent * 100 ) < 0   ) {
+        textViewTip.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
         } else {
             textViewTip.setTextColor(ContextCompat.getColor(getContext(), R.color.black_overlay));
         }
@@ -265,6 +267,8 @@ public class TableDataAdapter extends LongPressAwareTableDataAdapter<DeliveryEve
             textView2.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
         } else if( deliveryEvent._status.equals("Future") || deliveryEvent._status.equals("Makeline")) {
             textView2.setTextColor(ContextCompat.getColor(getContext(), R.color.blue));
+        } else if( deliveryEvent._status.equals("Out the Door") ) {
+            textView2.setText(deliveryEvent._status + " ("+deliveryEvent._driver+")");
         }
 
         LinearLayout linearLayout = new LinearLayout(getContext());

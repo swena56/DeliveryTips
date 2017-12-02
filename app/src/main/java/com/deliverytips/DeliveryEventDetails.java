@@ -206,7 +206,7 @@ public class DeliveryEventDetails extends AppCompatActivity {
                 }
             });
 
-            //Delcare Save Button
+            //Declare Save Button
             Button saveButton = (Button) findViewById(R.id.buttonSaveEvent);
             saveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -255,8 +255,7 @@ public class DeliveryEventDetails extends AppCompatActivity {
                 .path("0,0")
                 .appendQueryParameter("q", address);
         //Intent intent = new Intent(Intent.ACTION_VIEW, uriBuilder.build());
-
-//        Intent intent1 = getLaunchIntentForPackage("com.google.android.apps.maps");
+        //        Intent intent1 = getLaunchIntentForPackage("com.google.android.apps.maps");
 //        intent.setAction(Intent.ACTION_VIEW);
 //        intent.setData(Uri.parse("google.navigation:/?free=1&mode=d&entry=fnls"));
 //        startActivity(intent);
@@ -280,7 +279,5 @@ public class DeliveryEventDetails extends AppCompatActivity {
         if( cursor != null ){
             cursor.close();
         }
-
-
     }
 }

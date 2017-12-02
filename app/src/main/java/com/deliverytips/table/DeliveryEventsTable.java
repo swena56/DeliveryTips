@@ -12,6 +12,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,7 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ExpandableListView;
+import android.widget.LinearLayout;
 import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -35,6 +37,7 @@ import com.deliverytips.MyDatabaseHelper;
 import com.deliverytips.R;
 import com.deliverytips.Settings;
 import com.deliverytips.SyncPwrLogin;
+import com.deliverytips.fragments.SummaryActivity;
 import com.deliverytips.table.data.DataFactory;
 import com.deliverytips.table.data.DeliveryEvent;
 
@@ -50,6 +53,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import de.codecrafters.tableview.listeners.SwipeToRefreshListener;
 import de.codecrafters.tableview.listeners.TableDataClickListener;
@@ -63,6 +68,8 @@ public class DeliveryEventsTable extends Fragment {
     TableDataAdapter tableDataAdapter;
     SharedPreferences sharedPref;
     public SortableDeliveryEventsTableView carTableView;
+
+    public static int SYNC_INTERVAL = 5;
     public String store_id;
     public String username;
     public String password;
@@ -71,6 +78,7 @@ public class DeliveryEventsTable extends Fragment {
     public String url;
     public DefaultHttpClient mDefaultHttpClient;
     public CookieStore cs;
+    public CheckBox auto_hide;
     public String city_state;
     public RequestQueue mRequestQueue; //for single function
     //public CookieManager cookieManager;
@@ -88,6 +96,8 @@ public class DeliveryEventsTable extends Fragment {
     ExpandableListView expListView;
     List<String> listDataHeader;
     HashMap<String, List<String>> listDataChild;
+    Timer timer;
+    TimerTask doAsynchronousTask;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -105,8 +115,22 @@ public class DeliveryEventsTable extends Fragment {
         totalTips = (TextView) rootView.findViewById(R.id.textViewTotalTips);
         averageTips = (TextView) rootView.findViewById(R.id.textViewAvgTips);
 
+        //Launch Summary Activity, when small details layout is clicked
+        LinearLayout linearLayoutSummary = (LinearLayout) rootView.findViewById(R.id.linearLayoutSummary);
+        linearLayoutSummary.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Toast.makeText(getContext(), "Viewing Summary Details", Toast.LENGTH_SHORT).show();
+                Intent i = new Intent(getActivity(), SummaryActivity.class);
+                startActivity(i);
+            }
+        });
+
+
+
         //hide complete checkbox
-        final CheckBox auto_hide = (CheckBox) rootView.findViewById(R.id.checkboxHideComplete);
+        auto_hide = (CheckBox) rootView.findViewById(R.id.checkboxHideComplete);
         auto_hide.setChecked(sharedPref.getBoolean("hide_complete",false));
         auto_hide.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -141,7 +165,7 @@ public class DeliveryEventsTable extends Fragment {
             {
                 selectedItem = parent.getItemAtPosition(position).toString();
 
-                Toast.makeText(getContext(),"Selected Driver: " + selectedItem,Toast.LENGTH_SHORT ).show();
+                //Toast.makeText(getContext(),"Selected Driver: " + selectedItem,Toast.LENGTH_SHORT ).show();
 
                 //Save driver to preferences
                 SharedPreferences.Editor editor = sharedPref.edit();
@@ -150,9 +174,9 @@ public class DeliveryEventsTable extends Fragment {
 
                 //Set Dealer Stats
                 Map<String,String> map =  DataFactory.GetDriverStats(getContext(),selectedItem);
-                numDeleliveries.setText(map.get("size") + " ( $"+map.get("total_price") +" )" );
-                totalTips.setText("$" + map.get("total_tip"));
-                averageTips.setText("$" + map.get("avg_tip"));
+                numDeleliveries.setText(map.get("size") + " ( $"+ ( ( map.get("total_price") != null  ) ? map.get("total_price") : "0" ) +" )" );
+                totalTips.setText("$" + ( ( map.get("total_tip") != null  ) ? map.get("total_tip") : "0" ));
+                averageTips.setText("$" + ( ( map.get("avg_tip") != null  ) ? map.get("avg_tip") : "0" ));
 
                 tableDataAdapter = new TableDataAdapter(getContext(), DataFactory.createDeliveryEventsList(getContext(),selectedItem,null, auto_hide.isChecked()  ), carTableView);
                 carTableView.setDataAdapter(tableDataAdapter);
@@ -195,7 +219,7 @@ public class DeliveryEventsTable extends Fragment {
                 //
                 if( newText.equals("") ){
 
-                    Toast.makeText(getContext(),"Clear Search",Toast.LENGTH_SHORT ).show();
+                    //Toast.makeText(getContext(),"Clear Search",Toast.LENGTH_SHORT ).show();
                     tableDataAdapter = new TableDataAdapter(getContext(), DataFactory.createDeliveryEventsList(getContext(), selectedItem,null,auto_hide.isChecked()), carTableView);
                     carTableView.setDataAdapter(tableDataAdapter);
 
@@ -235,37 +259,7 @@ public class DeliveryEventsTable extends Fragment {
                     carTableView.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            //tableDataAdapter.getData();
-
-                            String problem_log = "";
-                            if( store_id == "" ){
-                                problem_log += "Missing Store Identification Number.\n";
-                            }
-
-                            if( username == "" ){
-                                problem_log += "Missing Username \n";
-                            }
-
-                            if( password == "" ){
-                                problem_log += "Missing password \n";
-                            }
-
-                            if( store_id == "" || username == "" || password == "" ){
-                                Toast.makeText(getContext(), "Error: " + problem_log, Toast.LENGTH_SHORT).show();
-                                FragmentManager fm = getActivity().getFragmentManager();
-                                fm.beginTransaction().replace(R.id.content_frame, new Settings()).commit();
-                            } else {
-                                sync();
-                                tableDataAdapter = new TableDataAdapter(getContext(), DataFactory.createDeliveryEventsList(getContext(), selectedItem,null,auto_hide.isChecked()), carTableView);
-                                tableDataAdapter.notifyDataSetChanged();
-
-                                SharedPreferences.Editor editor = sharedPref.edit();
-                                SimpleDateFormat s = new SimpleDateFormat("MM/dd hh:mm");
-                                String format = s.format(new Date());
-                                editor.putString("last_sync_date", format.toString() );
-                                editor.commit();
-
-                            }
+                            sync();
                             refreshIndicator.hide();
                         }
                     }, 3000);
@@ -273,19 +267,96 @@ public class DeliveryEventsTable extends Fragment {
             });
         }
 
+        create_sync_timer();
+
+
         // Inflate the layout for this fragment
         return rootView;
     }
 
-    public void sync(){
-        Toast.makeText(getContext(), "Syncing with PWR", Toast.LENGTH_SHORT).show();
 
-        //pd = ProgressDialog.show(DeliveryEventsTable.th is,"Loading...", true, false);
-        Intent i = new Intent(getActivity(), SyncPwrLogin.class);
-        i.putExtra("store_id",store_id);
-        i.putExtra("username",username);
-        i.putExtra("password",password);
-        startActivity(i);
+    public void create_sync_timer(){
+        final Handler handler = new Handler();
+        timer = new Timer();
+        doAsynchronousTask = new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    public void run() {
+                        try {
+
+                            SimpleDateFormat s = new SimpleDateFormat("MM/dd hh:mm");
+                            String format = s.format(new Date());
+                            String last_update = sharedPref.getString("last_sync_date",null);
+
+                            long second = 1000l;
+                            long minute = 60l * second;
+                            long hour = 60l * minute;
+
+                            Date date1 = s.parse(last_update);
+                            Date date2 = s.parse(format.toString());
+
+                            long diff = date2.getTime() - date1.getTime();
+
+                            String diff_str = String.format("%02d", diff / hour) + ":" + String.format("%02d", (diff % hour) / minute) + ":" + String.format("%02d", (diff % minute) / second);
+
+                            if( (diff / hour) > 1 || ( diff / minute ) >= SYNC_INTERVAL ){
+                                Toast.makeText(getContext(), "Syncing with PWR", Toast.LENGTH_SHORT).show();
+                                sync();
+                            } else {
+                                //Toast.makeText(getContext(), "Waiting to sync: " + diff_str, Toast.LENGTH_SHORT).show();
+                            }
+
+                        } catch (Exception e) {
+                        }
+                    }
+                });
+            }
+        };
+        int sleep_time = 50000;
+
+        timer.schedule(doAsynchronousTask, 0, sleep_time);
+    }
+    public void sync(){
+
+        String problem_log = "";
+        if( store_id == "" ){
+            problem_log += "Missing Store Identification Number.\n";
+        }
+
+        if( username == "" ){
+            problem_log += "Missing Username \n";
+        }
+
+        if( password == "" ){
+            problem_log += "Missing password \n";
+        }
+
+        if( store_id == "" || username == "" || password == "" ){
+            Toast.makeText(getContext(), "Error: " + problem_log, Toast.LENGTH_SHORT).show();
+            FragmentManager fm = getActivity().getFragmentManager();
+            fm.beginTransaction().replace(R.id.content_frame, new Settings()).commit();
+        } else {
+
+
+            Toast.makeText(getContext(), "Syncing with PWR", Toast.LENGTH_SHORT).show();
+
+            //pd = ProgressDialog.show(DeliveryEventsTable.th is,"Loading...", true, false);
+            Intent i = new Intent(getActivity(), SyncPwrLogin.class);
+            i.putExtra("store_id", store_id);
+            i.putExtra("username", username);
+            i.putExtra("password", password);
+            startActivity(i);
+
+            tableDataAdapter = new TableDataAdapter(getContext(), DataFactory.createDeliveryEventsList(getContext(), selectedItem, null, auto_hide.isChecked()), carTableView);
+            tableDataAdapter.notifyDataSetChanged();
+
+            SharedPreferences.Editor editor = sharedPref.edit();
+            SimpleDateFormat s = new SimpleDateFormat("MM/dd hh:mm");
+            String format = s.format(new Date());
+            editor.putString("last_sync_date", format.toString());
+            editor.commit();
+        }
     }
 
     private List<String> prepareListData() {
@@ -319,7 +390,6 @@ public class DeliveryEventsTable extends Fragment {
 
                 //currently need a way to get state and city from settings
                 String carString = clickedData.getAddress() + " New Ulm, MN";
-
                 Toast.makeText(getContext(), carString, Toast.LENGTH_SHORT).show();
 
                 Intent i = new Intent(getActivity(), DeliveryEventDetails.class);
@@ -333,17 +403,28 @@ public class DeliveryEventsTable extends Fragment {
         }
     }
 
+    public static boolean openMap(Context context, String address) {
+
+        String URL = "https://www.google.com/maps/dir/?api=1&travelmode=driving&dir_action=navigate&destination="+address;
+        Uri location = Uri.parse(URL);
+        Intent intent = new Intent(Intent.ACTION_VIEW, location);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        if (intent.resolveActivity(context.getPackageManager()) != null) {
+            context.startActivity(intent);
+            return true;
+        }
+        return false;
+    }
+
     private class CarLongClickListener implements TableDataLongClickListener<DeliveryEvent> {
 
         @Override
         public boolean onDataLongClicked(final int rowIndex, final DeliveryEvent clickedData) {
-            final String carString = "Long Click: " + rowIndex + " " + clickedData.getAddress();
-            Toast.makeText(getContext(), carString, Toast.LENGTH_SHORT).show();
 
             //address nav
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse("http://maps.google.co.in/maps?q=" + carString));
-            startActivity(intent);
+            String address =  clickedData.getAddress() + "," + sharedPref.getString("address","");
+            openMap(getContext(),address);
             return true;
         }
     }
@@ -459,5 +540,17 @@ public class DeliveryEventsTable extends Fragment {
         }
 
         return this.queue;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        timer.cancel();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        create_sync_timer();
     }
 }

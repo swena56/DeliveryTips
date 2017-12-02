@@ -1,5 +1,6 @@
 package com.deliverytips;
 
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -9,8 +10,6 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.webkit.CookieManager;
@@ -35,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class SyncPwr extends AppCompatActivity {
+public class SyncPwr extends Activity {
 
     TextView text;
     public CookieStore cs;
@@ -58,8 +57,6 @@ public class SyncPwr extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sync_pwr);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
         //sharedPref = getPreferences(Context.MODE_PRIVATE);
         sharedPref = getSharedPreferences("", Context.MODE_PRIVATE);
@@ -271,11 +268,20 @@ public class SyncPwr extends AppCompatActivity {
             String[] arr = row.get(1).split("#");
             String ticket_id = "";
             Long order_number;
+            String date;
+
             if (arr.length > 0) {
                 order_number = Long.parseLong(arr[1]);
                 deliveryEvent._order_number = order_number;
                 ticket_id = arr[1];
+                date = arr[0];
+
+                editor = sharedPref.edit();
+                editor.putString("date", date);
+                editor.commit();
             }
+
+            //String date = sharedPref.getString("date", null);
 
             MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(getApplicationContext());
             SQLiteDatabase db = myDatabaseHelper.getWritableDatabase();

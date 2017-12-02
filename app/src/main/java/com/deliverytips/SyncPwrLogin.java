@@ -119,6 +119,7 @@ public class SyncPwrLogin extends AppCompatActivity {
 
                 Intent i2 = new Intent(MainActivity.get(), SyncPwr.class);
                 i2.putExtra("store_id",getIntent().getExtras().getString("store_id"));
+                i2.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(i2);
             }
         });
