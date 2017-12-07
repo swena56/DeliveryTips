@@ -32,6 +32,7 @@ public class Settings extends Fragment {
     EditText editTextAddress;
     Button saveButton;
     Button resetDBButton;
+    AppKey appKey;
     View rootView;
 
     SharedPreferences sharedPref;
@@ -43,6 +44,7 @@ public class Settings extends Fragment {
                              Bundle savedInstanceState) {
 
         MainActivity.get().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+
 
         _this = this;
 
@@ -57,7 +59,21 @@ public class Settings extends Fragment {
         sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
         editTextStoreId.setText( sharedPref.getString("store_id", null) );
         editTextUsername.setText( sharedPref.getString("username", null) );
+
+        //load password into memory
+        byte[] test = Base64.decode(sharedPref.getString("ivs",null),Base64.DEFAULT);
+        byte[] en = Base64.decode(sharedPref.getString("encryption",null),Base64.DEFAULT);
+
+        appKey = new AppKey(MainActivity.get());
         editTextPassword.setText( sharedPref.getString("password", null) );
+        try {
+
+            String e = appKey.decryptText(String.valueOf(R.string.enc_alias),test,en);
+            editTextPassword.setText( e );
+        } catch (UnsupportedEncodingException e1) {
+            e1.printStackTrace();
+        }
+
         editTextAddress.setText( sharedPref.getString("address", null) );
 
         Button import_button = (Button) rootView.findViewById(R.id.buttonImport);
@@ -77,15 +93,14 @@ public class Settings extends Fragment {
 
                   SharedPreferences.Editor editor = sharedPref.edit();
 
-                  AppKey appKey = new AppKey(MainActivity.get());
                   try {
 
                       SecureRandom random = new SecureRandom();
-                      random.setSeed(R.string.enc_alias);
+                      //random.setSeed(R.string.enc_alias);
                       String seed = random.toString();
                       editor.putString("key",seed);
 
-                      String encrypted = appKey.encryptText(seed, editTextPassword.getText().toString());
+                      String encrypted = appKey.encryptText(String.valueOf(R.string.enc_alias), editTextPassword.getText().toString());
 
                       editor.putString("password", encrypted);
                       editor.putString("ivs", Base64.encodeToString(appKey.GetIvs(),Base64.DEFAULT).toString());
@@ -129,4 +144,5 @@ public class Settings extends Fragment {
         // Inflate the layout for this fragment
         return rootView;
     }
+
 }

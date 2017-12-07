@@ -54,12 +54,13 @@ class DeCryptor {
             NoSuchProviderException, NoSuchPaddingException, InvalidKeyException, IOException,
             BadPaddingException, IllegalBlockSizeException, InvalidAlgorithmParameterException {
 
-        if( encryptedData == null ){
-            return "Failed";
-        }
         final Cipher cipher = Cipher.getInstance(TRANSFORMATION);
         final GCMParameterSpec spec = new GCMParameterSpec(128, encryptionIv);
         cipher.init(Cipher.DECRYPT_MODE, getSecretKey(alias), spec);
+
+        if( encryptedData == null ){
+            return "Failed";
+        }
 
         return new String(cipher.doFinal(encryptedData), "UTF-8");
     }

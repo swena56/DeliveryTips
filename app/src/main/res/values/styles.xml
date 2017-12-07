@@ -17,8 +17,17 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
 
+    <!--<style name="EditTextStyleWithoutAutoFill" parent="Widget.AppCompat.EditText">-->
+        <!--<item name="android:importantForAutofill">no</item>-->
+    <!--</style>-->
+
+    <style name="BrandButtonStyle" parent="Widget.AppCompat.Button.Colored">
+        <item name="android:colorButtonNormal">@color/red</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
     <style name="Theme.AppCompat.Translucent" parent="Theme.AppCompat.NoActionBar">
-        <item name="android:background">#00000000
+        <item name="android:background">#00000010
         </item> <!-- Or any transparency or color you need -->
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>

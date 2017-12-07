@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.deliverytips.SyncPwrLogin">
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        >
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+                        <WebView
+                            android:id="@+id/webview"
+                            android:layout_width="match_parent"
+                            android:layout_height="1000px"
+                            />
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/EDIT_TEXT"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.14"
+                    android:ems="10"
+                    android:inputType="textMultiLine"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.14"
+                    android:orientation="horizontal">
+
+                    <CheckBox
+                        android:id="@+id/checkBoxEnableAutoSubmit"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.13"
+                        android:text="Auto"/>
+
+                    <Button
+                        android:id="@+id/buttonSubmitImport"
+                        style="@style/Widget.AppCompat.Button.Colored"
+                        android:layout_width="140dp"
+                        android:layout_height="wrap_content"
+                        android:text="Submit"
+                        android:visibility="gone"
+                        android:enabled="false"
+                        android:textSize="18sp"
+                        android:layout_weight="0.12"/>
+
+                    <Button
+                        android:id="@+id/buttonImportCancel"
+
+                        style="@style/Widget.AppCompat.Button.Colored"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.12"
+                        android:text="Cancel"
+                        android:textSize="18sp"/>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/log_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Loading...."/>
+
+            </LinearLayout>
+        </LinearLayout>
+    </RelativeLayout>
+
+
+
+</android.support.constraint.ConstraintLayout>

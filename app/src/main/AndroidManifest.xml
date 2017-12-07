@@ -53,17 +53,14 @@
             android:name=".SyncPwr"
             android:configChanges="orientation"
             android:label="@string/title_activity_sync_pwr"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/Transparent">
         </activity>
         <activity
             android:name=".SyncPwrLogin"
             android:configChanges="orientation"
-            android:label="Pwr Login"
             android:theme="@style/AppTheme.NoActionBar"
-            >
+            android:label="Pwr Login">
         </activity>
-
-
         <activity
             android:name=".SettingsActivity"
             android:configChanges="orientation"

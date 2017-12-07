@@ -83,6 +83,8 @@ public class AppKey {
                     //bytes = decryptor.decryptData(this.activity.getString(R.string.enc_alias), encryptor.getEncryption(), ivs).getBytes("UTF-8");
 
                     //return Base64.decode(bytes,Base64.DEFAULT).toString();
+
+
                     if(encryption == null){
                         encryption = encryptor.getEncryption();
                     }
@@ -104,8 +106,9 @@ public class AppKey {
     public String encryptText(String alias,String text) throws UnsupportedEncodingException {
 
         if( this.activity != null && alias != null ) {
-            try {
 
+
+            try {
                 byte[] encryptedText = encryptor
                         .encryptText(alias, text);
                 //return encryptedText.toString();

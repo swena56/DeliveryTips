@@ -1,9 +1,7 @@
 package com.deliverytips;
 
-import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -12,6 +10,7 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
@@ -39,7 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class SyncPwrLogin extends Activity {
+public class SyncPwrLogin extends AppCompatActivity {
 
     TextView text;
     public CookieStore cs;
@@ -60,12 +59,9 @@ public class SyncPwrLogin extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //setContentView(R.layout.activity_pwr_sync);
         setContentView(R.layout.activity_sync_pwr);
-        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
-        //view.setVisibility(View.VISIBLE);
 
-        //sharedPref = getPreferences(Context.MODE_PRIVATE);
         sharedPref = MainActivity.get().getPreferences(Context.MODE_PRIVATE);
 
         text = (TextView) findViewById(R.id.log_text);
@@ -81,51 +77,34 @@ public class SyncPwrLogin extends Activity {
         webView = (WebView) findViewById(R.id.webview);
         webView.getSettings().setLoadWithOverviewMode(true);
         webView.getSettings().setUseWideViewPort(true);
+        webView.getSettings().setSavePassword(false);
         webView.clearFormData();
         webView.getSettings().getAllowFileAccessFromFileURLs();
         webView.getSettings().getCacheMode();
         webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webView.addJavascriptInterface(new MyJavaScriptInterface(), "HTMLOUT");
-
-        //getWindow().requestFeature(Window.FEATURE_PROGRESS);
         webView.enableSlowWholeDocumentDraw();
 
         String store_id = getIntent().getExtras().getString("store_id");
         loadURL = "https://pwr.dominos.com/PWR/RealTimeOrderDetail.aspx?PrintMode=true&FilterCode=sr_"+store_id+"&FilterDesc=Store-"+store_id;
-        loadURL = "https://pwr.dominos.com/PWR/RealTimeOrderDetail.aspx?FilterCode=sr_"+store_id+"&FilterDesc=Store-"+store_id;
-        //loadURL = "https://pwr.dominos.com/PWR/Login.aspx";
+        //loadURL = "https://pwr.dominos.com/PWR/RealTimeOrderDetail.aspx?FilterCode=sr_"+store_id+"&FilterDesc=Store-"+store_id;
+
         webView.loadUrl(loadURL);
         CookieManager.getInstance().setAcceptCookie(true);
 
         text.setText("Loading...please wait");
         webView.findAllAsync("Store Order Detail");
+        webView.setFitsSystemWindows(true);
         webView.setFindListener(new WebView.FindListener() {
 
             @Override
             public void onFindResultReceived(int activeMatchOrdinal, int numberOfMatches, boolean isDoneCounting) {
 
                 if( isDoneCounting && numberOfMatches > 0 ){
-                    text.setText(text.getText() + "\nReal: " + numberOfMatches + ", " + isDoneCounting);
-                    text.setText(text.getText() + "\nGenerating html");
-
                     StartImport();
                     StartImport();
-                    //launchParser();
-                    saveImportButton.setEnabled(true);
                 }
-            }
-
-            public void launchParser(){
-
-                boolean autoSaveSettings = sharedPref.getBoolean("auto_sync",false);
-
-                StopAll();
-
-                Intent i2 = new Intent(MainActivity.get(), SyncPwr.class);
-                i2.putExtra("store_id",getIntent().getExtras().getString("store_id"));
-                i2.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(i2);
             }
         });
 
@@ -135,7 +114,6 @@ public class SyncPwrLogin extends Activity {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 super.onPageStarted(view, url, favicon);
-                //text.setText(text.getText() + "\nPage started");
             }
 
             @Override
@@ -154,22 +132,28 @@ public class SyncPwrLogin extends Activity {
 
                     if (username != null && password != null ) {
 
-                        text.setText(text.getText() + "\nInjecting Login Creds");
-
                         byte[] test = Base64.decode(sharedPref.getString("ivs",null),Base64.DEFAULT);
                         byte[] en = Base64.decode(sharedPref.getString("encryption",null),Base64.DEFAULT);
 
-                        String e = appKey.decryptText(sharedPref.getString("seed",null),test,en);
+                        String e = appKey.decryptText(String.valueOf(R.string.enc_alias),test,en);
+                        //Log.d("Login", e);
 
                         String javaScript = "javascript:(function() {" +
+
+                                "var element = document.getElementById(\"loginwrapper\");\n" +
+                                "element.style='position:absolute;position:fixed !important; height:100%;top:0;botton:0;left:0;right:0;background-color: white';\n" +
                                 "document.getElementById(\"txtUsername\").value = \"" + username + "\";\n" +
                                 "document.getElementById(\"txtPassword\").value = \"" + e + "\";\n" +
                                 "var submit = document.getElementById(\"txtPassword\");\n" +
+                                 "document.getElementById(\"btnLogin\").style='position:absolute;position:fixed !important; height:100%;width:100%;top:0;botton:0;left:0;right:0;font-size : 40px;';\n" +
+
                                 //"submit.click();\n" +
                                 //"$(\".btnLogin\").click();\n" +
                                 "})()";
-
+                        e = null;
                         view.loadUrl(javaScript);
+                        javaScript = null;
+
                     } else {
                         text.setText(text.getText() + "\nInjecting Login Creds...failed");
                     }
@@ -178,7 +162,6 @@ public class SyncPwrLogin extends Activity {
                     e.printStackTrace();
                 }
             }
-
 
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 view.loadUrl(url);
@@ -213,41 +196,9 @@ public class SyncPwrLogin extends Activity {
             public void onClick(View view) {
                 Snackbar.make(view, "Parsing....", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-
-                stopProcessing = true;
-
-                SharedPreferences.Editor editor = sharedPref.edit();
-                editor.putBoolean("auto_sync", true);
-                editor.commit();
-
-//                StopAll();
-//
-//                Intent i2 = new Intent(MainActivity.get(), SyncPwr.class);
-//                i2.putExtra("store_id",getIntent().getExtras().getString("store_id"));
-//                startActivity(i2);
-            }
-
-        });
-
-        saveImportButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Snackbar.make(v, "Parsing....", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-                //webView.loadUrl("javascript:window.HTMLOUT.processHTML('<head>'+document.getElementsByTagName('html')[0].innerHTML+'</head>");
-                stopProcessing = true;
-
-                SharedPreferences.Editor editor = sharedPref.edit();
-                editor.putBoolean("auto_sync", true);
-                editor.commit();
-
                 SaveImport();
-                StopAll();
-
-                Intent i2 = new Intent(MainActivity.get(), SyncPwr.class);
-                i2.putExtra("store_id",getIntent().getExtras().getString("store_id"));
-                startActivity(i2);
             }
+
         });
 
         cancelImportButton.setOnClickListener(new View.OnClickListener() {
@@ -265,7 +216,6 @@ public class SyncPwrLogin extends Activity {
         stopProcessing = true;
         this.finish();
     }
-
 
     public class MyJavaScriptInterface
     {
