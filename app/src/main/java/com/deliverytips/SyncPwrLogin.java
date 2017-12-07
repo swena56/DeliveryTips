@@ -1,5 +1,6 @@
 package com.deliverytips;
 
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -11,8 +12,7 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.webkit.CookieManager;
@@ -27,17 +27,19 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.deliverytips.RegisterAppKey.AppKey;
 import com.deliverytips.table.data.DeliveryEvent;
 
 import org.apache.http.client.CookieStore;
 
+import java.io.UnsupportedEncodingException;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class SyncPwrLogin extends AppCompatActivity {
+public class SyncPwrLogin extends Activity {
 
     TextView text;
     public CookieStore cs;
@@ -59,11 +61,13 @@ public class SyncPwrLogin extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sync_pwr);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        //setSupportActionBar(toolbar);
+        //view.setVisibility(View.VISIBLE);
 
         //sharedPref = getPreferences(Context.MODE_PRIVATE);
-        sharedPref = getSharedPreferences("", Context.MODE_PRIVATE);
+        sharedPref = MainActivity.get().getPreferences(Context.MODE_PRIVATE);
+
         text = (TextView) findViewById(R.id.log_text);
         editText = (EditText) findViewById(R.id.EDIT_TEXT);
         webView = (WebView) findViewById(R.id.webview);
@@ -106,7 +110,8 @@ public class SyncPwrLogin extends AppCompatActivity {
                     text.setText(text.getText() + "\nGenerating html");
 
                     StartImport();
-                    launchParser();
+                    StartImport();
+                    //launchParser();
                     saveImportButton.setEnabled(true);
                 }
             }
@@ -138,27 +143,39 @@ public class SyncPwrLogin extends AppCompatActivity {
 
                 injectCredentials(view);
                 text.setText(text.getText() + "\nPage finished");
-                text.setText(text.getText() + "\nContent Height: "+view.getContentHeight());
             }
 
             public void injectCredentials(WebView view){
                 String username = getIntent().getExtras().getString("username");
                 String password = getIntent().getExtras().getString("password");
 
-                if (username != null && password != null ) {
+                AppKey appKey = new AppKey(MainActivity.get());
+                try {
 
-                    text.setText(text.getText() + "\nInjecting Login Creds");
-                    String javaScript = "javascript:(function() {" +
-                            "document.getElementById(\"txtUsername\").value = \"" + username + "\";\n" +
-                            "document.getElementById(\"txtPassword\").value = \"" + password + "\";\n" +
-                            "var submit = document.getElementById(\"txtPassword\");\n" +
-                            //"submit.click();\n" +
-                            //"$(\".btnLogin\").click();\n" +
-                            "})()";
+                    if (username != null && password != null ) {
 
-                    view.loadUrl(javaScript);
-                } else {
-                    text.setText(text.getText() + "\nInjecting Login Creds...failed");
+                        text.setText(text.getText() + "\nInjecting Login Creds");
+
+                        byte[] test = Base64.decode(sharedPref.getString("ivs",null),Base64.DEFAULT);
+                        byte[] en = Base64.decode(sharedPref.getString("encryption",null),Base64.DEFAULT);
+
+                        String e = appKey.decryptText(sharedPref.getString("seed",null),test,en);
+
+                        String javaScript = "javascript:(function() {" +
+                                "document.getElementById(\"txtUsername\").value = \"" + username + "\";\n" +
+                                "document.getElementById(\"txtPassword\").value = \"" + e + "\";\n" +
+                                "var submit = document.getElementById(\"txtPassword\");\n" +
+                                //"submit.click();\n" +
+                                //"$(\".btnLogin\").click();\n" +
+                                "})()";
+
+                        view.loadUrl(javaScript);
+                    } else {
+                        text.setText(text.getText() + "\nInjecting Login Creds...failed");
+                    }
+
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
                 }
             }
 
@@ -226,10 +243,10 @@ public class SyncPwrLogin extends AppCompatActivity {
 
                 SaveImport();
                 StopAll();
+
                 Intent i2 = new Intent(MainActivity.get(), SyncPwr.class);
                 i2.putExtra("store_id",getIntent().getExtras().getString("store_id"));
                 startActivity(i2);
-
             }
         });
 
@@ -301,6 +318,8 @@ public class SyncPwrLogin extends AppCompatActivity {
             }
         }
 
+        SystemClock.sleep(3000);
+
         SaveImport();
 
         return true;
@@ -308,6 +327,7 @@ public class SyncPwrLogin extends AppCompatActivity {
 
     public Boolean SaveImport(){
         if (data.size() == 0 ) {
+            text.setText(text.getText() + "\nNo Data\n");
             //Toast.makeText(getApplicationContext(), "No Data available", Toast.LENGTH_SHORT).show();
             return false;
         }
@@ -392,7 +412,7 @@ public class SyncPwrLogin extends AppCompatActivity {
             //logout
             //webView.loadUrl("javascript:PWRLogout()");
 
-                   this.finish();
+            this.finish();
         }
 
         return true;

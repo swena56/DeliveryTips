@@ -108,4 +108,6 @@
     <string name="select_driver_dropdown_text">No Driver Selected.</string>
     <string name="money_symbol">$</string>
     <string name="title_activity_summary">SummaryActivity</string>
+    <string name="failed_encryption">Eat a bag of dicks.</string>
+    <string name="enc_alias">FWtnOOHAjbD6rNxWWEeVOCj7JXSEPGJQ</string>
 </resources>

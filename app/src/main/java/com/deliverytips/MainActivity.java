@@ -59,7 +59,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
     public static Intent getMapsIntent(String address, String city) {
 
         Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
@@ -139,6 +138,7 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            fm.beginTransaction().replace(R.id.content_frame,new Settings()).addToBackStack( "settings" ).commit();
             return true;
         }
 
@@ -159,11 +159,8 @@ public class MainActivity extends AppCompatActivity
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                         MY_PERMISSIONS_REQUEST_READ_CONTACTS);
-
-
             }
         }
-
     }
 
     @Override
@@ -191,8 +188,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
-
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -212,13 +207,13 @@ public class MainActivity extends AppCompatActivity
             //currently working to convert the new Delivery fragment over to a fullscreen activity so it can take advantage of CTR
             //fm.beginTransaction().replace(R.id.content_frame, new NewDelivery()).commit();
         } else if (id == R.id.phone_search) {
-            fm.beginTransaction().replace(R.id.content_frame, new Search()).commit();
+            fm.beginTransaction().replace(R.id.content_frame, new Search()).addToBackStack( "search" ).commit();
         } else if (id == R.id.settings) {
 
 //            Intent i = new Intent(getApplicationContext(), SettingsActivity.class);
 //            startActivity(i);
 
-            fm.beginTransaction().replace(R.id.content_frame,new Settings()).commit();
+            fm.beginTransaction().replace(R.id.content_frame,new Settings()).addToBackStack( "settings" ).commit();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -256,11 +251,9 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
     @Override
     protected void onResume() {
         super.onResume();
         fm.beginTransaction().replace(R.id.content_frame, new DeliveryEventsTable()).commit();
-
     }
 }

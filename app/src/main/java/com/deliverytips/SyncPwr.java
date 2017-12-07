@@ -59,7 +59,7 @@ public class SyncPwr extends Activity {
         setContentView(R.layout.activity_sync_pwr);
 
         //sharedPref = getPreferences(Context.MODE_PRIVATE);
-        sharedPref = getSharedPreferences("", Context.MODE_PRIVATE);
+        sharedPref = MainActivity.get().getPreferences(Context.MODE_PRIVATE);
         text = (TextView) findViewById(R.id.log_text);
         editText = (EditText) findViewById(R.id.EDIT_TEXT);
         webView = (WebView) findViewById(R.id.webview);
@@ -75,6 +75,7 @@ public class SyncPwr extends Activity {
         webView.getSettings().setUseWideViewPort(true);
         webView.clearFormData();
         webView.getSettings().getAllowFileAccessFromFileURLs();
+        webView.enableSlowWholeDocumentDraw();
         webView.getSettings().getCacheMode();
         webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
@@ -162,9 +163,6 @@ public class SyncPwr extends Activity {
 
     protected  Boolean Login(){
 
-        String username = getIntent().getExtras().getString("username");
-        String password = getIntent().getExtras().getString("password");
-
         webView.loadUrl("javascript:window.HTMLOUT.processHTML('<head>'+document.getElementsByTagName('html')[0].innerHTML+'</head>');");
 
         while (!doneParsing) {
@@ -178,9 +176,7 @@ public class SyncPwr extends Activity {
 
         StartImport();
 
-        // webView.loadUrl(loadURL);
         return true;
-
     }
 
     protected void StopAll(){
@@ -202,7 +198,7 @@ public class SyncPwr extends Activity {
             }
         }
 
-        SystemClock.sleep(3000);
+        SystemClock.sleep(3500);
 
        return SaveImport();
     }
@@ -226,8 +222,8 @@ public class SyncPwr extends Activity {
 
         //add update time to shared pref
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString("last_sync_date", "DATE" );
-        editor.commit();
+//        editor.putString("last_sync_date", "DATE" );
+//        editor.commit();
 
         text.setText(text.getText() + "\nNumber of entries detected: " + data.size() + "\n");
 
@@ -372,7 +368,6 @@ public class SyncPwr extends Activity {
                 if( line.contains("<input name=\"txtUsername\"")){
                     needsLogin = true;
                 }
-
             }
 
             doneParsing = true;

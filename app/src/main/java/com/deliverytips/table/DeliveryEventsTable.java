@@ -267,8 +267,11 @@ public class DeliveryEventsTable extends Fragment {
             });
         }
 
-        create_sync_timer();
 
+        //check if auto sync check box is checked
+        if( sharedPref.getBoolean("auto_sync", false) ) {
+            create_sync_timer();
+        }
 
         // Inflate the layout for this fragment
         return rootView;
@@ -300,11 +303,15 @@ public class DeliveryEventsTable extends Fragment {
 
                             String diff_str = String.format("%02d", diff / hour) + ":" + String.format("%02d", (diff % hour) / minute) + ":" + String.format("%02d", (diff % minute) / second);
 
-                            if( (diff / hour) > 1 || ( diff / minute ) >= SYNC_INTERVAL ){
-                                Toast.makeText(getContext(), "Syncing with PWR", Toast.LENGTH_SHORT).show();
-                                sync();
-                            } else {
-                                //Toast.makeText(getContext(), "Waiting to sync: " + diff_str, Toast.LENGTH_SHORT).show();
+                            //only sync when auto sync is enabled
+                            if( sharedPref.getBoolean("auto_sync", false) ) {
+
+                                if ((diff / hour) > 1 || (diff / minute) >= SYNC_INTERVAL) {
+                                    Toast.makeText(getContext(), "Syncing with PWR", Toast.LENGTH_SHORT).show();
+                                    sync();
+                                } else {
+                                    //Toast.makeText(getContext(), "Waiting to sync: " + diff_str, Toast.LENGTH_SHORT).show();
+                                }
                             }
 
                         } catch (Exception e) {
