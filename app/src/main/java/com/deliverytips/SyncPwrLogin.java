@@ -130,23 +130,27 @@ public class SyncPwrLogin extends AppCompatActivity {
                 AppKey appKey = new AppKey(MainActivity.get());
                 try {
 
-                    if (username != null && password != null ) {
+                    if (username != null && password != null  ) {
 
-                        byte[] test = Base64.decode(sharedPref.getString("ivs",null),Base64.DEFAULT);
-                        byte[] en = Base64.decode(sharedPref.getString("encryption",null),Base64.DEFAULT);
+                        String ivs = sharedPref.getString("ivs",null);
+                        String encryption = sharedPref.getString("encryption",null);
+                        if( ivs == null || encryption == null ){
+                            return;
+                        }
+                        byte[] test = Base64.decode(ivs,Base64.DEFAULT);
+                        byte[] en = Base64.decode(encryption,Base64.DEFAULT);
 
                         String e = appKey.decryptText(String.valueOf(R.string.enc_alias),test,en);
                         //Log.d("Login", e);
 
                         String javaScript = "javascript:(function() {" +
 
+                                "document.getElementById(\"btnLogin\").style='position:absolute;position:fixed !important; height:100%;width:100%;top:0;botton:0;left:0;right:0;font-size : 40px;';\n" +
                                 "var element = document.getElementById(\"loginwrapper\");\n" +
                                 "element.style='position:absolute;position:fixed !important; height:100%;top:0;botton:0;left:0;right:0;background-color: white';\n" +
                                 "document.getElementById(\"txtUsername\").value = \"" + username + "\";\n" +
                                 "document.getElementById(\"txtPassword\").value = \"" + e + "\";\n" +
                                 "var submit = document.getElementById(\"txtPassword\");\n" +
-                                 "document.getElementById(\"btnLogin\").style='position:absolute;position:fixed !important; height:100%;width:100%;top:0;botton:0;left:0;right:0;font-size : 40px;';\n" +
-
                                 //"submit.click();\n" +
                                 //"$(\".btnLogin\").click();\n" +
                                 "})()";
@@ -210,6 +214,25 @@ public class SyncPwrLogin extends AppCompatActivity {
                 StopAll();
             }
         });
+
+        //prevent the activity from being open for too long, auto kill after 2 minutes
+//        final Handler handler = new Handler();
+//        Timer timer = new Timer();
+//        TimerTask doAsynchronousTask = new TimerTask() {
+//            @Override
+//            public void run() {
+//                handler.post(new Runnable() {
+//                    public void run() {
+//                        try {
+//                            StopAll();
+//                        } catch (Exception e) {
+//                        }
+//                    }
+//                });
+//            }
+//        };
+//
+//        timer.schedule(doAsynchronousTask, 0, 250000);
     }
 
     public void StopAll(){
@@ -317,6 +340,7 @@ public class SyncPwrLogin extends AppCompatActivity {
             deliveryEvent._description = row.get(11);
             deliveryEvent._street = address;
             deliveryEvent._full_name = row.get(1);
+            deliveryEvent._type = "CASH";
 
             //parse delivery number
             String[] arr = row.get(1).split("#");
@@ -326,6 +350,7 @@ public class SyncPwrLogin extends AppCompatActivity {
                 order_number = Long.parseLong(arr[1]);
                 deliveryEvent._order_number = order_number;
                 ticket_id = arr[1];
+                deliveryEvent._date = arr[0];
             }
 
             MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(getApplicationContext());
@@ -344,6 +369,7 @@ public class SyncPwrLogin extends AppCompatActivity {
             if (recordCount <= 0) {
                 text.setText(text.getText() + "\n\n(NEW) " + row);
                 Log.d("INSERTING",ticket_id);
+                Log.d("INSERTING",deliveryEvent.toString());
                 db.insert(deliveryEvent.TABLE_NAME, null, deliveryEvent.getContentValues());
             } else {
                 text.setText(text.getText() + "\n\n(UPDATE) " + row);

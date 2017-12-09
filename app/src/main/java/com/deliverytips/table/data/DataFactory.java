@@ -154,6 +154,8 @@ public final class DataFactory {
 
         int size = (hashMaps != null ) ? hashMaps.size() : 0;
 
+        Log.d("Size", "" + size);
+
         for (int i = 0; i < size; i++) {
 
             Boolean include = true;

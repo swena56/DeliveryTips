@@ -32,6 +32,9 @@ public class DeliveryEvent implements Chargable {
     public static String COLUMN_NAME_ORDER_NUMBER = "order_number";
     public long _order_number;
 
+    public static String COLUMN_NAME_DATE = "date";
+    public String _date;
+
     public static String COLUMN_NAME_TIMESTAMP = "timestamp";
     public String _timestamp = "0000-00-00 00:00:00";
 
@@ -69,6 +72,9 @@ public class DeliveryEvent implements Chargable {
     public static String COLUMN_NAME_NOTES = "notes";
     public String _notes = "";
 
+    public static String COLUMN_NAME_TYPE = "type";
+    public String _type = "CASH";
+
     public static String COLUMN_NAME_TIP = "tip";
     public Double _tip = 0.00;
 
@@ -94,6 +100,7 @@ public class DeliveryEvent implements Chargable {
 
             this._order_number = this.ticket_id;
             this._phone_number = results.get(0).get(DeliveryEvent.COLUMN_NAME_PHONE_NUMBER);
+            this._date = results.get(0).get(DeliveryEvent.COLUMN_NAME_DATE);
             this._street = results.get(0).get(DeliveryEvent.COLUMN_NAME_STREET);
             this._driver = results.get(0).get(DeliveryEvent.COLUMN_NAME_DRIVER);
             this._timestamp = results.get(0).get(DeliveryEvent.COLUMN_NAME_TIMESTAMP);
@@ -103,6 +110,7 @@ public class DeliveryEvent implements Chargable {
             this._status = results.get(0).get(DeliveryEvent.COLUMN_NAME_STATUS);
             this._tip = Double.parseDouble(results.get(0).get(DeliveryEvent.COLUMN_NAME_TIP));
             this._price = Double.parseDouble(results.get(0).get(DeliveryEvent.COLUMN_NAME_PRICE));
+            this._type = results.get(0).get(DeliveryEvent.COLUMN_NAME_TYPE);
 
             //calc tax
             this._tax = this._price * 0.075;
@@ -122,6 +130,10 @@ public class DeliveryEvent implements Chargable {
             this._street = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_STREET));
 
             //set tax
+            //add date
+            if( cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_DATE) != -1) {
+                this._date = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_DATE));
+            }
 
             //add status
             if( cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_STATUS) != -1) {
@@ -147,12 +159,18 @@ public class DeliveryEvent implements Chargable {
             if( cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_NOTES) != -1) {
                 this._notes = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_NOTES));
             }
+
+            //add types
+            if( cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_TYPE) != -1) {
+                this._type = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_TYPE));
+            }
         }
     }
     public ContentValues getContentValues(){
 
         ContentValues c = new ContentValues();
         c.put(this.COLUMN_NAME_PRICE, this._price);
+        c.put(this.COLUMN_NAME_DATE, this._date);
         c.put(this.COLUMN_NAME_TIP, this._tip);
         c.put(this.COLUMN_NAME_STATUS, this._status);
         c.put(this.COLUMN_NAME_SERVICE_METHOD, this._service);
@@ -164,6 +182,7 @@ public class DeliveryEvent implements Chargable {
         c.put(this.COLUMN_NAME_PHONE_NUMBER, this._phone_number);
         c.put(this.COLUMN_NAME_STREET, this._street);
         c.put(this.COLUMN_NAME_NOTES, this._notes);
+        c.put(this.COLUMN_NAME_TYPE, this._type);
         c.put(this.COLUMN_NAME_DRIVER, this._driver);
 
         return c;

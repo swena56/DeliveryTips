@@ -13,6 +13,7 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -126,8 +127,6 @@ public class DeliveryEventsTable extends Fragment {
                 startActivity(i);
             }
         });
-
-
 
         //hide complete checkbox
         auto_hide = (CheckBox) rootView.findViewById(R.id.checkboxHideComplete);
@@ -304,15 +303,12 @@ public class DeliveryEventsTable extends Fragment {
                             String diff_str = String.format("%02d", diff / hour) + ":" + String.format("%02d", (diff % hour) / minute) + ":" + String.format("%02d", (diff % minute) / second);
 
                             //only sync when auto sync is enabled
-                            if( sharedPref.getBoolean("auto_sync", false) ) {
-
                                 if ((diff / hour) > 1 || (diff / minute) >= SYNC_INTERVAL) {
                                     Toast.makeText(getContext(), "Syncing with PWR", Toast.LENGTH_SHORT).show();
                                     sync();
                                 } else {
                                     //Toast.makeText(getContext(), "Waiting to sync: " + diff_str, Toast.LENGTH_SHORT).show();
                                 }
-                            }
 
                         } catch (Exception e) {
                         }
@@ -378,6 +374,8 @@ public class DeliveryEventsTable extends Fragment {
         List<String> selectedDriver = new ArrayList<String>();
         selectedDriver.add("No Driver Selected.");
         while( cursor.moveToNext() ){
+
+            Log.d("Prepare", cursor.toString());
             String driver = cursor.getString(cursor.getColumnIndex(DeliveryEvent.COLUMN_NAME_DRIVER));
             if( driver != null && driver != "" && driver.length() > 0 && !driver.equals(" ()") ){
                 selectedDriver.add(driver);

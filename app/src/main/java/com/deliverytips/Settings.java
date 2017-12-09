@@ -12,6 +12,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -32,6 +34,7 @@ public class Settings extends Fragment {
     EditText editTextAddress;
     Button saveButton;
     Button resetDBButton;
+    CheckBox enableAutoSubmitCheckbox;
     AppKey appKey;
     View rootView;
 
@@ -57,12 +60,18 @@ public class Settings extends Fragment {
         saveButton = (Button) rootView.findViewById(R.id.buttonSaveSettings);
         resetDBButton = (Button) rootView.findViewById(R.id.buttonClearDB);
         sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+        enableAutoSubmitCheckbox = (CheckBox) rootView.findViewById(R.id.checkBoxEnableAutoSubmit);
         editTextStoreId.setText( sharedPref.getString("store_id", null) );
         editTextUsername.setText( sharedPref.getString("username", null) );
 
+        //set auto sync
+        enableAutoSubmitCheckbox.setChecked(sharedPref.getBoolean("auto_sync",false));
+
         //load password into memory
-        byte[] test = Base64.decode(sharedPref.getString("ivs",null),Base64.DEFAULT);
-        byte[] en = Base64.decode(sharedPref.getString("encryption",null),Base64.DEFAULT);
+        String ivs = sharedPref.getString("ivs",null);
+        String encryption = sharedPref.getString("ivs",null);
+        byte[] test = (ivs != null) ? Base64.decode(ivs,Base64.DEFAULT) :  new byte[]{};
+        byte[] en = (encryption != null) ? Base64.decode(encryption,Base64.DEFAULT) : new byte[]{};
 
         appKey = new AppKey(MainActivity.get());
         editTextPassword.setText( sharedPref.getString("password", null) );
@@ -120,6 +129,21 @@ public class Settings extends Fragment {
                   FragmentManager fm = getActivity().getFragmentManager();
                   fm.beginTransaction().replace(R.id.content_frame, new DeliveryEventsTable()).commit();
               }
+        });
+
+        //set shared preferences to run auto sync
+        enableAutoSubmitCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+                //save to Shared Preferences
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putBoolean("auto_sync", isChecked);
+                editor.commit();
+
+                //message to user
+                Toast.makeText(MainActivity.get(),"Auto Sync is "+((isChecked) ? "(ON)":"(OFF)") +" Unimplemented.", Toast.LENGTH_SHORT).show();
+            }
         });
 
         resetDBButton.setOnClickListener(new View.OnClickListener() {

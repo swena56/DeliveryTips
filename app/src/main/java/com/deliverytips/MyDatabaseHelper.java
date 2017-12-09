@@ -22,13 +22,14 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "DB";
 
-    private static final int DATABASE_VERSION = 17;
+    private static final int DATABASE_VERSION = 20;
 
     // Database creation sql statement
     public static final String CREATE_DELIVERY_EVENT = "CREATE TABLE IF NOT EXISTS " + DeliveryEvent.TABLE_NAME +
             " ( " +
                 DeliveryEvent.COLUMN_NAME_ID + " integer primary key, " +
-                DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + " integer, " +
+                DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + " text, " +
+                DeliveryEvent.COLUMN_NAME_DATE + " text, " +
                 DeliveryEvent.COLUMN_NAME_TIMESTAMP + " text, " +
                 DeliveryEvent.COLUMN_NAME_STREET + " text, " +
                 DeliveryEvent.COLUMN_NAME_FULL_NAME + " text, " +
@@ -40,7 +41,8 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
                 DeliveryEvent.COLUMN_NAME_PRICE + "  double, " +
                 DeliveryEvent.COLUMN_NAME_TIP + "  double, " +
                 DeliveryEvent.COLUMN_NAME_DESCRIPTION + " text, " +
-                DeliveryEvent.COLUMN_NAME_NOTES + " text " +
+                DeliveryEvent.COLUMN_NAME_NOTES + " text, " +
+                DeliveryEvent.COLUMN_NAME_TYPE + " text default 'CASH' " +
                // DeliveryEvent.COLUMN_NAME_CUSTOMER_ID + "  integer" +
             ");";
 
