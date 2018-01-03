@@ -86,7 +86,7 @@ public class DeliveryEvent implements Chargable {
         //note properly labeled
         this.ticket_id = ticket_id;
 
-        Log.d("Init Delivery Event", "ticket_id: " + Long.toString(ticket_id));
+        //Log.d("Init Delivery Event", "ticket_id: " + Long.toString(ticket_id));
 
         //create query string and ARGS
         String selectQuery = "SELECT * FROM " + DeliveryEvent.TABLE_NAME +

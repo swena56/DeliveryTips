@@ -43,6 +43,7 @@ public final class DataFactory {
                     //"printf(\"%.2f\", AVG(" + DeliveryEvent.COLUMN_NAME_TIP + ")) AS avg_tips " +
                     "printf(\"%.2f\", AVG(" + DeliveryEvent.COLUMN_NAME_TIP + ")) AS avg_tips " +
                     "FROM " + DeliveryEvent.TABLE_NAME
+                    //" WHERE " + DeliveryEvent.
                     , null);
 
             if( hashMaps.size() > 0 ){
@@ -125,6 +126,7 @@ public final class DataFactory {
                                 " WHEN "+DeliveryEvent.COLUMN_NAME_STATUS+" = 'Being Taken' THEN '3' " +
                                 " ELSE '4' "+
                                 " END, " +DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + " DESC"
+
                         , null
                 );
             } else {

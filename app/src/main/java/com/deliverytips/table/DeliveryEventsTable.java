@@ -48,11 +48,13 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.HttpParams;
 
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -82,6 +84,7 @@ public class DeliveryEventsTable extends Fragment {
     public CheckBox auto_hide;
     public String city_state;
     public RequestQueue mRequestQueue; //for single function
+    public NumberFormat numberFormat;
     //public CookieManager cookieManager;
     //public java.net.CookieManager cm;
 
@@ -109,7 +112,7 @@ public class DeliveryEventsTable extends Fragment {
         sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
         store_id = sharedPref.getString("store_id", "" );
 
-
+        numberFormat = NumberFormat.getNumberInstance(Locale.US);
         numDeleliveries = (TextView) rootView.findViewById(R.id.textViewNumEvents);
         totalTips = (TextView) rootView.findViewById(R.id.textViewTotalTips);
         averageTips = (TextView) rootView.findViewById(R.id.textViewAvgTips);
@@ -171,9 +174,10 @@ public class DeliveryEventsTable extends Fragment {
 
                 //Set Dealer Stats
                 Map<String,String> map =  DataFactory.GetDriverStats(getContext(),selectedItem);
-                numDeleliveries.setText(map.get("size") + " ( $"+ ( ( map.get("total_price") != null  ) ? map.get("total_price") : "0" ) +" )" );
-                totalTips.setText("$" + ( ( map.get("total_tip") != null  ) ? map.get("total_tip") : "0" ));
-                averageTips.setText("$" + ( ( map.get("avg_tip") != null  ) ? map.get("avg_tip") : "0" ));
+
+                numDeleliveries.setText(commify(map.get("size")) + " ( $"+ commify(map.get("total_price")) +" )" );
+                totalTips.setText("$" + commify(map.get("total_tip")));
+                averageTips.setText("$" + commify(map.get("avg_tip")));
 
                 tableDataAdapter = new TableDataAdapter(getContext(), DataFactory.createDeliveryEventsList(getContext(),selectedItem,null, auto_hide.isChecked()  ), carTableView);
                 carTableView.setDataAdapter(tableDataAdapter);
@@ -274,6 +278,20 @@ public class DeliveryEventsTable extends Fragment {
         return rootView;
     }
 
+    public String commify(String num ){
+
+        if( num == null ){
+            return "0";
+        }
+
+        if( num.contains(".") ){
+            double number = Double.parseDouble(num);
+            return numberFormat.format(number);
+        } else {
+            int number = Integer.parseInt(num);
+            return numberFormat.format(number);
+        }
+    }
 
     public void create_sync_timer(){
         final Handler handler = new Handler();
@@ -393,22 +411,18 @@ public class DeliveryEventsTable extends Fragment {
 
         @Override
         public void onDataClicked(final int rowIndex, final DeliveryEvent clickedData) {
+            //currently need a way to get state and city from settings
+            String address = sharedPref.getString("address", null ); //" New Ulm, MN"
+            String carString = clickedData.getAddress() + address;
+            Toast.makeText(getContext(), carString, Toast.LENGTH_SHORT).show();
 
-            if( clickedData.getAddress() != null ) {
+            Intent i = new Intent(getActivity(), DeliveryEventDetails.class);
+            Bundle bundle = new Bundle();
+            bundle.putString("ticket_id", clickedData.getTicketID().toString());
+            bundle.putString("address", carString);
+            i.putExtras(bundle);
 
-                //currently need a way to get state and city from settings
-                String address = sharedPref.getString("address", null ); //" New Ulm, MN"
-                String carString = clickedData.getAddress() + address;
-                Toast.makeText(getContext(), carString, Toast.LENGTH_SHORT).show();
-
-                Intent i = new Intent(getActivity(), DeliveryEventDetails.class);
-                Bundle bundle = new Bundle();
-                bundle.putString("ticket_id", clickedData.getTicketID().toString());
-                bundle.putString("address", carString);
-                i.putExtras(bundle);
-
-                startActivity(i);
-            }
+            startActivity(i);
         }
     }
 
