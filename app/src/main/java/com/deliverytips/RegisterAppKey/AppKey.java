@@ -77,8 +77,8 @@ public class AppKey {
     public String decryptText(String alias, byte[] ivs, byte[] encryption  ) throws UnsupportedEncodingException {
         byte[] bytes;
 
-        if( this.activity != null && alias != null  ) {
-            if (ivs != null && ivs.length > 0) {
+        if( this.activity != null && alias != null   ) {
+            if (ivs != null && ivs.length > 0 && encryption != null && encryption.length > 0) {
                 try {
                     //bytes = decryptor.decryptData(this.activity.getString(R.string.enc_alias), encryptor.getEncryption(), ivs).getBytes("UTF-8");
 
@@ -89,7 +89,7 @@ public class AppKey {
                         encryption = encryptor.getEncryption();
                     }
 
-                    return decryptor.decryptData(alias, encryption, ivs);
+                    return decryptor.decryptData(this.activity.getString(R.string.enc_alias), encryption, ivs);
 
                 } catch (UnrecoverableEntryException | NoSuchAlgorithmException |
                         KeyStoreException | NoSuchPaddingException | NoSuchProviderException |

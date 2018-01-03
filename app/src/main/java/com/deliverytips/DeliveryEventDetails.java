@@ -17,11 +17,15 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.deliverytips.table.data.DeliveryEvent;
 import com.google.android.gms.maps.MapView;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class DeliveryEventDetails extends AppCompatActivity {
 
@@ -35,6 +39,7 @@ public class DeliveryEventDetails extends AppCompatActivity {
     public TextView textViewTimestamp;
     public TextView textViewAddress;
     public TextView price;
+    public Spinner spinnerStatus;
 
     public SharedPreferences sharedPref;
 
@@ -54,6 +59,7 @@ public class DeliveryEventDetails extends AppCompatActivity {
         editTextTip = (EditText) findViewById(R.id.editTextTip);
         editTextTipTotal = (EditText) findViewById(R.id.editTextTotal);
         editTextNotes = (EditText) findViewById(R.id.editTextNotes);
+        spinnerStatus = (Spinner) findViewById(R.id.spinnerStatus);
 
         Button call_button = (Button) findViewById(R.id.buttonCall);
         Button nav_button = (Button) findViewById(R.id.buttonMaps);
@@ -87,6 +93,7 @@ public class DeliveryEventDetails extends AppCompatActivity {
 
         //Need to parse the description
         //Toast.makeText(getApplicationContext(), deliveryEvent._description, Toast.LENGTH_LONG).show();
+
 
         editTextNotes.setText(deliveryEvent._notes);
         editTextTip.setText(deliveryEvent._tip.toString());
@@ -174,6 +181,23 @@ public class DeliveryEventDetails extends AppCompatActivity {
                 call_button.setEnabled(false);
             }
 
+
+            //set spinner id
+            String[] myResArray = getResources().getStringArray(R.array.status_array);
+            List<String> status_array = Arrays.asList(myResArray);
+
+            int current_status_index = 1;
+            for (String s : status_array) {
+               if( s.equals(deliveryEvent._status)){
+
+                   current_status_index = status_array.indexOf(s);
+                   break;
+               }
+            }
+
+            spinnerStatus.setSelection(current_status_index);
+            //spinnerStatus.setId(current_status_index);
+
             //Navigation button, hide it when dealing with no address
             String address = deliveryEvent._street;
             String complete_address = address + " New Ulm, MN"; //+ sharedPref.getString("address", String.valueOf(R.string.default_city).toString());
@@ -211,18 +235,7 @@ public class DeliveryEventDetails extends AppCompatActivity {
             saveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
-                    //save tips and notes
-                    DeliveryEvent deliveryEvent = new DeliveryEvent(Long.parseLong(ticket));
-                    deliveryEvent._tip = Double.parseDouble(editTextTip.getText().toString());
-                    deliveryEvent._notes = editTextNotes.getText().toString();
-                    deliveryEvent.printToLogs();
-                    deliveryEvent.save();
-
-                    //Toast.makeText(getApplicationContext(), "Delivery Event ( " + deliveryEvent._order_number + " ) Updated", Toast.LENGTH_SHORT).show();
-
-                    Intent intent = new Intent(DeliveryEventDetails.this, MainActivity.class);
-                    startActivity(intent);
+                    saveItem(v);
                 }
             });
 
@@ -230,23 +243,38 @@ public class DeliveryEventDetails extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Saving", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-
-                //save tips and notes
-                DeliveryEvent deliveryEvent = new DeliveryEvent(Long.parseLong(ticket));
-                deliveryEvent._tip = Double.parseDouble(editTextTip.getText().toString());
-                deliveryEvent._notes = editTextNotes.getText().toString();
-                deliveryEvent.printToLogs("SAVING");
-                deliveryEvent.save();
-
-                //Toast.makeText(getApplicationContext(),"Delivery Event ( "+deliveryEvent._order_number+" ) Updated", Toast.LENGTH_SHORT).show();
-                Toast.makeText(getApplicationContext(),"Delivery Event ( "+deliveryEvent._order_number+" ) Updated", Toast.LENGTH_SHORT).show();
-
-                Intent intent = new Intent(DeliveryEventDetails.this, MainActivity.class);
-                startActivity(intent);
+                saveItem(view);
             }
         });
+    }
+
+    private void saveItem(View view) {
+        Snackbar.make(view, "Saving", Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
+
+        //Spinner
+        String item = String.valueOf(spinnerStatus.getSelectedItem());
+
+        //save tips and notes
+        DeliveryEvent deliveryEvent = new DeliveryEvent(Long.parseLong(ticket));
+        deliveryEvent._tip = Double.parseDouble(editTextTip.getText().toString());
+        deliveryEvent._notes = editTextNotes.getText().toString();
+
+        if( deliveryEvent._status != item ){
+            Toast.makeText(getApplicationContext(),"Status Changed", Toast.LENGTH_SHORT).show();
+            deliveryEvent._status = item;
+        } else {
+            //Toast.makeText(getApplicationContext(),"Status: " + item + ", ("+deliveryEvent._status+")", Toast.LENGTH_SHORT).show();
+        }
+
+        deliveryEvent.printToLogs("SAVING");
+        deliveryEvent.save();
+
+        //Toast.makeText(getApplicationContext(),"Delivery Event ( "+deliveryEvent._order_number+" ) Updated", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(),"Delivery Event ( "+deliveryEvent._order_number+" ) Updated", Toast.LENGTH_SHORT).show();
+
+        Intent intent = new Intent(DeliveryEventDetails.this, MainActivity.class);
+        startActivity(intent);
     }
 
     public static boolean openMap(Context context, String address) {

@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.SystemClock;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -33,8 +32,6 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 
 public class SyncPwr extends Activity {
@@ -181,6 +178,8 @@ public class SyncPwr extends Activity {
 
         Toast.makeText(getApplicationContext(), "Logged in.", Toast.LENGTH_SHORT).show();
 
+        StartImport();
+        StartImport();
         StartImport();
 
         return true;

@@ -131,15 +131,10 @@ public class DashboardTable extends Fragment {
                                     if( login_name_label.length > 0){
                                         text.setText(text.getText().toString() +  "\nSuccessful login" );
                                         //text.setText(text.getText().toString() + "\n\nURL: " + url + "url\n\n" + "\nCookie: " + cookie_str + "\n\n" + response);
-
-
-                                        //715 N FRANKLIN ST
                                         String[] td_tokens = response.split("<tbody>");
 
                                         if( td_tokens.length > 0  ){
                                             //String[] a = td_tokens[1].split("</tbody>");
-
-
 
                                             text.setText(text.getText().toString() +  "\nDectect table data: " + td_tokens.length + td_tokens[0] );
                                         }

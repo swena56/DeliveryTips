@@ -21,6 +21,7 @@ import com.deliverytips.RegisterAppKey.AppKey;
 import com.deliverytips.fragments.Import;
 import com.deliverytips.table.DeliveryEventsTable;
 import com.deliverytips.table.data.DeliveryEvent;
+import com.pddstudio.preferences.encrypted.EncryptedPreferences;
 
 import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
@@ -100,6 +101,12 @@ public class Settings extends Fragment {
               @Override
               public void onClick(View v) {
 
+                  EncryptedPreferences encryptedPreferences = new EncryptedPreferences.Builder(MainActivity.get()).withEncryptionPassword(String.valueOf(R.string.enc_alias)).build();
+
+                  encryptedPreferences.edit()
+                          .putString("password", editTextPassword.getText().toString())
+                          .apply();
+
                   SharedPreferences.Editor editor = sharedPref.edit();
 
                   try {
@@ -118,6 +125,8 @@ public class Settings extends Fragment {
                       editor.putString("username", editTextUsername.getText().toString());
                       editor.putString("address", editTextAddress.getText().toString());
                       editor.commit();
+
+
                       Toast.makeText(MainActivity.get(),"Saved Settings", Toast.LENGTH_SHORT).show();
                   } catch (UnsupportedEncodingException e) {
 

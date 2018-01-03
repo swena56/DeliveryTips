@@ -11,7 +11,6 @@ import android.os.SystemClock;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.webkit.CookieManager;
@@ -26,12 +25,11 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.deliverytips.RegisterAppKey.AppKey;
 import com.deliverytips.table.data.DeliveryEvent;
+import com.pddstudio.preferences.encrypted.EncryptedPreferences;
 
 import org.apache.http.client.CookieStore;
 
-import java.io.UnsupportedEncodingException;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -127,44 +125,37 @@ public class SyncPwrLogin extends AppCompatActivity {
                 String username = getIntent().getExtras().getString("username");
                 String password = getIntent().getExtras().getString("password");
 
-                AppKey appKey = new AppKey(MainActivity.get());
-                try {
-
                     if (username != null && password != null  ) {
 
                         String ivs = sharedPref.getString("ivs",null);
                         String encryption = sharedPref.getString("encryption",null);
-                        if( ivs == null || encryption == null ){
-                            return;
+
+                        EncryptedPreferences encryptedPreferences = new EncryptedPreferences.Builder(MainActivity.get()).withEncryptionPassword(String.valueOf(R.string.enc_alias)).build();
+                        encryptedPreferences.getString("password", null);
+
+                        webView.clearFormData();
+
+                        if( encryptedPreferences.getString("password", null) != null ) {
+
+                            String javaScript = "javascript:(function() {" +
+
+                                    "document.getElementById(\"btnLogin\").style='position:absolute;position:fixed !important; height:100%;width:100%;top:0;botton:0;left:0;right:0;font-size : 40px;';\n" +
+                                    "var element = document.getElementById(\"loginwrapper\");\n" +
+                                    "element.style='position:absolute;position:fixed !important; height:100%;top:0;botton:0;left:0;right:0;background-color: white';\n" +
+                                    "document.getElementById(\"txtUsername\").value = \"" + username + "\";\n" +
+                                    "document.getElementById(\"txtPassword\").value = \"" + encryptedPreferences.getString("password", null) + "\";\n" +
+                                    "var submit = document.getElementById(\"txtPassword\");\n" +
+                                    //"submit.click();\n" +
+                                    //"$(\".btnLogin\").click();\n" +
+                                    "})()";
+
+                            view.loadUrl(javaScript);
+                            javaScript = null;
                         }
-                        byte[] test = Base64.decode(ivs,Base64.DEFAULT);
-                        byte[] en = Base64.decode(encryption,Base64.DEFAULT);
-
-                        String e = appKey.decryptText(String.valueOf(R.string.enc_alias),test,en);
-                        //Log.d("Login", e);
-
-                        String javaScript = "javascript:(function() {" +
-
-                                "document.getElementById(\"btnLogin\").style='position:absolute;position:fixed !important; height:100%;width:100%;top:0;botton:0;left:0;right:0;font-size : 40px;';\n" +
-                                "var element = document.getElementById(\"loginwrapper\");\n" +
-                                "element.style='position:absolute;position:fixed !important; height:100%;top:0;botton:0;left:0;right:0;background-color: white';\n" +
-                                "document.getElementById(\"txtUsername\").value = \"" + username + "\";\n" +
-                                "document.getElementById(\"txtPassword\").value = \"" + e + "\";\n" +
-                                "var submit = document.getElementById(\"txtPassword\");\n" +
-                                //"submit.click();\n" +
-                                //"$(\".btnLogin\").click();\n" +
-                                "})()";
-                        e = null;
-                        view.loadUrl(javaScript);
-                        javaScript = null;
 
                     } else {
                         text.setText(text.getText() + "\nInjecting Login Creds...failed");
                     }
-
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
             }
 
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -214,25 +205,6 @@ public class SyncPwrLogin extends AppCompatActivity {
                 StopAll();
             }
         });
-
-        //prevent the activity from being open for too long, auto kill after 2 minutes
-//        final Handler handler = new Handler();
-//        Timer timer = new Timer();
-//        TimerTask doAsynchronousTask = new TimerTask() {
-//            @Override
-//            public void run() {
-//                handler.post(new Runnable() {
-//                    public void run() {
-//                        try {
-//                            StopAll();
-//                        } catch (Exception e) {
-//                        }
-//                    }
-//                });
-//            }
-//        };
-//
-//        timer.schedule(doAsynchronousTask, 0, 250000);
     }
 
     public void StopAll(){
@@ -242,7 +214,6 @@ public class SyncPwrLogin extends AppCompatActivity {
 
     public class MyJavaScriptInterface
     {
-
         @JavascriptInterface
         @SuppressWarnings("unused")
         public void processHTML(String html)

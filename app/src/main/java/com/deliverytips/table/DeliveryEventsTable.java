@@ -108,9 +108,7 @@ public class DeliveryEventsTable extends Fragment {
 
         sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
         store_id = sharedPref.getString("store_id", "" );
-        username = sharedPref.getString("username", "" );
-        password = sharedPref.getString("password", "" );
-        address = sharedPref.getString("address", "" );
+
 
         numDeleliveries = (TextView) rootView.findViewById(R.id.textViewNumEvents);
         totalTips = (TextView) rootView.findViewById(R.id.textViewTotalTips);
@@ -322,20 +320,25 @@ public class DeliveryEventsTable extends Fragment {
     }
     public void sync(){
 
+    store_id = sharedPref.getString("store_id", null );
+        username = sharedPref.getString("username", null );
+        password = sharedPref.getString("password", null );
+        address = sharedPref.getString("address", null );
+
         String problem_log = "";
-        if( store_id == "" ){
+        if( store_id == null ){
             problem_log += "Missing Store Identification Number.\n";
         }
 
-        if( username == "" ){
+        if( username == null ){
             problem_log += "Missing Username \n";
         }
 
-        if( password == "" ){
+        if( password == null ){
             problem_log += "Missing password \n";
         }
 
-        if( store_id == "" || username == "" || password == "" ){
+        if( store_id == null || username == null || password == null ){
             Toast.makeText(getContext(), "Error: " + problem_log, Toast.LENGTH_SHORT).show();
             FragmentManager fm = getActivity().getFragmentManager();
             fm.beginTransaction().replace(R.id.content_frame, new Settings()).commit();
@@ -394,7 +397,8 @@ public class DeliveryEventsTable extends Fragment {
             if( clickedData.getAddress() != null ) {
 
                 //currently need a way to get state and city from settings
-                String carString = clickedData.getAddress() + " New Ulm, MN";
+                String address = sharedPref.getString("address", null ); //" New Ulm, MN"
+                String carString = clickedData.getAddress() + address;
                 Toast.makeText(getContext(), carString, Toast.LENGTH_SHORT).show();
 
                 Intent i = new Intent(getActivity(), DeliveryEventDetails.class);

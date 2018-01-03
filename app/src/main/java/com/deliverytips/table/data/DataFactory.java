@@ -136,6 +136,7 @@ public final class DataFactory {
                                 " AND " + DeliveryEvent.COLUMN_NAME_STATUS + " != \"Bad\" " +
                                 " AND " + DeliveryEvent.COLUMN_NAME_STATUS + " != \"Void\" " +
                                 " AND " + DeliveryEvent.COLUMN_NAME_STATUS + " != \"Being Taken\" " +
+                                " AND " + DeliveryEvent.COLUMN_NAME_STATUS + " != \"Gift Card Purchase\" " +
                                 //" AND " + DeliveryEvent.COLUMN_NAME_STATUS + " != \"Future\" " +
                                 //" AND " + DeliveryEvent.COLUMN_NAME_STATUS + " == \"Routing Station\""
                                 " AND (" +
