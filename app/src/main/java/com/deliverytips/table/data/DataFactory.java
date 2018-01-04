@@ -43,6 +43,7 @@ public final class DataFactory {
                     //"printf(\"%.2f\", AVG(" + DeliveryEvent.COLUMN_NAME_TIP + ")) AS avg_tips " +
                     "printf(\"%.2f\", AVG(" + DeliveryEvent.COLUMN_NAME_TIP + ")) AS avg_tips " +
                     "FROM " + DeliveryEvent.TABLE_NAME
+                    //" WHERE " + DeliveryEvent.COLUMN_NAME_DATE + " = date('now', 'start of day','-2 days')"
                     //" WHERE " + DeliveryEvent.
                     , null);
 
@@ -52,6 +53,7 @@ public final class DataFactory {
                 map.put("total_tip", hashMaps.get(0).get("tips"));
                 map.put("avg_tip", hashMaps.get(0).get("avg_tips"));
             }
+
         } else {
 
 
@@ -168,7 +170,8 @@ public final class DataFactory {
                             hashMaps.get(i).get(DeliveryEvent.COLUMN_NAME_STATUS).equals("Abandoned") ||
                             hashMaps.get(i).get(DeliveryEvent.COLUMN_NAME_STATUS).equals("Bad")) ||
                             hashMaps.get(i).get(DeliveryEvent.COLUMN_NAME_STATUS).equals("Canceled") ||
-                            hashMaps.get(i).get(DeliveryEvent.COLUMN_NAME_STATUS).equals("Void")
+                            hashMaps.get(i).get(DeliveryEvent.COLUMN_NAME_STATUS).equals("Void") ||
+                            hashMaps.get(i).get(DeliveryEvent.COLUMN_NAME_STATUS).equals("Gift Card Purchase")
                     ){
                 include = false;
             }

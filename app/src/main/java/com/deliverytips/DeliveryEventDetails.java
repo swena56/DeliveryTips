@@ -199,21 +199,13 @@ public class DeliveryEventDetails extends AppCompatActivity {
             //spinnerStatus.setId(current_status_index);
 
             //Navigation button, hide it when dealing with no address
-            String address = deliveryEvent._street;
-            String complete_address = address + " New Ulm, MN"; //+ sharedPref.getString("address", String.valueOf(R.string.default_city).toString());
-
-            nav_button.setText("Navigate: " + complete_address);
-            if (address != null) {
+            nav_button.setText("Navigate: " + deliveryEvent._street + " " + sharedPref.getString("address", "") );
+            if (deliveryEvent._street != null) {
                 nav_button.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
-                        //get ZIP or CITY from shared Preferences
-                        //String city_state = sharedPref.getString("address", String.valueOf(R.string.default_city).toString());
-                        String complete_address = getIntent().getExtras().getString("address");// + "," + city_state;
-                        //String complete_address = getIntent().getExtras().getString("address");
-                        openMap(getApplicationContext(), complete_address);
-                        Toast.makeText(getApplicationContext(), "Starting Navigation to " + complete_address, Toast.LENGTH_SHORT).show();
+                        openMap(getApplicationContext(), deliveryEvent._street + " " + sharedPref.getString("address", ""));
+                        Toast.makeText(getApplicationContext(), "Starting Navigation to " + deliveryEvent._street + " " + sharedPref.getString("address", ""), Toast.LENGTH_SHORT).show();
                     }
                 });
             } else {
