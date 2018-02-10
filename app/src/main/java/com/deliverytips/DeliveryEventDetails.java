@@ -269,7 +269,7 @@ public class DeliveryEventDetails extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public static boolean openMap(Context context, String address) {
+    public boolean openMap(Context context, String address) {
         Uri.Builder uriBuilder = new Uri.Builder()
                 .scheme("geo")
                 .path("0,0")
@@ -281,6 +281,7 @@ public class DeliveryEventDetails extends AppCompatActivity {
 //        startActivity(intent);
 
         String URL = "https://www.google.com/maps/dir/?api=1&travelmode=driving&dir_action=navigate&destination="+address;
+
         Uri location = Uri.parse(URL);
         Intent intent = new Intent(Intent.ACTION_VIEW, location);
 

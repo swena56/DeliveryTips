@@ -7,6 +7,8 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -64,6 +66,30 @@ public class Settings extends Fragment {
         enableAutoSubmitCheckbox = (CheckBox) rootView.findViewById(R.id.checkBoxEnableAutoSubmit);
         editTextStoreId.setText( sharedPref.getString("store_id", null) );
         editTextUsername.setText( sharedPref.getString("username", null) );
+
+        //store id change detection
+        editTextStoreId.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start,
+                                          int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start,
+                                      int before, int count) {
+
+                    SharedPreferences.Editor editor = sharedPref.edit();
+                    editor.putString("store_id", editTextStoreId.getText().toString());
+                    editor.commit();
+
+            }
+        });
+
+
 
         //set auto sync
         enableAutoSubmitCheckbox.setChecked(sharedPref.getBoolean("auto_sync",false));
