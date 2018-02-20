@@ -48,6 +48,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.HttpParams;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -68,7 +70,7 @@ import de.codecrafters.tableview.listeners.TableDataLongClickListener;
  */
 public class DeliveryEventsTable extends Fragment {
 
-    TableDataAdapter tableDataAdapter;
+    public TableDataAdapter tableDataAdapter;
     SharedPreferences sharedPref;
     public SortableDeliveryEventsTableView carTableView;
 
@@ -102,12 +104,19 @@ public class DeliveryEventsTable extends Fragment {
     HashMap<String, List<String>> listDataChild;
     Timer timer;
     TimerTask doAsynchronousTask;
+    private static DeliveryEventsTable _instance;
+
+    public static DeliveryEventsTable get() {
+        return _instance;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         final View rootView = inflater.inflate(R.layout.fragment_delivery_events_table, container, false);
+
+        _instance = this;
 
         sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
         store_id = sharedPref.getString("store_id", "" );
@@ -181,6 +190,7 @@ public class DeliveryEventsTable extends Fragment {
 
                 tableDataAdapter = new TableDataAdapter(getContext(), DataFactory.createDeliveryEventsList(getContext(),selectedItem,null, auto_hide.isChecked()  ), carTableView);
                 carTableView.setDataAdapter(tableDataAdapter);
+
                 //tableDataAdapter.getData();
             } // to close the onItemSelected
 
@@ -205,8 +215,8 @@ public class DeliveryEventsTable extends Fragment {
         searchInput.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                // do something on text submit
 
+                // do something on text submit
                 Toast.makeText(getContext(),"Search: "+query,Toast.LENGTH_SHORT ).show();
                 //tableDataAdapter.
                 tableDataAdapter = new TableDataAdapter(getContext(), DataFactory.createDeliveryEventsList(getContext(), selectedItem, query,auto_hide.isChecked()), carTableView);
@@ -214,21 +224,11 @@ public class DeliveryEventsTable extends Fragment {
                 return false;
             }
 
+
             @Override
             public boolean onQueryTextChange(String newText) {
                 // do something when text changes
-                //
-                if( newText.equals("") ){
-
-                    //Toast.makeText(getContext(),"Clear Search",Toast.LENGTH_SHORT ).show();
-                    tableDataAdapter = new TableDataAdapter(getContext(), DataFactory.createDeliveryEventsList(getContext(), selectedItem,null,auto_hide.isChecked()), carTableView);
-                    carTableView.setDataAdapter(tableDataAdapter);
-
-                } else {
-                    //Toast.makeText(getContext(),"Search Change: "+newText,Toast.LENGTH_SHORT ).show();
-                    tableDataAdapter = new TableDataAdapter(getContext(), DataFactory.createDeliveryEventsList(getContext(), selectedItem,newText, auto_hide.isChecked()), carTableView);
-                    carTableView.setDataAdapter(tableDataAdapter);
-                }
+                updateTable(newText);
                 return false;
             }
         });
@@ -268,14 +268,28 @@ public class DeliveryEventsTable extends Fragment {
             });
         }
 
-
         //check if auto sync check box is checked
         if( sharedPref.getBoolean("auto_sync", false) ) {
-            create_sync_timer();
+            //create_sync_timer();
         }
 
         // Inflate the layout for this fragment
         return rootView;
+    }
+
+    public void updateTable(String newText){
+
+        if( newText.equals("") ){
+
+            //Toast.makeText(getContext(),"Clear Search",Toast.LENGTH_SHORT ).show();
+            tableDataAdapter = new TableDataAdapter(getContext(), DataFactory.createDeliveryEventsList(getContext(), selectedItem,null,auto_hide.isChecked()), carTableView);
+            carTableView.setDataAdapter(tableDataAdapter);
+
+        } else {
+            //Toast.makeText(getContext(),"Search Change: "+newText,Toast.LENGTH_SHORT ).show();
+            tableDataAdapter = new TableDataAdapter(getContext(), DataFactory.createDeliveryEventsList(getContext(), selectedItem,newText, auto_hide.isChecked()), carTableView);
+            carTableView.setDataAdapter(tableDataAdapter);
+        }
     }
 
     public String commify(String num ){
@@ -303,28 +317,31 @@ public class DeliveryEventsTable extends Fragment {
                     public void run() {
                         try {
 
-                            SimpleDateFormat s = new SimpleDateFormat("MM/dd hh:mm");
-                            String format = s.format(new Date());
-                            String last_update = sharedPref.getString("last_sync_date",null);
+                            if( sharedPref.getBoolean("auto_sync", false) ) {
 
-                            long second = 1000l;
-                            long minute = 60l * second;
-                            long hour = 60l * minute;
+                                SimpleDateFormat s = new SimpleDateFormat("MM/dd hh:mm");
+                                String format = s.format(new Date());
+                                String last_update = sharedPref.getString("last_sync_date", null);
 
-                            Date date1 = s.parse(last_update);
-                            Date date2 = s.parse(format.toString());
+                                long second = 1000l;
+                                long minute = 60l * second;
+                                long hour = 60l * minute;
 
-                            long diff = date2.getTime() - date1.getTime();
+                                Date date1 = s.parse(last_update);
+                                Date date2 = s.parse(format.toString());
 
-                            String diff_str = String.format("%02d", diff / hour) + ":" + String.format("%02d", (diff % hour) / minute) + ":" + String.format("%02d", (diff % minute) / second);
+                                long diff = date2.getTime() - date1.getTime();
 
-                            //only sync when auto sync is enabled
+                                String diff_str = String.format("%02d", diff / hour) + ":" + String.format("%02d", (diff % hour) / minute) + ":" + String.format("%02d", (diff % minute) / second);
+
+                                //only sync when auto sync is enabled
                                 if ((diff / hour) > 1 || (diff / minute) >= SYNC_INTERVAL) {
                                     Toast.makeText(getContext(), "Syncing with PWR", Toast.LENGTH_SHORT).show();
                                     sync();
                                 } else {
                                     //Toast.makeText(getContext(), "Waiting to sync: " + diff_str, Toast.LENGTH_SHORT).show();
                                 }
+                            }
 
                         } catch (Exception e) {
                         }
@@ -336,9 +353,10 @@ public class DeliveryEventsTable extends Fragment {
 
         timer.schedule(doAsynchronousTask, 0, sleep_time);
     }
+
     public void sync(){
 
-    store_id = sharedPref.getString("store_id", null );
+        store_id = sharedPref.getString("store_id", null );
         username = sharedPref.getString("username", null );
         password = sharedPref.getString("password", null );
         address = sharedPref.getString("address", null );
@@ -412,7 +430,7 @@ public class DeliveryEventsTable extends Fragment {
         @Override
         public void onDataClicked(final int rowIndex, final DeliveryEvent clickedData) {
             //currently need a way to get state and city from settings
-            String address = sharedPref.getString("address", null ); //" New Ulm, MN"
+            String address = sharedPref.getString("address", null );
             String carString = clickedData.getAddress() + address;
             Toast.makeText(getContext(), carString, Toast.LENGTH_SHORT).show();
 
@@ -428,7 +446,13 @@ public class DeliveryEventsTable extends Fragment {
 
     public static boolean openMap(Context context, String address) {
 
-        String URL = "https://www.google.com/maps/dir/?api=1&travelmode=driving&dir_action=navigate&destination="+address;
+        String URL = null;
+        try {
+            URL = "https://www.google.com/maps/dir/?api=1&travelmode=driving&dir_action=navigate&destination="+ URLEncoder.encode(" " +address, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
         Uri location = Uri.parse(URL);
         Intent intent = new Intent(Intent.ACTION_VIEW, location);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -568,12 +592,16 @@ public class DeliveryEventsTable extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        timer.cancel();
+        //timer.cancel();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        create_sync_timer();
+        //create_sync_timer();
+    }
+
+    public void toggleLoginButton(){
+
     }
 }

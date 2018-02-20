@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
+import com.deliverytips.fragments.PwrSyncFragment;
 import com.deliverytips.fragments.Search;
 import com.deliverytips.table.DeliveryEventsTable;
 
@@ -42,7 +43,7 @@ public class MainActivity extends AppCompatActivity
     private SharedPreferences _preferences;
 
     private static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 0;
-    FragmentManager fm;
+    public FragmentManager fm;
     Intent intent;
 
     public static MainActivity get() {
@@ -111,6 +112,7 @@ public class MainActivity extends AppCompatActivity
         fm = getFragmentManager();
         //fm.beginTransaction().replace(R.id.content_frame, new DashboardTable()).commit();
         fm.beginTransaction().replace(R.id.content_frame, new DeliveryEventsTable()).commit();
+        fm.beginTransaction().replace(R.id.content_frame_stats, new PwrSyncFragment()).addToBackStack( "sync" ).commit();
 
     }
 
@@ -209,6 +211,7 @@ public class MainActivity extends AppCompatActivity
             //currently working to convert the new Delivery fragment over to a fullscreen activity so it can take advantage of CTR
             //fm.beginTransaction().replace(R.id.content_frame, new NewDelivery()).commit();
         } else if (id == R.id.phone_search) {
+            //MainActivity.get().getFragmentManager().beginTransaction().replace(R.id.content_frame, new Search()).addToBackStack( "search" ).commit();
             fm.beginTransaction().replace(R.id.content_frame, new Search()).addToBackStack( "search" ).commit();
         } else if (id == R.id.settings) {
 
