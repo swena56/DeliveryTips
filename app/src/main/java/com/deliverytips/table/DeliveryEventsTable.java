@@ -34,10 +34,12 @@ import com.android.volley.toolbox.HttpClientStack;
 import com.android.volley.toolbox.HttpStack;
 import com.android.volley.toolbox.Volley;
 import com.deliverytips.DeliveryEventDetails;
+import com.deliverytips.MainActivity;
 import com.deliverytips.MyDatabaseHelper;
 import com.deliverytips.R;
 import com.deliverytips.Settings;
 import com.deliverytips.SyncPwrLogin;
+import com.deliverytips.fragments.PwrSyncFragment;
 import com.deliverytips.fragments.SummaryActivity;
 import com.deliverytips.table.data.DataFactory;
 import com.deliverytips.table.data.DeliveryEvent;
@@ -188,6 +190,7 @@ public class DeliveryEventsTable extends Fragment {
                 totalTips.setText("$" + commify(map.get("total_tip")));
                 averageTips.setText("$" + commify(map.get("avg_tip")));
 
+
                 tableDataAdapter = new TableDataAdapter(getContext(), DataFactory.createDeliveryEventsList(getContext(),selectedItem,null, auto_hide.isChecked()  ), carTableView);
                 carTableView.setDataAdapter(tableDataAdapter);
 
@@ -260,7 +263,7 @@ public class DeliveryEventsTable extends Fragment {
                     carTableView.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            sync();
+                            sync(false);
                             refreshIndicator.hide();
                         }
                     }, 3000);
@@ -337,7 +340,7 @@ public class DeliveryEventsTable extends Fragment {
                                 //only sync when auto sync is enabled
                                 if ((diff / hour) > 1 || (diff / minute) >= SYNC_INTERVAL) {
                                     Toast.makeText(getContext(), "Syncing with PWR", Toast.LENGTH_SHORT).show();
-                                    sync();
+                                    sync(true);
                                 } else {
                                     //Toast.makeText(getContext(), "Waiting to sync: " + diff_str, Toast.LENGTH_SHORT).show();
                                 }
@@ -354,13 +357,17 @@ public class DeliveryEventsTable extends Fragment {
         timer.schedule(doAsynchronousTask, 0, sleep_time);
     }
 
-    public void sync(){
+    public void sync(Boolean updateFragment){
 
+        if( updateFragment ) {
+            MainActivity.get().fm.beginTransaction().replace(R.id.content_frame_stats, new PwrSyncFragment()).addToBackStack("sync").commit();
+            return;
+        }
         store_id = sharedPref.getString("store_id", null );
         username = sharedPref.getString("username", null );
         password = sharedPref.getString("password", null );
         address = sharedPref.getString("address", null );
-
+        
         String problem_log = "";
         if( store_id == null ){
             problem_log += "Missing Store Identification Number.\n";
@@ -380,7 +387,6 @@ public class DeliveryEventsTable extends Fragment {
             fm.beginTransaction().replace(R.id.content_frame, new Settings()).commit();
         } else {
 
-
             Toast.makeText(getContext(), "Syncing with PWR", Toast.LENGTH_SHORT).show();
 
             //pd = ProgressDialog.show(DeliveryEventsTable.th is,"Loading...", true, false);
@@ -390,6 +396,8 @@ public class DeliveryEventsTable extends Fragment {
             i.putExtra("password", password);
             startActivity(i);
 
+
+            //DataFactory.getDeliveryDataFromServer(store_id,"user","password");
             tableDataAdapter = new TableDataAdapter(getContext(), DataFactory.createDeliveryEventsList(getContext(), selectedItem, null, auto_hide.isChecked()), carTableView);
             tableDataAdapter.notifyDataSetChanged();
 

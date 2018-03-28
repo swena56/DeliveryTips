@@ -102,6 +102,8 @@ public class SyncPwrLogin extends AppCompatActivity {
                 if( isDoneCounting && numberOfMatches > 0 ){
                     StartImport();
                     StartImport();
+                    StartImport();
+                    StartImport();
                 }
             }
         });

@@ -293,6 +293,20 @@ public class DeliveryEvent implements Chargable {
         return _price;
     }
 
+    public void setOrderNumber(String order_id){
+
+        if( order_id.contains("#") ){
+            String[] id = order_id.split("#");
+            _order_number = Long.valueOf(id[1]).longValue();
+        } else {
+            _order_number = Long.valueOf(order_id).longValue();
+        }
+
+    }
+
+    public void setPrice(String price){
+        _price = Double.valueOf(price).doubleValue();
+    }
     public double getPrice() {
 
         Double total = ( _price * 0.075 ) + _price;

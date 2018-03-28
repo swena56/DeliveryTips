@@ -1,6 +1,7 @@
 package com.deliverytips.http_helpers;
 
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
@@ -41,7 +42,7 @@ public class StringRequest extends com.android.volley.toolbox.StringRequest {
 
                 @Override
                 public void onResponse(String response) {
-
+                    Log.d("StringRequest",response.toString());
                 }
 
             },

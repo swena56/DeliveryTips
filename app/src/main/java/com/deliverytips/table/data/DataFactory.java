@@ -2,10 +2,27 @@ package com.deliverytips.table.data;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Cache;
+import com.android.volley.Network;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.BasicNetwork;
+import com.android.volley.toolbox.DiskBasedCache;
+import com.android.volley.toolbox.HurlStack;
+import com.android.volley.toolbox.StringRequest;
+import com.deliverytips.MainActivity;
 import com.deliverytips.MyDatabaseHelper;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -185,4 +202,129 @@ public final class DataFactory {
 
         return deliveryEvents;
     }
+
+    public static String getDeliveryDataFromServer(String store_id, final String username, final String password){
+
+        String url = "https://pwr-deliveries.ddns.net/delivery/"+store_id;
+
+        RequestQueue mRequestQueue;
+
+        // Instantiate the cache
+        Cache cache = new DiskBasedCache(MainActivity.get().getCacheDir(), 1024 * 1024); // 1MB cap
+
+        // Set up the network to use HttpURLConnection as the HTTP client.
+        Network network = new BasicNetwork(new HurlStack());
+
+        // Instantiate the RequestQueue with the cache and network.
+        mRequestQueue = new RequestQueue(cache, network);
+
+        // Start the queue
+        mRequestQueue.start();
+
+        // return data
+        List<DeliveryEvent> deliveryEvents = new ArrayList<>();
+        ArrayList<HashMap<String, String>> hashMaps = null;
+
+        // Formulate the request and handle the response.
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // Do something with the response
+                        //Log.d("http",response.toString());
+
+                        MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(MainActivity.get());
+                        SQLiteDatabase db = myDatabaseHelper.getWritableDatabase();
+
+                        //load json
+                        String in = response.toString();
+                            try {
+                                JSONObject reader = new JSONObject(in);
+                                JSONArray contacts = reader.getJSONArray("results");
+
+                                //reader.get
+                                int le = contacts.length();
+                                Log.d("http",le + "");
+
+                                for (int i = 0; i < contacts.length(); i++) {
+                                    JSONObject c = contacts.getJSONObject(i);
+                                    Log.d("http", c.toString());
+                                    DeliveryEvent deliveryEvent = new DeliveryEvent();
+                                    deliveryEvent.setOrderNumber(c.getString("order_id"));
+                                    deliveryEvent.setPrice(c.getString("price"));
+                                    deliveryEvent._status = c.getString("status");
+                                    deliveryEvent._service = c.getString("service");
+                                    deliveryEvent._timestamp = c.getString("timestamp");
+                                    deliveryEvent._driver = c.getString("driver");
+                                    deliveryEvent._phone_number = c.getString("phone");
+                                    deliveryEvent._csr = c.getString("source");
+                                    deliveryEvent._description = c.getString("description");
+                                    deliveryEvent._street = c.getString("address");
+
+                                    String[] whereArgs = {c.getString("order_id")};
+                                    Cursor cursor = db.rawQuery("SELECT " + DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + "," +
+                                            DeliveryEvent.COLUMN_NAME_TIP + "," +
+                                            DeliveryEvent.COLUMN_NAME_NOTES +
+                                            " FROM " + DeliveryEvent.TABLE_NAME
+                                            + " WHERE " + DeliveryEvent.COLUMN_NAME_ORDER_NUMBER + " = ?", whereArgs);
+
+                                    int recordCount = cursor.getCount();
+                                    cursor.close();
+
+                                    if (recordCount <= 0) {
+                                        db.insert(deliveryEvent.TABLE_NAME, null, deliveryEvent.getContentValues());
+                                        //deliveryEvent.
+//                                        deliveryEvents.add(
+//                                                deliveryEvent
+//                                        );
+                                    } else {
+
+
+                                    }
+
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+
+                            db.close();
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // Handle error
+                        Log.d("http",error.toString());
+                    }
+                }){
+
+            //This is for Headers If You Needed
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                //params.put("Content-Type", "application/json; charset=UTF-8");
+                //params.put("token", ACCESS_TOKEN);
+                params.put("php-auth-user", username);
+                params.put("php-auth-pw", password);
+                return params;
+            }
+
+            //Pass Your Parameters here
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("php-auth-user", "user");
+                params.put("php-auth-pw", "password");
+                return params;
+            }
+        };
+
+
+        // Add the request to the RequestQueue.
+        mRequestQueue.add(stringRequest);
+
+        return "processed";
+    }
 }
+

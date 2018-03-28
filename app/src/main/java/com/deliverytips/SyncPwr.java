@@ -178,9 +178,19 @@ public class SyncPwr extends Activity {
 
         Toast.makeText(getApplicationContext(), "Logged in.", Toast.LENGTH_SHORT).show();
 
-        StartImport();
-        StartImport();
-        StartImport();
+        int x = 1;
+
+        // Exit when x becomes greater than 4
+        while (x <= 5)
+        {
+            StartImport();
+            x++;
+        }
+
+        //If no data was found, then likely a login is needed
+//        Intent i = new Intent(getApplicationContext(), SyncPwrLogin.class);
+//        startActivity(i);
+//        this.finish();
 
         return true;
     }
