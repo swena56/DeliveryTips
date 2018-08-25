@@ -49,7 +49,10 @@ dependencies {
     //compile 'io.filepicker:filepicker-android:4.0.2'
     // compile 'com.nononsenseapps:filepicker:4.1.0'
 
-    compile('com.mikepenz:materialdrawer:6.0.2@aar')
+
+//    compile 'com.mikepenz:google-material-typeface:6.0.2@aar' //Google Material Icons
+//    compile 'com.mikepenz:fontawesome-typeface:6.0.2@aar'     //FontAwesome
+    //compile('com.mikepenz:materialdrawer:6.0.2@aar')
     compile 'com.android.support:appcompat-v7:26.+'
     compile 'com.android.support:support-v4:26.+'
     compile 'com.android.support:design:26.+'

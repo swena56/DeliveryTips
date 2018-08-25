@@ -12,7 +12,6 @@
             android:icon="@drawable/ic_menu_gallery"
             android:title="New Delivery" />
         <item
-            android:id="@+id/previous_tips"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="Previous Tips" />
         <item

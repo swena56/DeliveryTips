@@ -28,7 +28,6 @@
                 android:text="PWR CSV Import"/>
 
             <TextView
-                android:id="@+id/textViewDashboardText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Dashboard"/>
