@@ -81,8 +81,8 @@ public final class DataFactory {
                     //"printf(\"%.2f\", AVG(" + DeliveryEvent.COLUMN_NAME_TIP + ")) AS avg_tips " +
                     "printf(\"%.2f\", AVG(" + DeliveryEvent.COLUMN_NAME_TIP + ")) AS avg_tips " +
                     "FROM " + DeliveryEvent.TABLE_NAME
-                    + " WHERE " + DeliveryEvent.COLUMN_NAME_DRIVER + " = ? " +
-                    " OR " + DeliveryEvent.COLUMN_NAME_STATUS + " = 'Out the Door'", whereArgs);
+                    + " WHERE " + DeliveryEvent.COLUMN_NAME_DRIVER + " = ? "
+                    , whereArgs);
 
             if (hashMaps.size() > 0) {
                 map.put("size", hashMaps.get(0).get("count"));
