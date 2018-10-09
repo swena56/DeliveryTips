@@ -126,12 +126,14 @@ public class DeliveryEventDetails extends AppCompatActivity {
         });
 
         editTextTip.setText(deliveryEvent._tip.toString());
+        editTextTip.setSelectAllOnFocus(true);
 
         //set total
         Double total = tot + deliveryEvent._tip;
         editTextTipTotal.setText(total.toString());
 
         //clear the total tip field when clicked
+        editTextTipTotal.setSelectAllOnFocus(true);
         editTextTipTotal.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -150,7 +152,6 @@ public class DeliveryEventDetails extends AppCompatActivity {
                         editTextTip.setText(rounded_tip.toString());
                     }
                 }
-
 
                 //editTextTipTotal.getText().clear();
             }
