@@ -361,6 +361,16 @@ public class SyncPwrLogin extends AppCompatActivity {
             //logout
             //webView.loadUrl("javascript:PWRLogout()");
 
+            if (data.size() == 300) {
+                webView.loadUrl(
+                        "javascript:(function() { " +
+                                "document.querySelector('.dxWeb_pAll').click();" +
+                                "})()");
+
+                StartImport();
+                return false;
+            }
+
             this.finish();
         }
 
