@@ -141,14 +141,12 @@ public class SyncPwrLogin extends AppCompatActivity {
 
                             String javaScript = "javascript:(function() {" +
 
-                                    "document.getElementById(\"btnLogin\").style='position:absolute;position:fixed !important; height:100%;width:100%;top:0;botton:0;left:0;right:0;font-size : 40px;';\n" +
-                                    "var element = document.getElementById(\"loginwrapper\");\n" +
-                                    "element.style='position:absolute;position:fixed !important; height:100%;top:0;botton:0;left:0;right:0;background-color: white';\n" +
-                                    "document.getElementById(\"txtUsername\").value = \"" + username + "\";\n" +
-                                    "document.getElementById(\"txtPassword\").value = \"" + encryptedPreferences.getString("password", null) + "\";\n" +
-                                    "var submit = document.getElementById(\"txtPassword\");\n" +
-                                    //"submit.click();\n" +
-                                    //"$(\".btnLogin\").click();\n" +
+                                    //"document.getElementById(\"btnLogin\").style='position:absolute;position:fixed !important; height:100%;width:100%;top:0;botton:0;left:0;right:0;font-size : 40px;';\n" +
+                                    //"var element = document.getElementById(\"loginwrapper\");\n" +
+                                    //"element.style='position:absolute;position:fixed !important; height:100%;top:0;botton:0;left:0;right:0;background-color: white';\n" +
+                                    "$('#txtUsername').val('"+username+"');\n" +
+                                    "$('#txtPassword').val('"+encryptedPreferences.getString("password", null)+"');\n" +
+                                    "$('#dxLoginButton').click();\n" +
                                     "})()";
 
                             view.loadUrl(javaScript);
